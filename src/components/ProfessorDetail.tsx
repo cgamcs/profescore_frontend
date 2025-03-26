@@ -6,7 +6,10 @@ import api from '../api';
 interface Professor {
     _id: string;
     name: string;
-    department: string;
+    department: {
+        _id: string;
+        name: string;
+    };
     biography: string;
     subjects: Subject[];
     ratingStats: {
@@ -34,8 +37,7 @@ interface Subject {
 }
 
 const ProfessorDetail = () => {
-    const { facultyId } = useParams<{ facultyId: string; subjectId: string }>();
-    const { professorId } = useParams<{ professorId: string }>();
+    const { facultyId, professorId } = useParams<{ facultyId: string; professorId: string }>();
     const [professor, setProfessor] = useState<Professor | null>(null);
     const [ratings, setRatings] = useState<RatingType[]>([]);
     const [loading, setLoading] = useState(true);
@@ -49,12 +51,11 @@ const ProfessorDetail = () => {
                     api.get(`/faculties/${facultyId}/professors/${professorId}/ratings`)
                 ]);
 
-
                 setProfessor(professorRes.data);
                 setRatings(ratingsRes.data);
             } catch (error) {
                 console.error('Error fetching data:', error);
-                setError('Error al cargar los detalles de la materia');
+                setError('Error al cargar los detalles del profesor');
             } finally {
                 setLoading(false);
             }
@@ -66,7 +67,7 @@ const ProfessorDetail = () => {
     const renderStars = (rating: number) => {
         const fullStars = Math.floor(rating);
         const hasHalfStar = rating % 1 >= 0.5;
-        
+
         return (
             <div className="flex">
                 {[...Array(fullStars)].map((_, i) => (
@@ -83,7 +84,7 @@ const ProfessorDetail = () => {
     const renderCommentStars = (rating: number) => {
         const fullStars = Math.floor(rating);
         const hasHalfStar = rating % 1 >= 0.5;
-        
+
         return (
             <div className="flex">
                 {[...Array(fullStars)].map((_, i) => (
@@ -103,16 +104,16 @@ const ProfessorDetail = () => {
                 `/faculties/${facultyId}/professors/${professorId}/ratings/${ratingId}/vote`,
                 { type: 1 }
             );
-    
+
             if (res.status === 200) {
-                setRatings(prev => 
-                    prev.map(r => 
-                        r._id === ratingId 
-                            ? { 
+                setRatings(prev =>
+                    prev.map(r =>
+                        r._id === ratingId
+                            ? {
                                 ...r, // Mantener datos existentes
                                 ...res.data, // Sobreescribir campos actualizados
                                 subject: res.data.subject || r.subject // Preservar subject si no viene
-                              } 
+                              }
                             : r
                     )
                 );
@@ -147,32 +148,32 @@ const ProfessorDetail = () => {
                         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-6">
                             <div className="mb-1 font-medium">Explicación</div>
                             <div className="w-full bg-gray-200 rounded-full h-1.5 mb-4">
-                                <div 
-                                    className="bg-indigo-600 h-1.5 rounded-full" 
+                                <div
+                                    className="bg-indigo-600 h-1.5 rounded-full"
                                     style={{ width: `${(professor.ratingStats.averageExplanation / 5) * 100}%` }}
                                 ></div>
                             </div>
 
-                            <div className="mb-1 font-medium">Acessible</div>
+                            <div className="mb-1 font-medium">Accesible</div>
                             <div className="w-full bg-gray-200 rounded-full h-1.5 mb-4">
-                                <div 
-                                    className="bg-indigo-600 h-1.5 rounded-full" 
+                                <div
+                                    className="bg-indigo-600 h-1.5 rounded-full"
                                     style={{ width: `${(professor.ratingStats.averageAccessibility / 5) * 100}%` }}
                                 ></div>
                             </div>
 
                             <div className="mb-1 font-medium">Dificultad</div>
                             <div className="w-full bg-gray-200 rounded-full h-1.5 mb-4">
-                                <div 
-                                    className="bg-indigo-600 h-1.5 rounded-full" 
+                                <div
+                                    className="bg-indigo-600 h-1.5 rounded-full"
                                     style={{ width: `${(professor.ratingStats.averageDifficulty / 5) * 100}%` }}
                                 ></div>
                             </div>
 
                             <div className="mb-1 font-medium">Asistencia</div>
                             <div className="w-full bg-gray-200 rounded-full h-1.5 mb-4">
-                                <div 
-                                    className="bg-indigo-600 h-1.5 rounded-full" 
+                                <div
+                                    className="bg-indigo-600 h-1.5 rounded-full"
                                     style={{ width: `${(professor.ratingStats.averageAttendance / 5) * 100}%` }}
                                 ></div>
                             </div>
@@ -187,7 +188,7 @@ const ProfessorDetail = () => {
                                 </div>
                                 <div>
                                     <h3 className="text-sm font-medium text-gray-500">Departamento</h3>
-                                    <p>{professor.department}</p>
+                                    <p>{professor.department.name}</p>
                                 </div>
                                 <div>
                                     <h3 className="text-sm font-medium text-gray-500">Materias</h3>
@@ -235,7 +236,7 @@ const ProfessorDetail = () => {
                                         <p className="text-gray-700 mb-2">{rating.comment}</p>
                                         <p className="text-sm text-gray-500 mb-2">A {rating.likes.length} personas les resultó útil</p>
                                         <div className="flex items-center gap-5">
-                                            <button 
+                                            <button
                                                 className="flex items-center gap-2 border border-gray-200 rounded-full py-2 px-4 hover:cursor-pointer"
                                                 onClick={() => handleLike(rating._id)}
                                             >

@@ -13,10 +13,16 @@ interface IProfessor {
     };
 }
 
+interface IDepartment {
+    _id: string;
+    name: string;
+}
+
 const ProfessorsPage = () => {
     const { facultyId } = useParams();
     const [professors, setProfessors] = useState<IProfessor[]>([]);
     const [subjects, setSubjects] = useState<{ [key: string]: string }>({});
+    const [departments, setDepartments] = useState<{ [key: string]: string }>({});
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -24,9 +30,10 @@ const ProfessorsPage = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [professorsRes, subjectsRes] = await Promise.all([
+                const [professorsRes, subjectsRes, departmentsRes] = await Promise.all([
                     api.get(`/faculties/${facultyId}/professors`),
-                    api.get(`/faculties/${facultyId}/subjects`)
+                    api.get(`/faculties/${facultyId}/subjects`),
+                    api.get(`/faculties/${facultyId}/departments`)
                 ]);
 
                 const subjectsMap = subjectsRes.data.reduce((acc: { [key: string]: string }, subject: any) => {
@@ -34,7 +41,13 @@ const ProfessorsPage = () => {
                     return acc;
                 }, {});
 
+                const departmentsMap = departmentsRes.data.reduce((acc: { [key: string]: string }, department: IDepartment) => {
+                    acc[department._id] = department.name;
+                    return acc;
+                }, {});
+
                 setSubjects(subjectsMap);
+                setDepartments(departmentsMap);
                 setProfessors(professorsRes.data);
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -47,14 +60,19 @@ const ProfessorsPage = () => {
         fetchData();
     }, [facultyId]);
 
+    // Función para normalizar el texto (eliminar acentos y convertir a minúsculas)
+    const normalizeText = (text: string) => {
+        return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    };
+
     // Filtrado: si no hay búsqueda se muestran todos; de lo contrario, se filtra por nombre del maestro
     // o por alguna materia que imparte (utilizando el nombre de la materia obtenido de subjects)
     const filteredProfessors = professors.filter(professor => {
         if (searchQuery === '') return true;
-        const query = searchQuery.toLowerCase();
-        const nameMatches = professor.name.toLowerCase().includes(query);
+        const query = normalizeText(searchQuery);
+        const nameMatches = normalizeText(professor.name).includes(query);
         const subjectMatches = professor.subjects.some(subjectId => {
-            const subjectName = subjects[subjectId]?.toLowerCase() || '';
+            const subjectName = normalizeText(subjects[subjectId] || '');
             return subjectName.includes(query);
         });
         return nameMatches || subjectMatches;
@@ -134,7 +152,7 @@ const ProfessorsPage = () => {
                                     </Link>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {professor.department}
+                                    {departments[professor.department] || 'Cargando...'}
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-500">
                                     <div className="flex flex-wrap gap-1">

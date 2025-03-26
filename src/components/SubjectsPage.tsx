@@ -5,14 +5,20 @@ import api from '../api';
 interface ISubject {
   _id: string;
   name: string;
-  department: string[];
-  professors: string[];
+  department: {
+    _id: string;
+    name: string;
+  };
+  professors: {
+    _id: string;
+    name: string;
+  }[];
 }
 
 interface IProfessor {
   _id: string;
   name: string;
-  department: string[];
+  department: string | string[];
   subjects: string[];
   ratingStats: {
     averageGeneral: number;
@@ -20,10 +26,16 @@ interface IProfessor {
   };
 }
 
+interface IDepartment {
+  _id: string;
+  name: string;
+}
+
 const SubjectsPage = () => {
   const { facultyId } = useParams();
   const [subjects, setSubjects] = useState<ISubject[]>([]);
   const [professors, setProfessors] = useState<IProfessor[]>([]);
+  const [departments, setDepartments] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -31,10 +43,24 @@ const SubjectsPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const subjectsRes = await api.get(`/faculties/${facultyId}/subjects`);
-        const professorsRes = await api.get(`/faculties/${facultyId}/professors`);
+        console.log('Fetching data for facultyId:', facultyId);
+        const [subjectsRes, professorsRes, departmentsRes] = await Promise.all([
+          api.get(`/faculties/${facultyId}/subjects`),
+          api.get(`/faculties/${facultyId}/professors`),
+          api.get(`/faculties/${facultyId}/departments`)
+        ]);
+
+        console.log('Subjects data:', subjectsRes.data);
+        console.log('Professors data:', professorsRes.data);
+
+        const departmentsMap = departmentsRes.data.reduce((acc: { [key: string]: string }, department: IDepartment) => {
+          acc[department._id] = department.name;
+          return acc;
+        }, {});
+
         setSubjects(subjectsRes.data);
         setProfessors(professorsRes.data);
+        setDepartments(departmentsMap);
       } catch (err) {
         console.error('Error fetching data:', err);
         setError('Error al cargar la información');
@@ -46,12 +72,17 @@ const SubjectsPage = () => {
     fetchData();
   }, [facultyId]);
 
+  // Función para normalizar el texto (eliminar acentos y convertir a minúsculas)
+  const normalizeText = (text: string) => {
+    return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  };
+
   const filteredSubjects = subjects.filter(subject =>
-    searchQuery === '' || subject.name.toLowerCase().includes(searchQuery.toLowerCase())
+    searchQuery === '' || normalizeText(subject.name).includes(normalizeText(searchQuery))
   );
 
   const filteredProfessors = professors.filter(professor =>
-    searchQuery !== '' && professor.name.toLowerCase().includes(searchQuery.toLowerCase())
+    searchQuery !== '' && normalizeText(professor.name).includes(normalizeText(searchQuery))
   );
 
   if (loading) return <div className="text-center py-4">Cargando datos...</div>;
@@ -84,7 +115,7 @@ const SubjectsPage = () => {
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="text-lg font-medium text-indigo-600">{subject.name}</h3>
-                    <p className="text-sm text-gray-500">{subject.department}</p>
+                    <p className="text-sm text-gray-500">{subject.department.name}</p>
                   </div>
                   <div className="text-sm text-gray-500">
                     {subject.professors.length} profesor{subject.professors.length !== 1 && 'es'}
@@ -101,7 +132,11 @@ const SubjectsPage = () => {
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="text-lg font-medium text-indigo-600">{professor.name}</h3>
-                    <p className="text-sm text-gray-500">{professor.department}</p>
+                    <p className="text-sm text-gray-500">
+                      {Array.isArray(professor.department)
+                        ? professor.department.map(deptId => departments[deptId]).join(', ')
+                        : departments[professor.department]}
+                    </p>
                   </div>
                   <div className="text-sm text-gray-500">
                     {professor.ratingStats.totalRatings} reseña{professor.ratingStats.totalRatings !== 1 && 's'}

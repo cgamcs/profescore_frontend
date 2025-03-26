@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useVisitorData } from '@fingerprintjs/fingerprintjs-pro-react';
+import ReCAPTCHA from 'react-google-recaptcha'
 import api from '../api';
 
 interface RatingForm {
@@ -34,6 +35,7 @@ const ProfessorRating = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [ipAddress, setIpAddress] = useState('');
+  const [captchaValue, setCaptchaValue] = useState('');
 
   // Obtener fingerprint del usuario
   const { data: visitorData, isLoading: visitorLoading, error: fpError } = useVisitorData(
@@ -105,30 +107,44 @@ const ProfessorRating = () => {
     setFormData(prev => ({ ...prev, wouldRetake: value }));
   };
 
+  // Manejar el cambio del CAPTCHA
+  const handleCaptchaChange = (value: string | null) => {
+    if (value) {
+      setCaptchaValue(value);
+    }
+  };
+
   // Enviar calificación
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (visitorLoading && !isDevelopment) return;
-
+  
     // Validar que se haya seleccionado una materia
     if (!formData.subject) {
       setError('Por favor selecciona una materia');
       return;
     }
-
+  
+    // Validar que el CAPTCHA esté resuelto
+    if (!captchaValue) {
+      setError('Por favor completa el CAPTCHA');
+      return;
+    }
+  
     setLoading(true);
-
+  
     try {
       const ratingData = {
         ...formData,
         professor: professorId,
-        userIdentifier: isDevelopment ? 'dev-user' : `${ipAddress}-${userFingerprint}`
+        userIdentifier: isDevelopment ? 'dev-user' : `${ipAddress}-${userFingerprint}`,
+        captcha: captchaValue // Incluir el token del CAPTCHA
       };
-      
+  
       console.log('Datos a enviar:', ratingData);
-    
+  
       const response = await api.post(`/faculties/${facultyId}/professors/${professorId}/ratings`, ratingData);
-    
+  
       if (response.status === 201) {
         localStorage.setItem(`rated-${professorId}`, 'true');
         navigate(`/facultad/${facultyId}/maestro/${professorId}`);
@@ -262,6 +278,14 @@ const ProfessorRating = () => {
                 value={formData.comment}
                 onChange={(e) => setFormData(prev => ({ ...prev, comment: e.target.value }))}
               ></textarea>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">Verificación CAPTCHA</label>
+              <ReCAPTCHA
+                sitekey="6LeyFQErAAAAAImBSdkGzJUwqGMc9ZboUzUvd9CD"
+                onChange={handleCaptchaChange}
+              />
             </div>
 
             <div className="pt-4 flex justify-end space-x-4">

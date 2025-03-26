@@ -7,8 +7,8 @@ interface ISubject {
     name: string;
     credits: number;
     department: {
-        _id: string
-        name: string
+        _id: string;
+        name: string;
     };
     professors: string[];
 }
@@ -24,33 +24,40 @@ interface IProfessor {
     };
 }
 
+interface IDepartment {
+    _id: string;
+    name: string;
+}
+
 const FacultyDetails = () => {
     const { facultyId } = useParams();
     const [subjects, setSubjects] = useState<ISubject[]>([]);
     const [professors, setProfessors] = useState<IProfessor[]>([]);
+    const [departments, setDepartments] = useState<{ [key: string]: string }>({});
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    // Filtrado de materias y profesores según el término de búsqueda
-    const filteredSubjects = subjects.filter(subject =>
-        subject.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    const filteredProfessors = professors.filter(professor =>
-        professor.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const subjectsRes = await api.get(`/faculties/${facultyId}/subjects`);
-                const professorsRes = await api.get(`/faculties/${facultyId}/professors`);
+                const [subjectsRes, professorsRes, departmentsRes] = await Promise.all([
+                    api.get(`/faculties/${facultyId}/subjects`),
+                    api.get(`/faculties/${facultyId}/professors`),
+                    api.get(`/faculties/${facultyId}/departments`)
+                ]);
 
                 console.log('Subjects Response:', subjectsRes.data);
                 console.log('Professors Response:', professorsRes.data);
 
+                const departmentsMap = departmentsRes.data.reduce((acc: { [key: string]: string }, department: IDepartment) => {
+                    acc[department._id] = department.name;
+                    return acc;
+                }, {});
+
                 setSubjects(subjectsRes.data);
                 setProfessors(professorsRes.data);
+                setDepartments(departmentsMap);
                 setLoading(false);
             } catch (error) {
                 console.error(error);
@@ -62,6 +69,23 @@ const FacultyDetails = () => {
 
         fetchData();
     }, [facultyId]);
+
+    // Función para normalizar el texto (eliminar acentos y convertir a minúsculas)
+    const normalizeText = (text: string) => {
+        return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    };
+
+    // Filtrado de materias y profesores según el término de búsqueda
+    const filteredSubjects = subjects.filter(subject =>
+        normalizeText(subject.name).includes(normalizeText(searchQuery))
+    );
+    const filteredProfessors = professors.filter(professor =>
+        normalizeText(professor.name).includes(normalizeText(searchQuery))
+    );
+
+    // Limitar la cantidad de materias y profesores mostrados
+    const displayedSubjects = searchQuery ? filteredSubjects : filteredSubjects.slice(0, 6);
+    const displayedProfessors = searchQuery ? filteredProfessors : filteredProfessors.slice(0, 3);
 
     const renderStars = (rating: number) => {
         const fullStars = Math.floor(rating);
@@ -115,17 +139,17 @@ const FacultyDetails = () => {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Créditos</th>
                             </tr>
                         </thead>
-                        {filteredSubjects.map((subject) => (
-                            <tbody key={subject._id} className="bg-white divide-y divide-gray-200">
-                                <tr className="hover:bg-gray-50">
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {displayedSubjects.map((subject) => (
+                                <tr key={subject._id} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
                                         <Link to={`materia/${subject._id}`}>{subject.name}</Link>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{subject.department?.name || 'Sin departamento'}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{subject.credits}</td>
                                 </tr>
-                            </tbody>
-                        ))}
+                            ))}
+                        </tbody>
                     </table>
                 </div>
             </section>
@@ -134,11 +158,15 @@ const FacultyDetails = () => {
             <section>
                 <h2 className="text-xl font-semibold mb-4">Maestros Mejor Calificados</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {filteredProfessors.map((professor) => (
+                    {displayedProfessors.map((professor) => (
                         <Link key={professor._id} to={`/facultad/${facultyId}/maestro/${professor._id}`} className="block">
                             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 hover:shadow-md transition-shadow">
                                 <h3 className="font-medium text-lg mb-1">{professor.name}</h3>
-                                <p className="text-gray-500 text-sm mb-3">{professor.department}</p>
+                                <p className="text-gray-500 text-sm mb-3">
+                                    {Array.isArray(professor.department)
+                                        ? professor.department.map(deptId => departments[deptId]).join(', ')
+                                        : departments[professor.department]}
+                                </p>
                                 <div className="flex items-center">
                                     <div className="flex items-center">
                                         <span className="bg-indigo-100 text-indigo-800 font-bold rounded px-2 py-1 text-sm mr-2">

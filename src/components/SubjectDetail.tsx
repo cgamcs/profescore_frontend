@@ -5,7 +5,10 @@ import api from '../api';
 interface ISubject {
   _id: string;
   name: string;
-  department: string;
+  department: {
+    _id: string;
+    name: string;
+  };
   credits: number;
   description: string;
   professorsCount: number;
@@ -32,7 +35,14 @@ const SubjectDetail = () => {
       try {
         const subjectRes = await api.get(`/faculties/${facultyId}/subjects/${subjectId}`);
         const professorsRes = await api.get(`/faculties/${facultyId}/subjects/${subjectId}/professors`);
-        setSubject(subjectRes.data);
+
+        // Actualizar el número de profesores en el objeto subject
+        const updatedSubject = {
+          ...subjectRes.data,
+          professorsCount: professorsRes.data.length
+        };
+
+        setSubject(updatedSubject);
         setProfessors(professorsRes.data);
       } catch (err) {
         console.error(err);
@@ -80,7 +90,7 @@ const SubjectDetail = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
               <h3 className="text-sm font-medium text-gray-500">Departamento</h3>
-              <p>{subject.department}</p>
+              <p>{subject.department.name}</p>
             </div>
             <div>
               <h3 className="text-sm font-medium text-gray-500">Créditos</h3>
