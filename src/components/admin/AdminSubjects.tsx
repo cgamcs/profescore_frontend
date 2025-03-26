@@ -239,8 +239,9 @@ const AdminSubjects: React.FC = () => {
           <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Agregar Materia</h3>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Selecciona una facultad:</label>
+              <label htmlFor="faculty-select" className="block text-sm font-medium text-gray-700">Selecciona una facultad:</label>
               <select
+                id="faculty-select"
                 className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 onChange={(e) => handleFacultySelect(e.target.value)}
                 value={selectedFaculty || ''}

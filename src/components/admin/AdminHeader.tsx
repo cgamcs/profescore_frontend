@@ -37,7 +37,7 @@ const AdminHeader = () => {
                             }
                         >Materias</NavLink>
                         <NavLink 
-                            to="/admin/profesores" 
+                            to="/admin/maestros" 
                             className={({ isActive }) =>
                                 `text-sm ${isActive ? 'text-indigo-600 font-medium' : 'text-gray-600'}`
                             }

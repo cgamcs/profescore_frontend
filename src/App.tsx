@@ -19,6 +19,8 @@ import EditFaculty from './components/admin/EditFaculty';
 import AdminSubjects from './components/admin/AdminSubjects';
 import AddSubject from './components/admin/AddSubject';
 import EditSubject from './components/admin/EditSubject';
+import AdminProfessors from './components/admin/AdminProfessors';
+import AddProfessor from './components/admin/AddProfessor';
 
 const App: React.FC = () => {
   return (
@@ -34,7 +36,8 @@ const App: React.FC = () => {
         <Route path="materias" element={<AdminSubjects />} />
         <Route path="facultad/:facultyId/materia/agregar" element={<AddSubject />} />
         <Route path="facultad/:facultyId/materia/:subjectId" element={<EditSubject />} />
-        {/* <Route path="profesores" element={<AdminProfessors />} /> Proxima ruta */}
+        <Route path="maestros" element={<AdminProfessors />} />
+        <Route path="facultad/:facultyId/maestro/multiple" element={<AddProfessor />} />
       </Route>
 
       {/* Ruta principal sin header */}
