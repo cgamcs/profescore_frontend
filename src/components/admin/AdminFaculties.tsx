@@ -14,7 +14,6 @@ const AdminFaculties: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedFaculty, setSelectedFaculty] = useState<Faculty | null>(null);
   const [confirmationInput, setConfirmationInput] = useState('');
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
@@ -34,8 +33,6 @@ const AdminFaculties: React.FC = () => {
       setFaculties(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -50,10 +47,14 @@ const AdminFaculties: React.FC = () => {
     }
   }, [location.state, navigate]);
 
+  const normalizeString = (str: string) => {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  };
+
   // Handle search
   const filteredFaculties = faculties.filter(faculty =>
-    faculty.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    faculty.abbreviation.toLowerCase().includes(searchTerm.toLowerCase())
+    normalizeString(faculty.name).includes(normalizeString(searchTerm)) ||
+    normalizeString(faculty.abbreviation).includes(normalizeString(searchTerm))
   );
 
   // Handle deletion
@@ -61,7 +62,7 @@ const AdminFaculties: React.FC = () => {
     if (!selectedFaculty) return;
 
     // Check if confirmation input matches exactly
-    if (confirmationInput.trim() !== selectedFaculty.name.trim()) {
+    if (normalizeString(confirmationInput.trim()) !== normalizeString(selectedFaculty.name.trim())) {
       setError('El nombre ingresado no coincide');
       return;
     }
@@ -80,7 +81,7 @@ const AdminFaculties: React.FC = () => {
 
       // Remove faculty from local state
       setFaculties(prev => prev.filter(f => f._id !== selectedFaculty._id));
-      
+
       // Reset modal state
       setShowDeleteModal(false);
       setConfirmationInput('');
@@ -90,7 +91,6 @@ const AdminFaculties: React.FC = () => {
     }
   };
 
-  if (loading) return <div className="text-center py-8">Cargando...</div>;
   if (error) return <div className="text-red-500 text-center py-8">{error}</div>;
 
   return (
@@ -111,17 +111,19 @@ const AdminFaculties: React.FC = () => {
         </div>
 
         {/* Barra de búsqueda */}
-        <div className="relative max-w-2xl mx-auto mb-8">
-          <input
-            type="text"
-            placeholder="Buscar por nombre o abreviatura..."
-            className="w-full border border-gray-200 px-4 py-3 rounded-xl shadow-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+        <div className="relative w-full max-w-md mb-6">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Buscar por nombre o abreviatura..."
+              className="w-full border border-gray-200 px-4 py-3 rounded-xl shadow-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
         </div>
 
         {/* Tabla de facultades */}
@@ -177,52 +179,52 @@ const AdminFaculties: React.FC = () => {
 
       {/* Secure Delete Modal */}
       {showDeleteModal && selectedFaculty && (
-          <div className="fixed inset-0 backdrop-brightness-50 backdrop-opacity-60 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Eliminar Facultad</h3>
-              <p className="text-sm text-gray-500 mb-4">
-                Estás a punto de eliminar la facultad <strong>"{selectedFaculty.name}"</strong>. 
-                Esta acción eliminará TODA la información relacionada, incluyendo:
-                <ul className="list-disc list-inside text-sm text-gray-600 mt-2">
-                  <li>Departamentos</li>
-                  <li>Materias</li>
-                  <li>Profesores</li>
-                  <li>Calificaciones de profesores</li>
-                </ul>
-              </p>
-              <p className="text-sm text-gray-500 mb-4">
-                Para confirmar, escribe el nombre exacto de la facultad:
-              </p>
-              <input 
-                type="text" 
-                placeholder={`Escribe "${selectedFaculty.name}"`}
-                value={confirmationInput}
-                onChange={(e) => setConfirmationInput(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 mb-4 text-sm"
-              />
-              {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-              <div className="flex justify-end space-x-4">
-                <button
-                  onClick={() => {
-                    setShowDeleteModal(false);
-                    setConfirmationInput('');
-                    setError('');
-                  }}
-                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
-                  disabled={confirmationInput.trim() !== selectedFaculty.name.trim()}
-                >
-                  Eliminar Permanentemente
-                </button>
-              </div>
+        <div className="fixed inset-0 backdrop-brightness-50 backdrop-opacity-60 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Eliminar Facultad</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              Estás a punto de eliminar la facultad <strong>"{selectedFaculty.name}"</strong>.
+              Esta acción eliminará TODA la información relacionada, incluyendo:
+              <ul className="list-disc list-inside text-sm text-gray-600 mt-2">
+                <li>Departamentos</li>
+                <li>Materias</li>
+                <li>Profesores</li>
+                <li>Calificaciones de profesores</li>
+              </ul>
+            </p>
+            <p className="text-sm text-gray-500 mb-4">
+              Para confirmar, escribe el nombre exacto de la facultad:
+            </p>
+            <input
+              type="text"
+              placeholder={`Escribe "${selectedFaculty.name}"`}
+              value={confirmationInput}
+              onChange={(e) => setConfirmationInput(e.target.value)}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 mb-4 text-sm"
+            />
+            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setConfirmationInput('');
+                  setError('');
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
+                disabled={normalizeString(confirmationInput.trim()) !== normalizeString(selectedFaculty.name.trim())}
+              >
+                Eliminar Permanentemente
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
     </div>
   );
 };

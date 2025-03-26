@@ -16,6 +16,9 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import AdminFaculties from './components/admin/AdminFaculties';
 import AddFaculty from './components/admin/AddFaculty';
 import EditFaculty from './components/admin/EditFaculty';
+import AdminSubjects from './components/admin/AdminSubjects';
+import AddSubject from './components/admin/AddSubject';
+import EditSubject from './components/admin/EditSubject';
 
 const App: React.FC = () => {
   return (
@@ -28,7 +31,9 @@ const App: React.FC = () => {
         <Route path="facultades" element={<AdminFaculties />} />
         <Route path="facultades/agregar" element={<AddFaculty />} />
         <Route path="facultades/:facultyId" element={<EditFaculty />} />
-        {/* <Route path="materias" element={<AdminSubjects />} /> Proxima ruta */} 
+        <Route path="materias" element={<AdminSubjects />} />
+        <Route path="facultad/:facultyId/materia/agregar" element={<AddSubject />} />
+        <Route path="facultad/:facultyId/materia/:subjectId" element={<EditSubject />} />
         {/* <Route path="profesores" element={<AdminProfessors />} /> Proxima ruta */}
       </Route>
 

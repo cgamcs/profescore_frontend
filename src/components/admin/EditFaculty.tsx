@@ -15,18 +15,18 @@ interface Department {
 
 const EditFaculty: React.FC = () => {
   const { facultyId } = useParams();
-  const [faculty, setFaculty] = useState<Faculty>({
+  const [ faculty, setFaculty ] = useState<Faculty>({
     name: '',
     abbreviation: '',
     departments: [],
   });
-  const [nombre, setNombre] = useState('');
-  const [abreviatura, setAbreviatura] = useState('');
-  const [departamentos, setDepartamentos] = useState<Department[]>([]);
-  const [isEditing, setIsEditing] = useState(false);
-  const [nombreError, setNombreError] = useState(false);
-  const [abreviaturaError, setAbreviaturaError] = useState(false);
-  const [departamentosError, setDepartamentosError] = useState(false);
+  const [ nombre, setNombre ] = useState('');
+  const [ abreviatura, setAbreviatura ] = useState('');
+  const [ departamentos, setDepartamentos ] = useState<Department[]>([]);
+  const [ isEditing, setIsEditing ] = useState(false);
+  const [ nombreError, setNombreError ] = useState(false);
+  const [ abreviaturaError, setAbreviaturaError]  = useState(false);
+  const [ departamentosError, setDepartamentosError ] = useState(false);
 
   useEffect(() => {
     const fetchFacultyData = async () => {

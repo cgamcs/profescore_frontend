@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 
 const AdminHeader = () => {
     const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -24,10 +24,28 @@ const AdminHeader = () => {
 
                     {/* Navegación desktop */}
                     <nav className="hidden md:flex items-center space-x-6">
-                        <Link to="/admin/facultades" className="text-sm text-indigo-600 font-medium">Facultades</Link>
-                        <Link to="/admin/materias" className="text-sm text-gray-600">Materias</Link>
-                        <Link to="/admin/profesores" className="text-sm text-gray-600">Profesores</Link>
-                        <Link to="/" className="text-sm text-gray-600">Volver al sitio</Link>
+                        <NavLink 
+                            to="/admin/facultades"
+                            className={({ isActive }) =>
+                                `text-sm ${isActive ? 'text-indigo-600 font-medium' : 'text-gray-600'}`
+                            }
+                        >Facultades</NavLink>
+                        <NavLink 
+                            to="/admin/materias" 
+                            className={({ isActive }) =>
+                                `text-sm ${isActive ? 'text-indigo-600 font-medium' : 'text-gray-600'}`
+                            }
+                        >Materias</NavLink>
+                        <NavLink 
+                            to="/admin/profesores" 
+                            className={({ isActive }) =>
+                                `text-sm ${isActive ? 'text-indigo-600 font-medium' : 'text-gray-600'}`
+                            }
+                        >Profesores</NavLink>
+                        <NavLink 
+                            to="/" 
+                            className="text-sm text-gray-600"
+                        >Volver al sitio</NavLink>
                     </nav>
 
                     <div className="hidden md:block">
@@ -47,10 +65,10 @@ const AdminHeader = () => {
                 {showMobileMenu && (
                     <div className="md:hidden bg-white border-t border-gray-200 py-2">
                         <nav className="container mx-auto px-4 flex flex-col space-y-3">
-                            <Link to="/admin/facultades" className="text-sm text-indigo-600 font-medium">Facultades</Link>
-                            <Link to="/admin/materias" className="text-sm text-gray-600">Materias</Link>
-                            <Link to="/admin/profesores" className="text-sm text-gray-600">Profesores</Link>
-                            <Link to="/" className="text-sm text-gray-600">Volver al sitio</Link>
+                            <NavLink to="/admin/facultades" className="text-sm text-indigo-600 font-medium">Facultades</NavLink>
+                            <NavLink to="/admin/materias" className="text-sm text-gray-600">Materias</NavLink>
+                            <NavLink to="/admin/profesores" className="text-sm text-gray-600">Profesores</NavLink>
+                            <NavLink to="/" className="text-sm text-gray-600">Volver al sitio</NavLink>
                             <button
                                 onClick={() => {
                                     localStorage.removeItem('token');
