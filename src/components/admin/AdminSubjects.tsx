@@ -65,7 +65,7 @@ const AdminSubjects: React.FC = () => {
     setSearchTerm(event.target.value);
   };
 
-  const handleDeleteClick = (id: string, name: string) => {
+  const handleDeleteClick = (id: string, _name: string) => {
     setMateriaIdToDelete(id);
     setShowModal(true);
   };

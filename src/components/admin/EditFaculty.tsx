@@ -15,7 +15,7 @@ interface Department {
 
 const EditFaculty: React.FC = () => {
   const { facultyId } = useParams();
-  const [ faculty, setFaculty ] = useState<Faculty>({
+  const [ _faculty, setFaculty ] = useState<Faculty>({
     name: '',
     abbreviation: '',
     departments: [],
