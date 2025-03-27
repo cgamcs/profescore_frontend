@@ -39,6 +39,12 @@ const ProfessorRating = () => {
 
   const SITE_KEY = import.meta.env.VITE_SITE_KEY || '';
 
+  if (!SITE_KEY) {
+    console.error('La clave del sitio de reCAPTCHA no está configurada.');
+  }
+
+  console.log('Clave del sitio de reCAPTCHA:', SITE_KEY);
+
   // Obtener fingerprint del usuario
   const { data: visitorData, isLoading: visitorLoading, error: fpError } = useVisitorData(
     { extendedResult: true },
