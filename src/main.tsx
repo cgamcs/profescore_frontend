@@ -9,8 +9,8 @@ createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <FpjsProvider
       loadOptions={{
-        apiKey: "oE5BeRE132yjhyikfDZF", // es mi API Key publica
-        endpoint: "https://your-proxy-server.com"
+        apiKey: import.meta.env.VITE_PUBLIC_KEY,
+        endpoint: import.meta.env.VITE_API_URL
       }}
     >
       <Router>

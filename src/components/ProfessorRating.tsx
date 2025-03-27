@@ -57,6 +57,8 @@ const ProfessorRating = () => {
   // Define el userFingerprint con valor por defecto para desarrollo
   const userFingerprint = visitorData?.visitorId || 'dev-fingerprint';
 
+  console.log(userFingerprint)
+
   useEffect(() => {
     if (fpError && !isDevelopment) {
       setError('Error en la verificación de seguridad. Desactiva bloqueadores de contenido.');
