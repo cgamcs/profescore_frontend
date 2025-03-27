@@ -44,6 +44,8 @@ const ProfessorRating = () => {
   }
 
   console.log('Clave del sitio de reCAPTCHA:', SITE_KEY);
+  console.log('Clave de API de FingerprintJS:', import.meta.env.VITE_PUBLIC_KEY);
+  console.log('Endpoint de API de FingerprintJS:', import.meta.env.VITE_API_URL);
 
   // Obtener fingerprint del usuario
   const { data: visitorData, isLoading: visitorLoading, error: fpError } = useVisitorData(
@@ -57,7 +59,7 @@ const ProfessorRating = () => {
   // Define el userFingerprint con valor por defecto para desarrollo
   const userFingerprint = visitorData?.visitorId || 'dev-fingerprint';
 
-  console.log(userFingerprint)
+  console.log(userFingerprint);
 
   useEffect(() => {
     if (fpError && !isDevelopment) {
