@@ -98,7 +98,7 @@ const ProfessorsPage = () => {
     };
 
     if (error) return <div className="text-red-500 text-center py-4">{error}</div>;
-    if (loading) return <div className="text-center py-10">Cargando profesores...</div>;
+    if (loading) return <div className="text-center py-10">Cargando maestros...</div>;
 
     return (
         <main className="container mx-auto px-4 py-6">

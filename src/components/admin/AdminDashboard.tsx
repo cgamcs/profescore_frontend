@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 // Interfaces for our data types
@@ -27,14 +27,20 @@ const AdminDashboard: React.FC = () => {
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    // Check for token and validate it
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/401');
+      return;
+    }
+
     // Fetch dashboard statistics and recent activities
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem('token');
-        if (!token) throw new Error('No token disponible');
 
         // Fetch stats
         const statsResponse = await axios.get(`${import.meta.env.VITE_API_URL}/admin/dashboard-stats`, {
@@ -48,24 +54,25 @@ const AdminDashboard: React.FC = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         console.log('Raw Activities Response:', activitiesResponse.data);
-        
+
         // Ensure activities is an array and limit to last 5
-        const activities = Array.isArray(activitiesResponse.data) 
-          ? activitiesResponse.data.slice(0, 5) 
+        const activities = Array.isArray(activitiesResponse.data)
+          ? activitiesResponse.data.slice(0, 5)
           : [];
-        
+
         console.log('Processed Activities:', activities);
         setRecentActivities(activities);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
         setError(error instanceof Error ? error.message : 'Un error desconocido ocurrió');
+        navigate('/401');
       } finally {
         setLoading(false);
       }
     };
 
     fetchDashboardData();
-  }, []);
+  }, [navigate]);
 
   // Format timestamp to human-readable relative time
   const formatTimestamp = (timestamp: string) => {

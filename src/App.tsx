@@ -21,6 +21,7 @@ import AddSubject from './components/admin/AddSubject';
 import EditSubject from './components/admin/EditSubject';
 import AdminProfessors from './components/admin/AdminProfessors';
 import AddProfessor from './components/admin/AddProfessor';
+import Unauthorized from './components/401/Unauthorized';
 
 const App: React.FC = () => {
   return (
@@ -72,6 +73,10 @@ const App: React.FC = () => {
         <Route path="maestros/agregar-maestro" element={<ProfessorAdd />} />
         <Route path="maestro/:professorId" element={<ProfessorDetail />} />
         <Route path="maestro/:professorId/calificar" element={<ProfessorRating />} />
+      </Route>
+
+      <Route element={<LayoutWithHeader />}>
+        <Route path='/401' element={<Unauthorized />}></Route>
       </Route>
     </Routes>
   );

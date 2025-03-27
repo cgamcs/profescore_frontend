@@ -85,7 +85,7 @@ const SubjectsPage = () => {
     searchQuery !== '' && normalizeText(professor.name).includes(normalizeText(searchQuery))
   );
 
-  if (loading) return <div className="text-center py-4">Cargando datos...</div>;
+  if (loading) return <div className="text-center py-4">Cargando materias...</div>;
   if (error) return <div className="text-red-500 text-center py-4">{error}</div>;
 
   return (
