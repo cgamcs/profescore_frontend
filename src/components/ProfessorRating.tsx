@@ -1,3 +1,4 @@
+// components/ProfessorRating.js
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useVisitorData } from '@fingerprintjs/fingerprintjs-pro-react';
@@ -44,19 +45,13 @@ const ProfessorRating = () => {
   }
 
   console.log('Clave del sitio de reCAPTCHA:', SITE_KEY);
-  console.log('Clave de API de FingerprintJS:', import.meta.env.VITE_PUBLIC_KEY);
-  console.log('Endpoint de API de FingerprintJS:', import.meta.env.VITE_API_URL);
 
-  // Obtener fingerprint del usuario
   const { data: visitorData, isLoading: visitorLoading, error: fpError } = useVisitorData(
     { extendedResult: true },
     { immediate: true }
   );
 
-  // Determinar si estamos en desarrollo
   const isDevelopment = process.env.NODE_ENV === 'development';
-
-  // Define el userFingerprint con valor por defecto para desarrollo
   const userFingerprint = visitorData?.visitorId || 'dev-fingerprint';
 
   console.log(userFingerprint);
@@ -69,7 +64,6 @@ const ProfessorRating = () => {
     }
   }, [fpError, isDevelopment]);
 
-  // Obtener la IP del usuario
   useEffect(() => {
     const getIpAddress = async () => {
       try {
@@ -83,10 +77,8 @@ const ProfessorRating = () => {
     getIpAddress();
   }, []);
 
-  // Obtener las materias de la facultad
   useEffect(() => {
     if (facultyId) {
-      // Llamada a la API para obtener las materias
       api.get(`/faculties/${facultyId}/subjects`)
         .then(response => {
           setSubjects(response.data);
@@ -97,47 +89,39 @@ const ProfessorRating = () => {
     }
   }, [facultyId]);
 
-  // Obtener la información del profesor
   useEffect(() => {
     api.get(`faculties/${facultyId}/professors/${professorId}`)
       .then(response => setProfessor(response.data))
       .catch(() => setError('No se pudo cargar la información del profesor'));
   }, [facultyId, professorId]);
 
-  // Manejar cambios en los botones de calificación
   const handleRatingChange = (field: keyof RatingForm, value: number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // Manejar cambio de materia
   const handleSubjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setFormData(prev => ({ ...prev, subject: e.target.value }));
   };
 
-  // Manejar cambio de "¿Tomarías clase con este profesor nuevamente?"
   const handleWouldRetakeChange = (value: boolean) => {
     setFormData(prev => ({ ...prev, wouldRetake: value }));
   };
 
-  // Manejar el cambio del CAPTCHA
   const handleCaptchaChange = (value: string | null) => {
     if (value) {
       setCaptchaValue(value);
     }
   };
 
-  // Enviar calificación
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (visitorLoading && !isDevelopment) return;
 
-    // Validar que se haya seleccionado una materia
     if (!formData.subject) {
       setError('Por favor selecciona una materia');
       return;
     }
 
-    // Validar que el CAPTCHA esté resuelto
     if (!captchaValue) {
       setError('Por favor completa el CAPTCHA');
       return;
@@ -149,8 +133,9 @@ const ProfessorRating = () => {
       const ratingData = {
         ...formData,
         professor: professorId,
-        userIdentifier: isDevelopment ? 'dev-user' : `${ipAddress}-${userFingerprint}`,
-        captcha: captchaValue // Incluir el token del CAPTCHA
+        userIdentifier: userFingerprint,
+        ipAddress,
+        captcha: captchaValue
       };
 
       console.log('Datos a enviar:', ratingData);
@@ -173,7 +158,6 @@ const ProfessorRating = () => {
     return <p className="text-red-600 text-center">{error}</p>;
   }
 
-  // Generar botones de calificación para cada categoría
   const renderRatingButtons = (field: keyof RatingForm) => {
     return [1, 2, 3, 4, 5].map(value => (
       <div key={`${field}-${value}`} className="flex flex-col items-center">
