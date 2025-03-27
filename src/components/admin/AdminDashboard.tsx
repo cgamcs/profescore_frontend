@@ -37,14 +37,14 @@ const AdminDashboard: React.FC = () => {
         if (!token) throw new Error('No token disponible');
 
         // Fetch stats
-        const statsResponse = await axios.get('http://localhost:4000/api/admin/dashboard-stats', {
+        const statsResponse = await axios.get(`${import.meta.env.VITE_API_URL}/admin/dashboard-stats`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         console.log('Dashboard Stats:', statsResponse.data);
         setStats(statsResponse.data);
 
         // Fetch recent activities
-        const activitiesResponse = await axios.get('http://localhost:4000/api/admin/recent-activities', {
+        const activitiesResponse = await axios.get(`${import.meta.env.VITE_API_URL}/admin/recent-activities`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         console.log('Raw Activities Response:', activitiesResponse.data);

@@ -21,7 +21,7 @@ const AdminFaculties: React.FC = () => {
   // Fetch faculties from API
   const fetchFaculties = async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/admin/faculty', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/faculty`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -69,7 +69,7 @@ const AdminFaculties: React.FC = () => {
 
     try {
       // Send delete request to backend
-      const response = await fetch(`http://localhost:4000/api/admin/faculty/${selectedFaculty._id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/faculty/${selectedFaculty._id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -120,9 +120,7 @@ const AdminFaculties: React.FC = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            `
           </div>
         </div>
 

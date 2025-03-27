@@ -24,7 +24,7 @@ const AddFaculty: React.FC = () => {
       // Fetch faculty data for editing
       const fetchFaculty = async () => {
         try {
-          const response = await axios.get(`http://localhost:4000/api/admin/faculty/${id}`, {
+          const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/faculty/${id}`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('token')}`
             }
@@ -81,14 +81,14 @@ const AddFaculty: React.FC = () => {
     try {
       if (id) {
         // Update faculty
-        await axios.put(`http://localhost:4000/api/admin/faculty/${id}`, faculty, {
+        await axios.put(`${import.meta.env.VITE_API_URL}/admin/faculty/${id}`, faculty, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
           }
         });
       } else {
         // Add new faculty
-        await axios.post('http://localhost:4000/api/admin/faculty', faculty, {
+        await axios.post(`${import.meta.env.VITE_API_URL}/admin/faculty`, faculty, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
           }

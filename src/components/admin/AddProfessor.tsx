@@ -27,7 +27,7 @@ const AddProfessor: React.FC = () => {
     useEffect(() => {
         const fetchDepartments = async () => {
             try {
-                const response = await axios.get(`http://localhost:4000/api/admin/faculty/${facultyId}/departments`, {
+                const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/faculty/${facultyId}/departments`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
@@ -50,7 +50,7 @@ const AddProfessor: React.FC = () => {
 
         const fetchSubjects = async () => {
             try {
-                const response = await axios.get(`http://localhost:4000/api/admin/faculty/${facultyId}/subjects`, {
+                const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/faculty/${facultyId}/subjects`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
@@ -118,7 +118,7 @@ const AddProfessor: React.FC = () => {
             console.log('Payload being sent:', payload);
 
             const endpoint = selectedSubjectIds.length > 1 ? 'multiple' : '';
-            const response = await axios.post(`http://localhost:4000/api/admin/faculty/${facultyId}/professor/${endpoint}`, payload, {
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/admin/faculty/${facultyId}/professor/${endpoint}`, payload, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }

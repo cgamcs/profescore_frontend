@@ -40,7 +40,7 @@ const EditSubject: React.FC = () => {
     const fetchSubject = async () => {
       try {
         if (subjectId) {
-          const response = await axios.get(`http://localhost:4000/api/admin/faculty/${facultyId}/subject/${subjectId}`, {
+          const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/faculty/${facultyId}/subject/${subjectId}`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
@@ -55,7 +55,7 @@ const EditSubject: React.FC = () => {
 
     const fetchDepartments = async () => {
       try {
-        const response = await axios.get(`http://localhost:4000/api/admin/faculty/${facultyId}/departments`, {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/faculty/${facultyId}/departments`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -122,7 +122,7 @@ const EditSubject: React.FC = () => {
 
     if (isValid) {
       try {
-        await axios.put(`http://localhost:4000/api/admin/faculty/${facultyId}/subject/${subjectId}`, formData, {
+        await axios.put(`${import.meta.env.VITE_API_URL}/admin/faculty/${facultyId}/subject/${subjectId}`, formData, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }

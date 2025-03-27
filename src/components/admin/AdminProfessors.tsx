@@ -31,7 +31,7 @@ const AdminProfessors: React.FC = () => {
     useEffect(() => {
         const fetchProfessors = async () => {
             try {
-                const response = await axios.get('http://localhost:4000/api/admin/professors', {
+                const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/professors`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
@@ -44,7 +44,7 @@ const AdminProfessors: React.FC = () => {
 
         const fetchFaculties = async () => {
             try {
-                const response = await axios.get('http://localhost:4000/api/admin/faculty', {
+                const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/faculty`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
@@ -78,7 +78,7 @@ const AdminProfessors: React.FC = () => {
             const faculty = faculties.find(f => f.name === professor.faculty);
             if (faculty) {
                 try {
-                    await axios.delete(`http://localhost:4000/api/admin/faculty/${faculty._id}/professor/${professor._id}`, {
+                    await axios.delete(`${import.meta.env.VITE_API_URL}/admin/faculty/${faculty._id}/professor/${professor._id}`, {
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('token')}`
                         }

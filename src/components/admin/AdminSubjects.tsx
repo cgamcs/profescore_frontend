@@ -32,7 +32,7 @@ const AdminSubjects: React.FC = () => {
     // Obtener todas las materias desde la API
     const fetchMaterias = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/api/admin/subjects', {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/subjects`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -46,7 +46,7 @@ const AdminSubjects: React.FC = () => {
     // Obtener todas las facultades desde la API
     const fetchFaculties = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/api/admin/faculty', {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/faculty`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -82,7 +82,7 @@ const AdminSubjects: React.FC = () => {
       const materiaToDelete = materias.find(m => m._id === materiaIdToDelete);
       if (materiaToDelete && normalizeString(confirmationInput) === normalizeString(materiaToDelete.name)) {
         try {
-          await axios.delete(`http://localhost:4000/api/admin/faculty/${materiaToDelete.faculty._id}/subject/${materiaIdToDelete}`, {
+          await axios.delete(`${import.meta.env.VITE_API_URL}/admin/faculty/${materiaToDelete.faculty._id}/subject/${materiaIdToDelete}`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
