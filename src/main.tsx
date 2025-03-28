@@ -10,7 +10,7 @@ createRoot(document.getElementById('root')!).render(
     <FpjsProvider
       loadOptions={{
         apiKey: import.meta.env.VITE_PUBLIC_KEY,
-        endpoint: import.meta.env.VITE_API_URL
+        endpoint: `${import.meta.env.VITE_API_URL}/fingerprint`
       }}
     >
       <Router>
