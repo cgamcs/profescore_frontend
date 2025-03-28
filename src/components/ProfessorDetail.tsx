@@ -43,6 +43,9 @@ const ProfessorDetail = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [userId, setUserId] = useState<string>('');
+    const [showReportModal, setShowReportModal] = useState(false);
+    const [selectedComment, setSelectedComment] = useState<RatingType | null>(null);
+    const [reportSent, setReportSent] = useState(false);
 
     // Generar o recuperar userId al cargar el componente
     useEffect(() => {
@@ -127,6 +130,39 @@ const ProfessorDetail = () => {
             }
         } catch (error) {
             console.error('Error votando:', error);
+        }
+    };
+
+    const openReportModal = (comment: RatingType) => {
+        setSelectedComment(comment);
+        setShowReportModal(true);
+    };
+
+    const closeReportModal = () => {
+        setSelectedComment(null);
+        setShowReportModal(false);
+    };
+
+    const handleReport = async (event: React.FormEvent) => {
+        event.preventDefault();
+        const reason = (document.getElementById('report-reason') as HTMLSelectElement).value;
+        const details = (document.getElementById('report-details') as HTMLTextAreaElement).value;
+
+        // Enviar el reporte al backend
+        try {
+            const res = await api.post(
+                `/faculties/${facultyId}/professors/${professorId}/ratings/${selectedComment?._id}/report`,
+                { commentId: [selectedComment?._id], reasons: [reason], reportComment: details }
+            );
+
+            if (res.status === 201) {
+                console.log('Reporte enviado exitosamente:', res.data);
+                setReportSent(true);
+                setTimeout(() => setReportSent(false), 3000); // Ocultar la notificación después de 3 segundos
+                closeReportModal();
+            }
+        } catch (error) {
+            console.error('Error al enviar el reporte:', error);
         }
     };
 
@@ -259,7 +295,7 @@ const ProfessorDetail = () => {
 
                                             <div className="border-l border-gray-200 pl-5">
                                                 <div className="flex items-center gap-2">
-                                                    <a href="#" className="text-sm text-gray-500 hover:cursor-pointer">Reportar</a>
+                                                    <a href="#" className="text-sm text-gray-500 hover:cursor-pointer" onClick={() => openReportModal(rating)}>Reportar</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -270,6 +306,76 @@ const ProfessorDetail = () => {
                     </div>
                 </div>
             </main>
+
+            {/* Modal de Reporte */}
+            {showReportModal && (
+                <div className="fixed inset-0 backdrop-brightness-50 backdrop-opacity-60 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
+                        <div className="bg-indigo-600 px-6 py-4 flex justify-between items-center">
+                            <h3 className="text-lg font-medium text-white">Reportar comentario</h3>
+                            <button className="text-white hover:text-gray-200 focus:outline-none" onClick={closeReportModal}>
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div className="p-6">
+                            <div className="mb-6">
+                                <h4 className="text-sm font-medium text-gray-500 mb-2">Comentario reportado:</h4>
+                                <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+                                    <p className="text-gray-700 text-sm">{selectedComment?.comment}</p>
+                                </div>
+                            </div>
+                            <form id="report-form" onSubmit={handleReport}>
+                                <div className="mb-6">
+                                    <label htmlFor="report-reason" className="block text-sm font-medium text-gray-700 mb-2">Motivo del reporte</label>
+                                    <select id="report-reason" className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="" disabled>Selecciona un motivo</option>
+                                        <option value="offensive">Contenido ofensivo o inapropiado</option>
+                                        <option value="false">Información falsa o engañosa</option>
+                                        <option value="personal">Contiene información personal</option>
+                                        <option value="spam">Spam o publicidad</option>
+                                        <option value="other">Otro motivo</option>
+                                    </select>
+                                </div>
+                                <div className="mb-6">
+                                    <label htmlFor="report-details" className="block text-sm font-medium text-gray-700 mb-2">Detalles adicionales (opcional)</label>
+                                    <textarea
+                                        id="report-details"
+                                        className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                        placeholder="Proporciona más información sobre por qué estás reportando este comentario..."
+                                    ></textarea>
+                                </div>
+                                <div className="bg-gray-50 p-4 rounded-md border border-gray-200 mb-6">
+                                    <div className="flex items-start">
+                                        <div className="flex-shrink-0">
+                                            <i className="fas fa-info-circle text-indigo-500 mt-0.5"></i>
+                                        </div>
+                                        <div className="ml-3">
+                                            <p className="text-sm text-gray-600">
+                                                Tu reporte será revisado por nuestro equipo de moderación. Los reportes ayudan a mantener nuestra comunidad segura y respetuosa.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex justify-end space-x-3">
+                                    <button type="button" className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" onClick={closeReportModal}>
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                        Enviar reporte
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Notificación de reporte enviado */}
+            {reportSent && (
+                <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg">
+                    Reporte enviado exitosamente
+                </div>
+            )}
         </div>
     );
 };

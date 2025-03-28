@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { FaSpinner } from 'react-icons/fa';
 import ReCAPTCHA from 'react-google-recaptcha';
 import api from '../api';
 
@@ -86,7 +85,7 @@ const ProfessorAdd = () => {
         }
     };
 
-    if (loading) return <div className="text-center py-8"><FaSpinner className="animate-spin text-2xl" /></div>;
+    if (loading) return <div className="text-center py-8">Cargando...</div>;
 
     return (
         <div className="bg-white min-h-screen">
@@ -142,7 +141,7 @@ const ProfessorAdd = () => {
 
                             {/* Biografía */}
                             <div className="space-y-2">
-                                <label className="block text-sm font-medium text-gray-700">Biografía (opcional)</label>
+                                <label className="block text-sm font-medium text-gray-700">Biografía</label>
                                 <textarea
                                     value={formData.biography}
                                     onChange={(e) => setFormData({...formData, biography: e.target.value})}
