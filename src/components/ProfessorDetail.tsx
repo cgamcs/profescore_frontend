@@ -155,6 +155,8 @@ const ProfessorDetail = () => {
                 { commentId: [selectedComment?._id], reasons: [reason], reportComment: details }
             );
 
+            console.log(res)
+
             if (res.status === 201) {
                 console.log('Reporte enviado exitosamente:', res.data);
                 setReportSent(true);
