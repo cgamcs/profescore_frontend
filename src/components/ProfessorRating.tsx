@@ -33,6 +33,7 @@ const ProfessorRating = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [captchaValue, setCaptchaValue] = useState('');
+  const [captchaError, setCaptchaError] = useState('');
 
   const SITE_KEY = import.meta.env.VITE_SITE_KEY || '';
 
@@ -75,6 +76,9 @@ const ProfessorRating = () => {
   const handleCaptchaChange = (value: string | null) => {
     if (value) {
       setCaptchaValue(value);
+      setCaptchaError('');
+    } else {
+      setCaptchaValue('');
     }
   };
 
@@ -87,7 +91,7 @@ const ProfessorRating = () => {
     }
 
     if (!captchaValue) {
-      setError('Por favor completa el CAPTCHA');
+      setCaptchaError('Por favor completa el CAPTCHA');
       return;
     }
 
@@ -243,6 +247,7 @@ const ProfessorRating = () => {
                 sitekey={SITE_KEY}
                 onChange={handleCaptchaChange}
               />
+              {captchaError && <p className="text-red-600 text-sm mt-1">{captchaError}</p>}
             </div>
 
             <div className="pt-4 flex justify-end space-x-4">
