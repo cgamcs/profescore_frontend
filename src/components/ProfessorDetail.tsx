@@ -42,6 +42,7 @@ const ProfessorDetail = () => {
     const [ratings, setRatings] = useState<RatingType[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [votedRatings, setVotedRatings] = useState<{ [key: string]: boolean }>({});
 
     useEffect(() => {
         const fetchProfessorDetails = async () => {
@@ -117,6 +118,10 @@ const ProfessorDetail = () => {
                             : r
                     )
                 );
+                setVotedRatings(prev => ({
+                    ...prev,
+                    [ratingId]: !prev[ratingId]
+                }));
             }
         } catch (error) {
             console.error('Error votando:', error);
@@ -240,7 +245,7 @@ const ProfessorDetail = () => {
                                                 className="flex items-center gap-2 border border-gray-200 rounded-full py-2 px-4 hover:cursor-pointer"
                                                 onClick={() => handleLike(rating._id)}
                                             >
-                                                {rating.likes.length > 0 ? (
+                                                {votedRatings[rating._id] ? (
                                                     <FaHeart className="text-indigo-600" />
                                                 ) : (
                                                     <FaRegHeart className="text-gray-500" />
