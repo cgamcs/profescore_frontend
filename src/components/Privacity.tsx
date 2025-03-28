@@ -32,7 +32,7 @@ const Privacity: React.FC = () => {
                             className={({ isActive }) =>
                                 `text-sm ${isActive ? 'text-indigo-600 font-medium' : 'text-gray-600'}`
                             }
-                        >Preguntas Frecuentes</NavLink>
+                        >Términos de Privacidad</NavLink>
                     </nav>
                 </div>
 
@@ -53,7 +53,7 @@ const Privacity: React.FC = () => {
                                 className={({ isActive }) =>
                                     `text-sm ${isActive ? 'text-indigo-600 font-medium' : 'text-gray-600'}`
                                 }
-                            >Preguntas Frecuentes</NavLink>
+                            >Términos de Privacidad</NavLink>
                         </nav>
                     </div>
                 )}

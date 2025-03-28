@@ -22,8 +22,8 @@ import EditSubject from './components/admin/EditSubject';
 import AdminProfessors from './components/admin/AdminProfessors';
 import AddProfessor from './components/admin/AddProfessor';
 import Unauthorized from './components/401/Unauthorized';
-import Faq from './components/footer/faq';
-import Privacity from './components/footer/Privacity';
+import Faq from './components/Faq';
+import Privacity from './components/Privacity';
 
 const App: React.FC = () => {
   return (
