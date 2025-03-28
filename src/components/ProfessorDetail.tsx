@@ -43,6 +43,20 @@ const ProfessorDetail = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [votedRatings, setVotedRatings] = useState<{ [key: string]: boolean }>({});
+    // Nuevo estado para el userId
+    const [userId, setUserId] = useState<string>('');
+
+    // Generar o recuperar userId al cargar el componente
+    useEffect(() => {
+        const storedUserId = localStorage.getItem('userId');
+        if (!storedUserId) {
+            const newUserId = Math.random().toString(36).substring(2, 15);
+            localStorage.setItem('userId', newUserId);
+            setUserId(newUserId);
+        } else {
+            setUserId(storedUserId);
+        }
+    }, []);
 
     useEffect(() => {
         const fetchProfessorDetails = async () => {
@@ -99,29 +113,20 @@ const ProfessorDetail = () => {
         );
     };
 
+    // Función modificada para enviar el userId
     const handleLike = async (ratingId: string) => {
         try {
             const res = await api.post(
                 `/faculties/${facultyId}/professors/${professorId}/ratings/${ratingId}/vote`,
-                { type: 1 }
+                { type: 1, userId: userId }
             );
 
             if (res.status === 200) {
                 setRatings(prev =>
                     prev.map(r =>
-                        r._id === ratingId
-                            ? {
-                                ...r, // Mantener datos existentes
-                                ...res.data, // Sobrescribir campos actualizados
-                                subject: res.data.subject || r.subject // Preservar subject si no viene
-                              }
-                            : r
+                        r._id === ratingId ? res.data : r
                     )
                 );
-                setVotedRatings(prev => ({
-                    ...prev,
-                    [ratingId]: !prev[ratingId]
-                }));
             }
         } catch (error) {
             console.error('Error votando:', error);
@@ -245,11 +250,13 @@ const ProfessorDetail = () => {
                                                 className="flex items-center gap-2 border border-gray-200 rounded-full py-2 px-4 hover:cursor-pointer"
                                                 onClick={() => handleLike(rating._id)}
                                             >
-                                                {votedRatings[rating._id] ? (
-                                                    <FaHeart className="text-indigo-600" />
-                                                ) : (
-                                                    <FaRegHeart className="text-gray-500" />
-                                                )}
+                                                {
+                                                    rating.likes.includes(userId) ? (
+                                                        <FaHeart className="text-indigo-600" />
+                                                    ) : (
+                                                        <FaRegHeart className="text-gray-500" />
+                                                    )
+                                                }
                                                 <span className="text-sm text-gray-500">Me gusta</span>
                                             </button>
 
