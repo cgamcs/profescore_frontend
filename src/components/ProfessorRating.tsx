@@ -1,4 +1,3 @@
-// components/ProfessorRating.js
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ReCAPTCHA from 'react-google-recaptcha';
@@ -33,7 +32,6 @@ const ProfessorRating = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [ipAddress, setIpAddress] = useState('');
   const [captchaValue, setCaptchaValue] = useState('');
 
   const SITE_KEY = import.meta.env.VITE_SITE_KEY || '';
@@ -43,42 +41,6 @@ const ProfessorRating = () => {
   }
 
   console.log('Clave del sitio de reCAPTCHA:', SITE_KEY);
-
-  // Función para establecer una cookie
-  const setCookie = (name: string, value: string, days: number) => {
-    var expires = "";
-    if (days) {
-      var date = new Date();
-      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-      expires = "; expires=" + date.toUTCString();
-    }
-    document.cookie = name + "=" + (value || "") + expires + "; path=/";
-  };
-
-  // Función para obtener una cookie
-  const getCookie = (name: string) => {
-    var nameEQ = name + "=";
-    var ca = document.cookie.split(';');
-    for (var i = 0; i < ca.length; i++) {
-      var c = ca[i];
-      while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-    }
-    return null;
-  };
-
-  useEffect(() => {
-    const getIpAddress = async () => {
-      try {
-        const ipResponse = await fetch('https://api.ipify.org?format=json');
-        const { ip } = await ipResponse.json();
-        setIpAddress(ip);
-      } catch {
-        setError('Error al obtener la IP del usuario');
-      }
-    };
-    getIpAddress();
-  }, []);
 
   useEffect(() => {
     if (facultyId) {
@@ -93,7 +55,7 @@ const ProfessorRating = () => {
   }, [facultyId]);
 
   useEffect(() => {
-    api.get(`faculties/${facultyId}/professors/${professorId}`)
+    api.get(`/faculties/${facultyId}/professors/${professorId}`)
       .then(response => setProfessor(response.data))
       .catch(() => setError('No se pudo cargar la información del profesor'));
   }, [facultyId, professorId]);
@@ -129,21 +91,12 @@ const ProfessorRating = () => {
       return;
     }
 
-    const cookieName = `rated_${professorId}_${formData.subject}`;
-    const hasRated = getCookie(cookieName);
-
-    if (hasRated) {
-      setError('Ya has calificado a este profesor en esta materia. Por favor, espera 6 meses antes de volver a calificar.');
-      return;
-    }
-
     setLoading(true);
 
     try {
       const ratingData = {
         ...formData,
         professor: professorId,
-        ipAddress,
         captcha: captchaValue
       };
 
@@ -152,7 +105,6 @@ const ProfessorRating = () => {
       const response = await api.post(`/faculties/${facultyId}/professors/${professorId}/ratings`, ratingData);
 
       if (response.status === 201) {
-        setCookie(cookieName, 'true', 180); // 180 días = 6 meses
         navigate(`/facultad/${facultyId}/maestro/${professorId}`);
       }
     } catch (error) {

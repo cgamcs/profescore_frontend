@@ -111,7 +111,7 @@ const ProfessorDetail = () => {
                         r._id === ratingId
                             ? {
                                 ...r, // Mantener datos existentes
-                                ...res.data, // Sobreescribir campos actualizados
+                                ...res.data, // Sobrescribir campos actualizados
                                 subject: res.data.subject || r.subject // Preservar subject si no viene
                               }
                             : r
