@@ -121,7 +121,7 @@ const Privacity: React.FC = () => {
                                 </p>
                                 <ul className="list-disc pl-6 text-gray-700 mb-4">
                                     <li className="mb-2">Evitar que califiques al mismo profesor en la misma materia antes de 6 meses.</li>
-                                    <li className="mb-2">Recordar preferencias básicas de visualización (ej. tema claro/oscuro).</li>
+                                    <li className="mb-2">Recordar preferencias básicas de visualización (ej. comentarios a los que les haz dado like).</li>
                                 </ul>
                                 <p className="text-gray-700">
                                     Estas cookies no recopilan información personal ni se comparten con terceros.
@@ -206,7 +206,7 @@ const Privacity: React.FC = () => {
                             <div>
                                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Reportar contenido:</h3>
                                 <p className="text-gray-700">
-                                    Si encuentras un comentario que infringe nuestras normas (ej. datos personales expuestos), repórtalo usando el botón correspondiente o escríbenos a contacto@profescore.uanl.com.
+                                    Si encuentras un comentario que infringe nuestras normas (ej. datos personales expuestos), repórtalo usando el botón correspondiente o escríbenos a contacto.profescore@gmail.com.
                                 </p>
                             </div>
                         </section>
@@ -225,7 +225,7 @@ const Privacity: React.FC = () => {
                             <h2 className="text-2xl font-bold text-gray-900 mb-4">7. Contacto</h2>
 
                             <p className="text-gray-700 mb-4">
-                                Para preguntas sobre privacidad, escribe a: <a href="mailto:contacto@profescore.uanl.com" className="text-indigo-600 hover:text-indigo-800">contacto@profescore.uanl.com</a>.
+                                Para preguntas sobre privacidad, escribe a: <a href="mailto:contacto.profescore@gmail.com" className="text-indigo-600 hover:text-indigo-800">contacto.profescore@gmail.com</a>.
                             </p>
 
                             <div className="bg-indigo-50 border-l-4 border-indigo-400 p-4">
