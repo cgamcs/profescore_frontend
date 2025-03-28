@@ -1,7 +1,6 @@
 // components/ProfessorRating.js
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useVisitorData } from '@fingerprintjs/fingerprintjs-pro-react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import api from '../api';
 
@@ -17,9 +16,8 @@ interface RatingForm {
 }
 
 const ProfessorRating = () => {
-  const { facultyId } = useParams<{ facultyId: string; subjectId: string }>();
+  const { facultyId, professorId } = useParams<{ facultyId: string; professorId: string }>();
   const [subjects, setSubjects] = useState<Array<{ _id: string, name: string }>>([]);
-  const { professorId } = useParams<{ professorId: string }>();
   const navigate = useNavigate();
   const [professor, setProfessor] = useState<{ name: string } | null>(null);
   const [formData, setFormData] = useState<RatingForm>({
@@ -46,23 +44,28 @@ const ProfessorRating = () => {
 
   console.log('Clave del sitio de reCAPTCHA:', SITE_KEY);
 
-  const { data: visitorData, isLoading: visitorLoading, error: fpError } = useVisitorData(
-    { extendedResult: true },
-    { immediate: true }
-  );
-
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  const userFingerprint = visitorData?.visitorId || 'dev-fingerprint';
-
-  console.log(userFingerprint);
-
-  useEffect(() => {
-    if (fpError && !isDevelopment) {
-      setError('Error en la verificación de seguridad. Desactiva bloqueadores de contenido.');
-    } else if (fpError && isDevelopment) {
-      console.warn('Error de fingerprinting ignorado en desarrollo:', fpError);
+  // Función para establecer una cookie
+  const setCookie = (name: string, value: string, days: number) => {
+    var expires = "";
+    if (days) {
+      var date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      expires = "; expires=" + date.toUTCString();
     }
-  }, [fpError, isDevelopment]);
+    document.cookie = name + "=" + (value || "") + expires + "; path=/";
+  };
+
+  // Función para obtener una cookie
+  const getCookie = (name: string) => {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  };
 
   useEffect(() => {
     const getIpAddress = async () => {
@@ -115,7 +118,6 @@ const ProfessorRating = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (visitorLoading && !isDevelopment) return;
 
     if (!formData.subject) {
       setError('Por favor selecciona una materia');
@@ -127,13 +129,20 @@ const ProfessorRating = () => {
       return;
     }
 
+    const cookieName = `rated_${professorId}_${formData.subject}`;
+    const hasRated = getCookie(cookieName);
+
+    if (hasRated) {
+      setError('Ya has calificado a este profesor en esta materia. Por favor, espera 6 meses antes de volver a calificar.');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const ratingData = {
         ...formData,
         professor: professorId,
-        userIdentifier: userFingerprint,
         ipAddress,
         captcha: captchaValue
       };
@@ -143,7 +152,7 @@ const ProfessorRating = () => {
       const response = await api.post(`/faculties/${facultyId}/professors/${professorId}/ratings`, ratingData);
 
       if (response.status === 201) {
-        localStorage.setItem(`rated-${professorId}`, 'true');
+        setCookie(cookieName, 'true', 180); // 180 días = 6 meses
         navigate(`/facultad/${facultyId}/maestro/${professorId}`);
       }
     } catch (error) {
@@ -294,10 +303,10 @@ const ProfessorRating = () => {
               </button>
               <button
                 type="submit"
-                disabled={loading || (visitorLoading && !isDevelopment) || (!!fpError && !isDevelopment)}
+                disabled={loading}
                 className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium hover:cursor-pointer disabled:opacity-50"
               >
-                {visitorLoading && !isDevelopment ? 'Verificando...' : loading ? 'Enviando...' : 'Enviar Calificación'}
+                {loading ? 'Enviando...' : 'Enviar Calificación'}
               </button>
             </div>
           </form>
