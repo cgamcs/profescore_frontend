@@ -42,8 +42,6 @@ const ProfessorDetail = () => {
     const [ratings, setRatings] = useState<RatingType[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [votedRatings, setVotedRatings] = useState<{ [key: string]: boolean }>({});
-    // Nuevo estado para el userId
     const [userId, setUserId] = useState<string>('');
 
     // Generar o recuperar userId al cargar el componente
@@ -113,7 +111,6 @@ const ProfessorDetail = () => {
         );
     };
 
-    // Función modificada para enviar el userId
     const handleLike = async (ratingId: string) => {
         try {
             const res = await api.post(
