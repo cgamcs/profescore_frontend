@@ -107,6 +107,7 @@ const ProfessorRating = () => {
       console.log('Datos a enviar:', ratingData);
 
       const response = await api.post(`/faculties/${facultyId}/professors/${professorId}/ratings`, ratingData);
+      console.log(response)
 
       if (response.status === 201) {
         navigate(`/facultad/${facultyId}/maestro/${professorId}`);
