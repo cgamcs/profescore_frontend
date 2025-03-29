@@ -152,7 +152,7 @@ const ProfessorDetail = () => {
         try {
             const res = await api.post(
                 `/faculties/${facultyId}/professors/${professorId}/ratings/${selectedComment?._id}/report`,
-                { commentId: selectedComment?._id, reasons: [reason], reportComment: details }
+                { reasons: [reason], reportComment: details || undefined }
             );
 
             console.log(res)
@@ -165,6 +165,8 @@ const ProfessorDetail = () => {
             }
         } catch (error) {
             console.error('Error al enviar el reporte:', error);
+            // Mostrar mensaje de error del backend
+            setError('Error al enviar el reporte');
         }
     };
 
