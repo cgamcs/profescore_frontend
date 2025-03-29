@@ -7,6 +7,7 @@ const AdminLogin: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
+    const [authError, setAuthError] = useState(''); // Estado para el mensaje de error de autenticación
     const navigate = useNavigate();
 
     const isValidEmail = (email: string) => {
@@ -37,32 +38,27 @@ const AdminLogin: React.FC = () => {
             }
 
             if (isValid) {
-                // Aquí iría la lógica de autenticación
-                console.log('Login exitoso');
-                navigate('/admin'); // Redirigir al dashboard
-            }
-            
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
 
-            const data = await response.json();
+                const data = await response.json();
 
-            if (response.ok) {
-                // Guardar token en localStorage
-                localStorage.setItem('token', data.token);
-                navigate('/admin');
-            } else {
-                // Manejar error de login
-                console.error('Login failed:', data);
+                if (response.ok) {
+                    // Guardar token en localStorage
+                    localStorage.setItem('token', data.token);
+                    navigate('/admin');
+                } else {
+                    // Manejar error de login
+                    setAuthError(data.message || 'Correo electrónico o contraseña incorrectos');
+                }
             }
         } catch (error) {
             console.error('Login error:', error);
+            setAuthError('Ocurrió un error al intentar iniciar sesión. Por favor, inténtalo de nuevo.');
         }
-
-
     };
 
     return (
@@ -146,6 +142,9 @@ const AdminLogin: React.FC = () => {
                                 </div>
                                 {passwordError && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
                             </div>
+
+                            {/* Mensaje de error de autenticación */}
+                            {authError && <p className="text-red-500 text-sm mt-1">{authError}</p>}
 
                             {/* Botón de Submit */}
                             <button

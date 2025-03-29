@@ -251,11 +251,15 @@ const Privacity: React.FC = () => {
                     </div>
                 </div>
             </main>
-            <footer className="bg-white py-8 border-t border-gray-200 flex justify-center">
-                <div className="px-4 text-center text-gray-600 flex flex-col gap-4 md:flex-row">
+            <footer className="bg-white border-t border-gray-200">
+                <div className='container mx-auto px-4 py-3 flex items-center justify-between'>
                     <p>&copy; ProfeScore - {new Date().getFullYear()}</p>
-                    <Link to="/faq" className="link">Preguntas Frecuentes</Link>
-                    <Link to="/privacity" className="link">Términos de Privacidad</Link>
+
+                    <div className="flex gap-4">
+                        <Link to="/faq" className="link">Preguntas Frecuentes</Link>
+                        <Link to="/privacity" className="link">Términos de Privacidad</Link>
+                    </div>
+
                 </div>
             </footer>
         </div>

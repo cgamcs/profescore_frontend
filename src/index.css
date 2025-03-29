@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+.scrollbar-none {
+    scrollbar-width: none;
+}
+
 .link {
     position: relative;
     padding-bottom: 2px;

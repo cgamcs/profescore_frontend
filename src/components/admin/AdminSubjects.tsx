@@ -13,7 +13,7 @@ interface ISubject {
   credits: number;
   department: string[];
   professors: string[];
-  faculty: IFaculty;
+  faculty: IFaculty | null; // Permitir que faculty sea null
 }
 
 const AdminSubjects: React.FC = () => {
@@ -82,7 +82,7 @@ const AdminSubjects: React.FC = () => {
       const materiaToDelete = materias.find(m => m._id === materiaIdToDelete);
       if (materiaToDelete && normalizeString(confirmationInput) === normalizeString(materiaToDelete.name)) {
         try {
-          await axios.delete(`${import.meta.env.VITE_API_URL}/admin/faculty/${materiaToDelete.faculty._id}/subject/${materiaIdToDelete}`, {
+          await axios.delete(`${import.meta.env.VITE_API_URL}/admin/faculty/${materiaToDelete.faculty?._id}/subject/${materiaIdToDelete}`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
@@ -122,7 +122,7 @@ const AdminSubjects: React.FC = () => {
 
   const filteredMaterias = materias.filter(materia =>
     normalizeString(materia.name).includes(normalizeString(searchTerm)) ||
-    normalizeString(materia.faculty.name).includes(normalizeString(searchTerm))
+    (materia.faculty && normalizeString(materia.faculty.name).includes(normalizeString(searchTerm)))
   );
 
   return (
@@ -169,12 +169,12 @@ const AdminSubjects: React.FC = () => {
                 {filteredMaterias.map(materia => (
                   <tr key={materia._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap font-medium">{materia.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{materia.faculty.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{materia.faculty?.name || 'Facultad no disponible'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{materia.credits}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{materia.professors.length}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <div className="flex space-x-2">
-                        <Link to={`/admin/facultad/${materia.faculty._id}/materia/${materia._id}`} className="text-indigo-600 hover:text-indigo-900">
+                        <Link to={`/admin/facultad/${materia.faculty?._id}/materia/${materia._id}`} className="text-indigo-600 hover:text-indigo-900">
                           <i className="fas fa-edit h-5 w-5"></i>
                         </Link>
                         <button
