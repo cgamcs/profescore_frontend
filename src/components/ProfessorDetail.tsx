@@ -152,7 +152,7 @@ const ProfessorDetail = () => {
         try {
             const res = await api.post(
                 `/faculties/${facultyId}/professors/${professorId}/ratings/${selectedComment?._id}/report`,
-                { commentId: [selectedComment?._id], reasons: [reason], reportComment: details }
+                { commentId: selectedComment?._id, reasons: [reason], reportComment: details }
             );
 
             console.log(res)
