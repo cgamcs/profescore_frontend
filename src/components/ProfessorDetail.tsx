@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { FaRegStar, FaStar, FaStarHalfAlt, FaHeart, FaRegHeart } from 'react-icons/fa';
+import ReCAPTCHA from 'react-google-recaptcha';
 import api from '../api';
 
 interface Professor {
@@ -46,6 +47,14 @@ const ProfessorDetail = () => {
     const [showReportModal, setShowReportModal] = useState(false);
     const [selectedComment, setSelectedComment] = useState<RatingType | null>(null);
     const [reportSent, setReportSent] = useState(false);
+    const [captchaValue, setCaptchaValue] = useState('');
+    const [captchaError, setCaptchaError] = useState('');
+
+    const SITE_KEY = import.meta.env.VITE_SITE_KEY || '';
+
+    if (!SITE_KEY) {
+        console.error('La clave del sitio de reCAPTCHA no está configurada.');
+    }
 
     // Generar o recuperar userId al cargar el componente
     useEffect(() => {
@@ -115,10 +124,15 @@ const ProfessorDetail = () => {
     };
 
     const handleLike = async (ratingId: string) => {
+        if (!captchaValue) {
+            setCaptchaError('Por favor completa el CAPTCHA');
+            return;
+        }
+
         try {
             const res = await api.post(
                 `/faculties/${facultyId}/professors/${professorId}/ratings/${ratingId}/vote`,
-                { type: 1, userId: userId }
+                { type: 1, userId: userId, captcha: captchaValue }
             );
 
             if (res.status === 200) {
@@ -127,9 +141,19 @@ const ProfessorDetail = () => {
                         r._id === ratingId ? res.data : r
                     )
                 );
+                setCaptchaValue(''); // Reset CAPTCHA after successful vote
             }
         } catch (error) {
             console.error('Error votando:', error);
+        }
+    };
+
+    const handleCaptchaChange = (value: string | null) => {
+        if (value) {
+            setCaptchaValue(value);
+            setCaptchaError('');
+        } else {
+            setCaptchaValue('');
         }
     };
 
@@ -141,6 +165,7 @@ const ProfessorDetail = () => {
     const closeReportModal = () => {
         setSelectedComment(null);
         setShowReportModal(false);
+        setCaptchaValue(''); // Reset CAPTCHA when closing the modal
     };
 
     const handleReport = async (event: React.FormEvent) => {
@@ -148,11 +173,24 @@ const ProfessorDetail = () => {
         const reason = (document.getElementById('report-reason') as HTMLSelectElement).value;
         const details = (document.getElementById('report-details') as HTMLTextAreaElement).value;
 
+        if (!reason) { // Validar que se seleccionó un motivo
+            setError('Por favor selecciona un motivo de reporte');
+            return;
+        }
+
+        if (!captchaValue) {
+            setCaptchaError('Por favor completa el CAPTCHA');
+            return;
+        }
+
+        const reportUrl = `/faculties/${facultyId}/professors/${professorId}/ratings/${selectedComment?._id}/report`;
+        console.log('Reporting to URL:', reportUrl);
+        console.log('Payload:', { commentId: selectedComment?._id, reasons: [reason], reportComment: details || undefined, captcha: captchaValue });
         // Enviar el reporte al backend
         try {
             const res = await api.post(
-                `/faculties/${facultyId}/professors/${professorId}/ratings/${selectedComment?._id}/report`,
-                { reasons: [reason], reportComment: details || undefined }
+                reportUrl,
+                { commentId: selectedComment?._id, reasons: [reason], reportComment: details || undefined, captcha: captchaValue }
             );
 
             console.log(res)
@@ -165,8 +203,6 @@ const ProfessorDetail = () => {
             }
         } catch (error) {
             console.error('Error al enviar el reporte:', error);
-            // Mostrar mensaje de error del backend
-            setError('Error al enviar el reporte');
         }
     };
 
@@ -347,6 +383,14 @@ const ProfessorDetail = () => {
                                         className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                         placeholder="Proporciona más información sobre por qué estás reportando este comentario..."
                                     ></textarea>
+                                </div>
+                                <div className="mb-6">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Verificación CAPTCHA</label>
+                                    <ReCAPTCHA
+                                        sitekey={SITE_KEY}
+                                        onChange={handleCaptchaChange}
+                                    />
+                                    {captchaError && <p className="text-red-600 text-sm mt-1">{captchaError}</p>}
                                 </div>
                                 <div className="bg-gray-50 p-4 rounded-md border border-gray-200 mb-6">
                                     <div className="flex items-start">
