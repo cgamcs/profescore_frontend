@@ -46,7 +46,9 @@ const ProfessorAdd = () => {
                 ]);
 
                 setDepartments(deptRes.data);
-                setSubjects(subjRes.data);
+                // Ordenar las materias alfabéticamente antes de establecerlas en el estado
+                const sortedSubjects = subjRes.data.sort((a: Subject, b: Subject) => a.name.localeCompare(b.name));
+                setSubjects(sortedSubjects);
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {

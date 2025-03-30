@@ -14,6 +14,11 @@ interface RatingForm {
   subject: string;
 }
 
+interface Subject {
+  _id: string;
+  name: string;
+}
+
 const ProfessorRating = () => {
   const { facultyId, professorId } = useParams<{ facultyId: string; professorId: string }>();
   const [subjects, setSubjects] = useState<Array<{ _id: string, name: string }>>([]);
@@ -47,7 +52,9 @@ const ProfessorRating = () => {
     if (facultyId) {
       api.get(`/faculties/${facultyId}/subjects`)
         .then(response => {
-          setSubjects(response.data);
+          // Ordenar las materias alfabéticamente antes de establecerlas en el estado
+          const sortedSubjects = response.data.sort((a: Subject, b: Subject) => a.name.localeCompare(b.name));
+          setSubjects(sortedSubjects);
         })
         .catch(err => {
           console.error('Error al cargar las materias:', err);
