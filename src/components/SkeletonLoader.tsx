@@ -1,4 +1,58 @@
 
+const FacultyListLoader = () => {
+    return (
+        <section className="pb-12 bg-white">
+            <div className="container mx-auto px-4">
+                <div className="text-center mb-8">
+                    <div className="bg-gray-200 h-8 w-1/2 mx-auto rounded-lg animate-pulse mb-2"></div>
+                    <div className="bg-gray-200 h-4 w-1/3 mx-auto rounded-lg animate-pulse"></div>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                    {[...Array(8)].map((_, i) => (
+                        <div key={i} className="bg-gray-200 border border-gray-200 rounded-lg p-4 h-25 text-center animate-pulse"></div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
+const TopProfessorsLoader = () => {
+    return (
+        <section className="py-12 bg-gray-50">
+            <div className="container mx-auto px-4">
+                <div className="text-center mb-8">
+                    <div className="h-6 bg-gray-200 rounded-md w-3/4 mx-auto mb-2 animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 rounded-md w-2/4 mx-auto animate-pulse"></div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                    {[...Array(3)].map((_, index) => (
+                        <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 animate-pulse">
+                            <div className="flex items-center justify-between mb-4">
+                                <div>
+                                    <div className="h-6 bg-gray-200 rounded-md w-3/4 mb-2"></div>
+                                    <div className="h-4 bg-gray-200 rounded-md w-1/4"></div>
+                                </div>
+                                <div className="h-6 bg-gray-200 rounded-md w-12"></div>
+                            </div>
+                            <div className="h-4 bg-gray-200 rounded-md w-full mb-4"></div>
+                            <div className="flex items-center justify-between">
+                                <div className="flex">
+                                    {[...Array(5)].map((_, i) => (
+                                        <div key={i} className="h-4 bg-gray-200 rounded-md w-4 mx-1"></div>
+                                    ))}
+                                </div>
+                                <div className="h-4 bg-gray-200 rounded-md w-16"></div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
 const FacultyDetailLoader = () => {
     return (
         <main className="container mx-auto px-4 py-6">
@@ -234,6 +288,8 @@ const ProfessorDetailLoader = () => {
 };
 
 export { 
+    FacultyListLoader,
+    TopProfessorsLoader,
     FacultyDetailLoader,
     SubjectPageLoader,
     SubjectDetailLoader,

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { FacultyListLoader } from './SkeletonLoader';
 import api from '../api';
 
 interface Faculty {
@@ -36,13 +37,8 @@ const FacultyList: React.FC = () => {
   }, []);
   
 
-  if (loading) {
-    return <div className="text-center py-10">Cargando...</div>;
-  }
-
-  if (error) {
-    return <div className="text-center text-red-500 py-10">{error}</div>;
-  }
+  if (loading) return <FacultyListLoader />;
+  if (error) return <div className="text-center text-red-500 py-10">{error}</div>;
 
   return (
     <section className="pb-12 bg-white">

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { TopProfessorsLoader } from './SkeletonLoader';
 import api from '../api';
 
 interface Professor {
@@ -32,7 +33,7 @@ const TopRatedProfessors: React.FC = () => {
     fetchData();
   }, []);
 
-  if (loading) return <div className="text-center py-10">Cargando...</div>;
+  if (loading) return <TopProfessorsLoader />;
   if (error) return <div className="text-center text-red-500 py-10">{error}</div>;
 
   return (
