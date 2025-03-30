@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { FacultyDetailLoader } from './SkeletonLoader';
 import api from '../api';
 
 interface ISubject {
@@ -106,7 +107,7 @@ const FacultyDetails = () => {
         );
     };
 
-    if (loading) return <div className="text-center py-4">Cargando...</div>;
+    if (loading) return <FacultyDetailLoader />;
     if (error) return <div className="text-red-500 text-center py-4">{error}</div>;
 
     return (

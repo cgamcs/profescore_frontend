@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { SubjectPageLoader } from './SkeletonLoader';
 import api from '../api';
 
 interface ISubject {
@@ -85,7 +86,7 @@ const SubjectsPage = () => {
     searchQuery !== '' && normalizeText(professor.name).includes(normalizeText(searchQuery))
   );
 
-  if (loading) return <div className="text-center py-4">Cargando materias...</div>;
+  if (loading) return <SubjectPageLoader />;
   if (error) return <div className="text-red-500 text-center py-4">{error}</div>;
 
   return (

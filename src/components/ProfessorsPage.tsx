@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { ProfessorPageLoader } from './SkeletonLoader';
 import api from '../api';
 
 interface IProfessor {
@@ -97,8 +98,8 @@ const ProfessorsPage = () => {
         );
     };
 
+    if (loading) return <ProfessorPageLoader />; // Mostrar el SkeletonLoader mientras se cargan los datos
     if (error) return <div className="text-red-500 text-center py-4">{error}</div>;
-    if (loading) return <div className="text-center py-10">Cargando maestros...</div>;
 
     return (
         <main className="container mx-auto px-4 py-6">

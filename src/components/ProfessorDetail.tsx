@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { FaRegStar, FaStar, FaStarHalfAlt, FaHeart, FaRegHeart } from 'react-icons/fa';
 import ReCAPTCHA from 'react-google-recaptcha';
 import api from '../api';
+import { ProfessorDetailLoader } from './SkeletonLoader'; // Importa el SkeletonLoader
 
 interface Professor {
     _id: string;
@@ -206,7 +207,7 @@ const ProfessorDetail = () => {
         }
     };
 
-    if (loading) return <div className='text-center py-4'>Cargando...</div>;
+    if (loading) return <ProfessorDetailLoader />; // Mostrar el SkeletonLoader mientras se cargan los datos
     if (error) return <div className="text-red-500 text-center py-4">{error}</div>;
     if (!professor) return <div className='text-center text-red-500 py-4'>Profesor no encontrado</div>;
 

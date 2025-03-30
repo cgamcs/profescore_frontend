@@ -39,6 +39,7 @@ const ProfessorRating = () => {
   const [error, setError] = useState('');
   const [captchaValue, setCaptchaValue] = useState('');
   const [captchaError, setCaptchaError] = useState('');
+  const [notification, setNotification] = useState(false); // Estado para la notificación
 
   const SITE_KEY = import.meta.env.VITE_SITE_KEY || '';
 
@@ -114,9 +115,11 @@ const ProfessorRating = () => {
       console.log('Datos a enviar:', ratingData);
 
       const response = await api.post(`/faculties/${facultyId}/professors/${professorId}/ratings`, ratingData);
-      console.log(response)
+      console.log(response);
 
       if (response.status === 201) {
+        setNotification(true); // Mostrar la notificación
+        setTimeout(() => setNotification(false), 3000); // Ocultar la notificación después de 3 segundos
         navigate(`/facultad/${facultyId}/maestro/${professorId}`);
       }
     } catch (error) {
@@ -277,6 +280,13 @@ const ProfessorRating = () => {
           </form>
         </div>
       </main>
+
+      {/* Notificación de calificación enviada */}
+      {notification && (
+        <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg">
+          Calificación enviada correctamente
+        </div>
+      )}
     </div>
   );
 };
