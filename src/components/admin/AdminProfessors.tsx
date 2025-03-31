@@ -11,6 +11,7 @@ interface IProfessor {
     _id: string;
     name: string;
     faculty: string;
+    facultyId: string;
     subjects: string[];
     ratingStats: {
         averageGeneral: number;
@@ -31,32 +32,36 @@ const AdminProfessors: React.FC = () => {
     useEffect(() => {
         const fetchProfessors = async () => {
             try {
-                const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/professors`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
+                const [professorsRes, facultiesRes] = await Promise.all([
+                    axios.get(`${import.meta.env.VITE_API_URL}/admin/professors`, {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    }),
+                    axios.get(`${import.meta.env.VITE_API_URL}/admin/faculty`, {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    })
+                ]);
+                
+                const faculties = facultiesRes.data;
+                const professorsWithFacultyId = professorsRes.data.map((professor: any) => {
+                    const faculty = faculties.find((f: IFaculty) => f.name === professor.faculty);
+                    return {
+                        ...professor,
+                        faculty: professor.faculty,
+                        facultyId: faculty?._id || ''
+                    };
                 });
-                setProfessors(response.data);
+                setProfessors(professorsWithFacultyId);
+                setFaculties(faculties);
             } catch (error) {
-                console.error('Error fetching professors:', error);
-            }
-        };
-
-        const fetchFaculties = async () => {
-            try {
-                const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/faculty`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-                setFaculties(response.data);
-            } catch (error) {
-                console.error('Error fetching faculties:', error);
+                console.error('Error fetching data:', error);
             }
         };
 
         fetchProfessors();
-        fetchFaculties();
     }, []);
 
     const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,10 +80,10 @@ const AdminProfessors: React.FC = () => {
 
     const handleDelete = async (professor: IProfessor) => {
         if (confirmName === professor.name) {
-            const faculty = faculties.find(f => f.name === professor.faculty);
+            const faculty = faculties.find(f => f._id === professor.facultyId);
             if (faculty) {
                 try {
-                    await axios.delete(`${import.meta.env.VITE_API_URL}/admin/faculty/${faculty._id}/professor/${professor._id}`, {
+                    await axios.delete(`${import.meta.env.VITE_API_URL}/admin/faculty/${professor.facultyId}/professor/${professor._id}`, {
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('token')}`
                         }
@@ -126,7 +131,7 @@ const AdminProfessors: React.FC = () => {
             </div>
         );
     };
-
+    
     return (
         <div className="bg-white min-h-screen">
             <main className="container mx-auto px-4 py-6">
@@ -190,7 +195,7 @@ const AdminProfessors: React.FC = () => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             <div className="flex space-x-2">
-                                                <Link to={`/editar-profesor/${professor._id}`} className="text-indigo-600 hover:text-indigo-900">
+                                                <Link to={`/admin/facultad/${professor.facultyId}/maestro/${professor._id}`} className="text-indigo-600 hover:text-indigo-900">
                                                     <i className="fas fa-edit h-5 w-5"></i>
                                                 </Link>
                                                 <button className="text-red-600 hover:text-red-900" onClick={() => setProfessorToDelete(professor)}>
@@ -204,8 +209,8 @@ const AdminProfessors: React.FC = () => {
                         </table>
                     </div>
                     {filteredProfessors.length === 0 && (
-                        <div className="text-center py-4 text-gray-500">
-                            No se encontraron profesores
+                        <div className="text-center py-4">
+                            <span className="loader"></span>
                         </div>
                     )}
                 </div>

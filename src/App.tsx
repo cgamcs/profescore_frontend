@@ -25,6 +25,7 @@ import Unauthorized from './components/401/Unauthorized';
 import Faq from './components/Faq';
 import Privacity from './components/Privacity';
 import AdminReports from './components/admin/AdminReports';
+import EditProfessor from './components/admin/EditProfessor';
 
 const App: React.FC = () => {
   return (
@@ -42,6 +43,7 @@ const App: React.FC = () => {
         <Route path="facultad/:facultyId/materia/:subjectId" element={<EditSubject />} />
         <Route path="maestros" element={<AdminProfessors />} />
         <Route path="facultad/:facultyId/maestro/multiple" element={<AddProfessor />} />
+        <Route path="facultad/:facultyId/maestro/:professorId" element={<EditProfessor />} />
         <Route path="reportes" element={<AdminReports />} />
       </Route>
 

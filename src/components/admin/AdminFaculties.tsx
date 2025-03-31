@@ -168,8 +168,8 @@ const AdminFaculties: React.FC = () => {
           </div>
 
           {filteredFaculties.length === 0 && (
-            <div className="text-center py-4 text-gray-500">
-              No se encontraron facultades
+            <div className="text-center py-4">
+              <span className="loader"></span>
             </div>
           )}
         </div>

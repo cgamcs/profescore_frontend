@@ -5,6 +5,10 @@ import api from '../api';
 interface Professor {
   _id: string;
   name: string;
+  department: {
+    _id: string;
+    name: string;
+  };
   faculty: { _id: string; abbreviation: string };
   subjects: { _id: string; name: string }[];
   ratingStats: {
@@ -22,9 +26,11 @@ const TopRatedProfessors: React.FC = () => {
     const fetchData = async () => {
       try {
         const response = await api.get('/faculties');
+        console.log('Professors data:', response.data.topProfessors);
         setProfessors(response.data.topProfessors);
       } catch (err) {
         setError('Error al cargar los profesores');
+        console.error('Error fetching professors:', err);
       } finally {
         setLoading(false);
       }
@@ -35,6 +41,7 @@ const TopRatedProfessors: React.FC = () => {
 
   if (loading) return <TopProfessorsLoader />;
   if (error) return <div className="text-center text-red-500 py-10">{error}</div>;
+  if (professors.length === 0) return <div className="text-center py-10">No hay profesores disponibles</div>;
 
   return (
     <section className="py-12 bg-gray-50">
@@ -47,7 +54,7 @@ const TopRatedProfessors: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {professors.map((professor) => (
             <div key={professor._id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between gap-1 mb-4">
                 <div>
                   <h3 className="font-bold text-lg text-gray-900">{professor.name}</h3>
                   <p className="text-indigo-600 text-sm">{professor.faculty.abbreviation}</p>
@@ -57,17 +64,20 @@ const TopRatedProfessors: React.FC = () => {
                 </div>
               </div>
               <p className="text-gray-600 mb-4">
-                {professor.subjects.length > 0 ? professor.subjects[0].name : 'Sin materia asignada'}
+                {professor.department && professor.department.name 
+                  ? professor.department.name 
+                  : 'Departamento no especificado'}
               </p>
               <div className="flex items-center justify-between">
                 <div className="flex">
                   {[...Array(5)].map((_, index) => (
                     <i
                       key={index}
-                      className={`fas fa-star ${index < Math.round(professor.ratingStats.averageGeneral)
+                      className={`fas fa-star ${
+                        index < Math.round(professor.ratingStats.averageGeneral)
                           ? 'text-indigo-500'
                           : 'text-gray-300'
-                        }`}
+                      }`}
                     ></i>
                   ))}
                 </div>
