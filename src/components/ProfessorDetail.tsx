@@ -74,10 +74,11 @@ const ProfessorDetail = () => {
             try {
                 setLoading(true);
                 const [professorRes, ratingsRes] = await Promise.all([
-                    api.get(`/faculties/${facultyId}/professors/${professorId}?populate=subjects,department`),
+                    api.get(`/faculties/${facultyId}/professors/${professorId}`),
                     api.get(`/faculties/${facultyId}/professors/${professorId}/ratings`)
                 ]);
     
+                console.log(professorRes.data)
                 setProfessor(professorRes.data);
                 setRatings(ratingsRes.data);
             } catch (error) {
@@ -278,7 +279,7 @@ const ProfessorDetail = () => {
                                 <div>
                                     <h3 className="text-sm font-medium text-gray-500">Materias</h3>
                                     <ul className="list-disc list-inside text-sm">
-                                        {professor.subjects?.slice(0, 2).map((subject) => (
+                                        {professor.subjects?.slice(0).map((subject) => (
                                             <li key={subject._id}>
                                                 {subject.name}
                                             </li>
