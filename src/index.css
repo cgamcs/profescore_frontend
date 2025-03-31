@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
-.scrollbar-none {
-    scrollbar-width: none;
+.scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(0.585 0.233 277.117) #fff;
 }
 
 .link {

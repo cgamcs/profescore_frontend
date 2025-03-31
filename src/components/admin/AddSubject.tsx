@@ -16,7 +16,7 @@ interface ISubject {
   faculty: string;
 }
 
-const EditSubject: React.FC = () => {
+const AddSubject: React.FC = () => {
   const { facultyId } = useParams<{ facultyId: string }>();
   const { subjectId } = useParams<{ subjectId: string }>();
   const navigate = useNavigate();
@@ -37,6 +37,7 @@ const EditSubject: React.FC = () => {
     credits: '',
     description: ''
   });
+  const [notification, setNotification] = useState({ success: false, error: false }); // Estado para las notificaciones
 
   useEffect(() => {
     const fetchSubject = async () => {
@@ -137,9 +138,13 @@ const EditSubject: React.FC = () => {
             }
           });
         }
+        setNotification({ success: true, error: false }); // Mostrar notificación de éxito
+        setTimeout(() => setNotification({ success: false, error: false }), 3000); // Ocultar la notificación después de 3 segundos
         navigate('/admin/materias');
       } catch (error) {
         console.error('Error al guardar la materia:', error);
+        setNotification({ success: false, error: true }); // Mostrar notificación de error
+        setTimeout(() => setNotification({ success: false, error: false }), 3000); // Ocultar la notificación después de 3 segundos
       }
     }
   };
@@ -238,8 +243,22 @@ const EditSubject: React.FC = () => {
           </form>
         </div>
       </main>
+
+      {/* Notificación de éxito */}
+      {notification.success && (
+        <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg">
+          Materia guardada correctamente
+        </div>
+      )}
+
+      {/* Notificación de error */}
+      {notification.error && (
+        <div className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg">
+          Error al guardar la materia
+        </div>
+      )}
     </div>
   );
 };
 
-export default EditSubject;
+export default AddSubject;
