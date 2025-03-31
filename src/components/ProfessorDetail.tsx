@@ -72,8 +72,9 @@ const ProfessorDetail = () => {
     useEffect(() => {
         const fetchProfessorDetails = async () => {
             try {
+                setLoading(true);
                 const [professorRes, ratingsRes] = await Promise.all([
-                    api.get(`/faculties/${facultyId}/professors/${professorId}?populate=subjects&timestamp=${Date.now()}`), // Añadir timestamp
+                    api.get(`/faculties/${facultyId}/professors/${professorId}?populate=subjects,department`),
                     api.get(`/faculties/${facultyId}/professors/${professorId}/ratings`)
                 ]);
     
