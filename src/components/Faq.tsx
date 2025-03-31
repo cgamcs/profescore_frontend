@@ -37,7 +37,7 @@ const Faq: React.FC = () => {
         {
             category: 'general',
             question: '¿Por qué hay comentarios groseros u ofensivos?',
-            answer: 'Nos esforzamos por mantener un ambiente respetuoso. Todos los comentarios pasan por un filtro automático para detectar lenguaje inapropiado, y los usuarios pueden reportar contenido que infrinja nuestras normas. Sin embargo, debido al volumen de interacciones, es posible que algún comentario inadecuado no sea detectado de inmediato. Agradecemos tu colaboración reportándolo.',
+            answer: 'Hay comentarios inadecuados y comentarios valiosos; no asumas que todas las opiniones serán constructivas. No aplicamos filtros automáticos, solo revisamos un comentario si es reportado por la comunidad. Agradecemos que nos alertes si encuentras contenido que incumpla nuestras normas.',
         },
         {
             category: 'professors',

@@ -40,7 +40,7 @@ const AdminHeader = () => {
                             className={({ isActive }) =>
                                 `text-sm ${isActive ? 'text-indigo-600 font-medium' : 'text-gray-600'}`
                             }
-                        >Profesores</NavLink>
+                        >Maestros</NavLink>
                         <NavLink 
                             to="/admin/reportes" 
                             className={({ isActive }) =>
@@ -72,7 +72,7 @@ const AdminHeader = () => {
                         <nav className="container mx-auto px-4 flex flex-col space-y-3">
                             <NavLink to="/admin/facultades" className="text-sm text-indigo-600 font-medium">Facultades</NavLink>
                             <NavLink to="/admin/materias" className="text-sm text-gray-600">Materias</NavLink>
-                            <NavLink to="/admin/profesores" className="text-sm text-gray-600">Profesores</NavLink>
+                            <NavLink to="/admin/maestros" className="text-sm text-gray-600">Maestros</NavLink>
                             <NavLink to="/admin/reportes" className="text-sm text-gray-600">Reportes</NavLink>
                             <NavLink to="/" className="text-sm text-gray-600">Volver al sitio</NavLink>
                             <button
