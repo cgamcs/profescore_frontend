@@ -73,10 +73,10 @@ const ProfessorDetail = () => {
         const fetchProfessorDetails = async () => {
             try {
                 const [professorRes, ratingsRes] = await Promise.all([
-                    api.get(`/faculties/${facultyId}/professors/${professorId}?populate=subjects`),
+                    api.get(`/faculties/${facultyId}/professors/${professorId}?populate=subjects&timestamp=${Date.now()}`), // Añadir timestamp
                     api.get(`/faculties/${facultyId}/professors/${professorId}/ratings`)
                 ]);
-
+    
                 setProfessor(professorRes.data);
                 setRatings(ratingsRes.data);
             } catch (error) {
@@ -86,7 +86,7 @@ const ProfessorDetail = () => {
                 setLoading(false);
             }
         };
-
+    
         fetchProfessorDetails();
     }, [facultyId, professorId]);
 

@@ -120,7 +120,8 @@ const ProfessorRating = () => {
       if (response.status === 201) {
         setNotification(true); // Mostrar la notificación
         setTimeout(() => setNotification(false), 3000); // Ocultar la notificación después de 3 segundos
-        navigate(`/facultad/${facultyId}/maestro/${professorId}`);
+        navigate(`/facultad/${facultyId}/maestro/${professorId}`, { replace: true });
+        window.location.reload();
       }
     } catch (error) {
       console.log(error);
