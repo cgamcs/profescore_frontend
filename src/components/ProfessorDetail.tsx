@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useLocation } from 'react-router-dom';
 import { FaRegStar, FaStar, FaStarHalfAlt, FaHeart, FaRegHeart } from 'react-icons/fa';
 import ReCAPTCHA from 'react-google-recaptcha';
 import api from '../api';
@@ -40,6 +40,7 @@ interface Subject {
 
 const ProfessorDetail = () => {
     const { facultyId, professorId } = useParams<{ facultyId: string; professorId: string }>();
+    const location = useLocation();
     const [professor, setProfessor] = useState<Professor | null>(null);
     const [ratings, setRatings] = useState<RatingType[]>([]);
     const [loading, setLoading] = useState(true);
@@ -50,6 +51,7 @@ const ProfessorDetail = () => {
     const [reportSent, setReportSent] = useState(false);
     const [captchaValue, setCaptchaValue] = useState('');
     const [captchaError, setCaptchaError] = useState('');
+    const [showNotification, setShowNotification] = useState(false); // Estado para la notificación
 
     const SITE_KEY = import.meta.env.VITE_SITE_KEY || '';
 
@@ -77,7 +79,7 @@ const ProfessorDetail = () => {
                     api.get(`/faculties/${facultyId}/professors/${professorId}`),
                     api.get(`/faculties/${facultyId}/professors/${professorId}/ratings`)
                 ]);
-    
+
                 console.log(professorRes.data)
                 setProfessor(professorRes.data);
                 setRatings(ratingsRes.data);
@@ -88,9 +90,20 @@ const ProfessorDetail = () => {
                 setLoading(false);
             }
         };
-    
+
         fetchProfessorDetails();
     }, [facultyId, professorId]);
+
+    useEffect(() => {
+        const urlParams = new URLSearchParams(location.search);
+        if (urlParams.get('success') === 'true') {
+            setShowNotification(true);
+            const timer = setTimeout(() => {
+                setShowNotification(false);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [location.search]);
 
     const renderStars = (rating: number) => {
         const fullStars = Math.floor(rating);
@@ -425,6 +438,13 @@ const ProfessorDetail = () => {
             {reportSent && (
                 <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg">
                     Reporte enviado exitosamente
+                </div>
+            )}
+
+            {/* Notificación de calificación enviada */}
+            {showNotification && (
+                <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg">
+                    Calificación enviada correctamente
                 </div>
             )}
         </div>

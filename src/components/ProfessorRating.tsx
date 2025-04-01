@@ -39,7 +39,7 @@ const ProfessorRating = () => {
   const [error, setError] = useState('');
   const [captchaValue, setCaptchaValue] = useState('');
   const [captchaError, setCaptchaError] = useState('');
-  const [notification, setNotification] = useState(false); // Estado para la notificación
+  const [notification] = useState(false); // Estado para la notificación
 
   const SITE_KEY = import.meta.env.VITE_SITE_KEY || '';
 
@@ -118,10 +118,7 @@ const ProfessorRating = () => {
       console.log(response);
 
       if (response.status === 201) {
-        setNotification(true); // Mostrar la notificación
-        setTimeout(() => setNotification(false), 3000); // Ocultar la notificación después de 3 segundos
-        navigate(`/facultad/${facultyId}/maestro/${professorId}`, { replace: true });
-        window.location.reload();
+        navigate(`/facultad/${facultyId}/maestro/${professorId}?success=true`, { replace: true });
       }
     } catch (error) {
       console.log(error);

@@ -43,6 +43,7 @@ const EditFaculty: React.FC = () => {
           setNombre(facultyData.name);
           setAbreviatura(facultyData.abbreviation);
           setDepartamentos(facultyData.departments);
+          console.log(facultyData.departments)
         } catch (error) {
           console.error('Error al obtener los datos de la facultad:', error);
         }

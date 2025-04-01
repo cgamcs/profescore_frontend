@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { ProfessorPageLoader } from './SkeletonLoader';
 import api from '../api';
 
@@ -21,12 +21,14 @@ interface IDepartment {
 
 const ProfessorsPage = () => {
     const { facultyId } = useParams();
+    const location = useLocation();
     const [professors, setProfessors] = useState<IProfessor[]>([]);
     const [subjects, setSubjects] = useState<{ [key: string]: string }>({});
     const [departments, setDepartments] = useState<{ [key: string]: string }>({});
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [showNotification, setShowNotification] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -60,6 +62,17 @@ const ProfessorsPage = () => {
 
         fetchData();
     }, [facultyId]);
+
+    useEffect(() => {
+        const urlParams = new URLSearchParams(location.search);
+        if (urlParams.get('success') === 'true') {
+            setShowNotification(true);
+            const timer = setTimeout(() => {
+                setShowNotification(false);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [location.search]);
 
     // Función para normalizar el texto (eliminar acentos y convertir a minúsculas)
     const normalizeText = (text: string) => {
@@ -103,6 +116,12 @@ const ProfessorsPage = () => {
 
     return (
         <main className="container mx-auto px-4 py-6">
+            {showNotification && (
+                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <strong className="font-bold">¡Éxito!</strong>
+                    <span className="block sm:inline"> Maestro agregado correctamente.</span>
+                </div>
+            )}
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold">Maestros</h1>
                 <Link

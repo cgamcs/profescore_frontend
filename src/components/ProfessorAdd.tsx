@@ -27,7 +27,6 @@ const ProfessorAdd = () => {
     });
     const [captchaValue, setCaptchaValue] = useState('');
     const [captchaError, setCaptchaError] = useState('');
-    const [notification, setNotification] = useState(false); // Estado para la notificación
 
     const SITE_KEY = import.meta.env.VITE_SITE_KEY || '';
 
@@ -73,9 +72,7 @@ const ProfessorAdd = () => {
                 subject: formData.subject,
                 captcha: captchaValue
             });
-            setNotification(true); // Mostrar la notificación
-            setTimeout(() => setNotification(false), 3000); // Ocultar la notificación después de 3 segundos
-            navigate(`/facultad/${facultyId}/maestros`);
+            navigate(`/facultad/${facultyId}/maestros?success=true`);
         } catch (error) {
             console.error('Error creating professor:', error);
         }
@@ -185,13 +182,6 @@ const ProfessorAdd = () => {
                     </div>
                 </div>
             </main>
-
-            {/* Notificación de maestro agregado */}
-            {notification && (
-                <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg">
-                    Maestro agregado correctamente
-                </div>
-            )}
         </div>
     );
 };
