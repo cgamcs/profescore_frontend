@@ -99,7 +99,7 @@ const AdminDashboard: React.FC = () => {
   };
 
   // Handle loading and error states
-  if (loading) return <div className="text-center py-8">Cargando...</div>;
+  if (loading) return  <div className="text-center py-8"><span className="loader"></span></div>;
   if (error) return <div className="text-red-500 text-center py-8">{error}</div>;
 
   return (

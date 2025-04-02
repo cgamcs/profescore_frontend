@@ -79,7 +79,7 @@ const AdminLogin: React.FC = () => {
                     <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8">
                         <div className="text-center mb-8">
                             <h1 className="text-2xl font-bold text-gray-900">Iniciar Sesión</h1>
-                            <p className="text-gray-600 mt-2">Ingresa tus credenciales para acceder</p>
+                            <p className="text-gray-600 mt-2">Esta sección es solo para el administrador</p>
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
