@@ -21,6 +21,14 @@ interface ProfessorFormData {
     biography: string;
 }
 
+interface FormErrors {
+    name: string;
+    department: string;
+    subject: string;
+    biography: string;
+    captcha: string;
+}
+
 const ProfessorAdd = () => {
     const queryClient = useQueryClient();
     const { facultyId } = useParams();
@@ -32,31 +40,50 @@ const ProfessorAdd = () => {
         biography: ''
     });
     const [captchaValue, setCaptchaValue] = useState('');
-    const [captchaError, setCaptchaError] = useState('');
-  
+    const [errors, setErrors] = useState<FormErrors>({
+        name: '',
+        department: '',
+        subject: '',
+        biography: '',
+        captcha: ''
+    });
+
     // Mutación para crear profesor
     const { mutate, isPending } = useMutation({
-      mutationFn: (newProfessor: ProfessorFormData & { captcha: string }) => 
-        api.post(`/faculties/${facultyId}/professors`, newProfessor),
-      onSuccess: () => {
-        queryClient.invalidateQueries({ 
-          queryKey: ['professors', facultyId] 
-        });
-        navigate(`/facultad/${facultyId}/maestros?success=true`);
-      }
+        mutationFn: (newProfessor: ProfessorFormData & { captcha: string }) =>
+            api.post(`/faculties/${facultyId}/professors`, newProfessor),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['professors', facultyId]
+            });
+            navigate(`/facultad/${facultyId}/maestros?success=true`);
+        },
+        onError: (error: any) => {
+            if (error.response && error.response.data) {
+                setErrors(error.response.data.errors);
+            } else {
+                setErrors({
+                    name: '',
+                    department: '',
+                    subject: '',
+                    biography: '',
+                    captcha: 'Error al enviar el formulario. Por favor, inténtalo de nuevo.'
+                });
+            }
+        }
     });
-  
+
     // Obtener departamentos y materias
     const { data: departments = [], isLoading: departmentsLoading } = useQuery({
-      queryKey: ['departments', facultyId],
-      queryFn: () => api.get(`/faculties/${facultyId}/departments`).then(res => res.data),
+        queryKey: ['departments', facultyId],
+        queryFn: () => api.get(`/faculties/${facultyId}/departments`).then(res => res.data),
     });
-  
+
     const { data: subjects = [], isLoading: subjectsLoading } = useQuery({
-      queryKey: ['subjects', facultyId],
-      queryFn: () => api.get(`/faculties/${facultyId}/subjects`).then(res => 
-        res.data.sort((a: Subject, b: Subject) => a.name.localeCompare(b.name))
-      ),
+        queryKey: ['subjects', facultyId],
+        queryFn: () => api.get(`/faculties/${facultyId}/subjects`).then(res =>
+            res.data.sort((a: Subject, b: Subject) => a.name.localeCompare(b.name))
+        ),
     });
 
     const isLoading = departmentsLoading || subjectsLoading;
@@ -70,7 +97,7 @@ const ProfessorAdd = () => {
         e.preventDefault();
 
         if (!captchaValue) {
-            setCaptchaError('Por favor completa el CAPTCHA');
+            setErrors({ ...errors, captcha: 'Por favor completa el CAPTCHA' });
             return;
         }
 
@@ -83,7 +110,7 @@ const ProfessorAdd = () => {
     const handleCaptchaChange = (value: string | null) => {
         if (value) {
             setCaptchaValue(value);
-            setCaptchaError('');
+            setErrors({ ...errors, captcha: '' });
         } else {
             setCaptchaValue('');
         }
@@ -105,10 +132,11 @@ const ProfessorAdd = () => {
                                 <input
                                     required
                                     value={formData.name}
-                                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     placeholder="Ej. Juan Pérez Rodríguez"
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 />
+                                {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
                             </div>
 
                             {/* Select Departamento */}
@@ -117,7 +145,7 @@ const ProfessorAdd = () => {
                                 <select
                                     required
                                     value={formData.department}
-                                    onChange={(e) => setFormData({...formData, department: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 >
                                     <option value="">Selecciona un departamento</option>
@@ -125,6 +153,7 @@ const ProfessorAdd = () => {
                                         <option key={dept._id} value={dept._id}>{dept.name}</option>
                                     ))}
                                 </select>
+                                {errors.department && <p className="text-red-600 text-sm mt-1">{errors.department}</p>}
                             </div>
 
                             {/* Select Materia */}
@@ -133,7 +162,7 @@ const ProfessorAdd = () => {
                                 <select
                                     required
                                     value={formData.subject}
-                                    onChange={(e) => setFormData({...formData, subject: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 >
                                     <option value="">Selecciona una materia</option>
@@ -141,6 +170,7 @@ const ProfessorAdd = () => {
                                         <option key={subj._id} value={subj._id}>{subj.name}</option>
                                     ))}
                                 </select>
+                                {errors.subject && <p className="text-red-600 text-sm mt-1">{errors.subject}</p>}
                             </div>
 
                             {/* Biografía */}
@@ -148,11 +178,12 @@ const ProfessorAdd = () => {
                                 <label className="block text-sm font-medium text-gray-700">Biografía</label>
                                 <textarea
                                     value={formData.biography}
-                                    onChange={(e) => setFormData({...formData, biography: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, biography: e.target.value })}
                                     rows={4}
                                     placeholder="Información sobre la formación académica y experiencia del profesor..."
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 ></textarea>
+                                {errors.biography && <p className="text-red-600 text-sm mt-1">{errors.biography}</p>}
                             </div>
 
                             {/* Verificación CAPTCHA */}
@@ -162,7 +193,7 @@ const ProfessorAdd = () => {
                                     sitekey={SITE_KEY}
                                     onChange={handleCaptchaChange}
                                 />
-                                {captchaError && <p className="text-red-600 text-sm mt-1">{captchaError}</p>}
+                                {errors.captcha && <p className="text-red-600 text-sm mt-1">{errors.captcha}</p>}
                             </div>
 
                             {/* Botones */}
