@@ -67,29 +67,39 @@ const AdminReports = () => {
 
     const handleDeleteReport = async (reportId: string) => {
         try {
-            await api.delete(`/admin/reports/${reportId}`);
-            // Update reports list
-            setReports(reports.filter(report => report._id !== reportId));
-            // Close modal if open
+            // Llamar al nuevo endpoint para eliminar el comentario reportado
+            await api.delete(`/admin/reports/${reportId}/delete-comment`);
+            
+            // Actualizar el estado local del reporte a 'deleted'
+            setReports(reports.map(report =>
+                report._id === reportId ? { ...report, status: 'deleted' } : report
+            ));
+            
+            // Cerrar el modal si está abierto
             setSelectedReport(null);
         } catch (error) {
-            console.error('Error al eliminar el reporte:', error);
+            console.error('Error al eliminar el comentario reportado:', error);
+            alert('Error al eliminar el comentario. Por favor, inténtalo de nuevo.');
         }
     };
     
     const handleRejectReport = async (reportId: string) => {
         try {
+            // Llamar al nuevo endpoint para rechazar el reporte
             await api.put(`/admin/reports/${reportId}/reject`);
-            // Update reports list
+            
+            // Actualizar el estado local del reporte a 'rejected'
             setReports(reports.map(report =>
                 report._id === reportId ? { ...report, status: 'rejected' } : report
             ));
-            // Close modal if open
+            
+            // Cerrar el modal si está abierto
             setSelectedReport(null);
         } catch (error) {
             console.error('Error al rechazar el reporte:', error);
+            alert('Error al rechazar el reporte. Por favor, inténtalo de nuevo.');
         }
-    };    
+    };
 
     // Filter reports
     const filteredReports = reports.filter(report => {
