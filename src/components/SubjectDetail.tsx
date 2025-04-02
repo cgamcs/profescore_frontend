@@ -1,19 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useParams, Link } from 'react-router-dom';
 import { SubjectDetailLoader } from './SkeletonLoader';
 import api from '../api';
-
-interface ISubject {
-  _id: string;
-  name: string;
-  department: {
-    _id: string;
-    name: string;
-  };
-  credits: number;
-  description: string;
-  professorsCount: number;
-}
 
 interface IProfessor {
   _id: string;
@@ -25,36 +14,20 @@ interface IProfessor {
 }
 
 const SubjectDetail = () => {
-  const { facultyId, subjectId } = useParams<{ facultyId: string; subjectId: string }>();
-  const [subject, setSubject] = useState<ISubject | null>(null);
-  const [professors, setProfessors] = useState<IProfessor[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { facultyId, subjectId } = useParams();
+  const [error] = useState('');
 
-  useEffect(() => {
-    const fetchSubjectDetails = async () => {
-      try {
-        const subjectRes = await api.get(`/faculties/${facultyId}/subjects/${subjectId}`);
-        const professorsRes = await api.get(`/faculties/${facultyId}/subjects/${subjectId}/professors`);
+  const { data: subject, isLoading: subjectLoading } = useQuery({
+    queryKey: ['subject', facultyId, subjectId],
+    queryFn: () => api.get(`/faculties/${facultyId}/subjects/${subjectId}`).then(res => res.data),
+  });
 
-        // Actualizar el número de profesores en el objeto subject
-        const updatedSubject = {
-          ...subjectRes.data,
-          professorsCount: professorsRes.data.length
-        };
+  const { data: professors = [], isLoading: professorsLoading } = useQuery({
+    queryKey: ['subjectProfessors', facultyId, subjectId],
+    queryFn: () => api.get(`/faculties/${facultyId}/subjects/${subjectId}/professors`).then(res => res.data),
+  });
 
-        setSubject(updatedSubject);
-        setProfessors(professorsRes.data);
-      } catch (err) {
-        console.error(err);
-        setError('Error al cargar los detalles de la materia');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSubjectDetails();
-  }, [facultyId, subjectId]);
+  const isLoading = subjectLoading || professorsLoading;
 
   const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);
@@ -75,7 +48,7 @@ const SubjectDetail = () => {
     );
   };
 
-  if (loading) return <SubjectDetailLoader />;
+  if (isLoading) return <SubjectDetailLoader />;
   if (error) return <div className="text-red-500 text-center py-4">{error}</div>;
   if (!subject) return <div className="text-center py-4">No se encontró la materia</div>;
 
@@ -99,7 +72,7 @@ const SubjectDetail = () => {
             </div>
             <div>
               <h3 className="text-sm font-medium text-gray-500">Profesores</h3>
-              <p>{subject.professorsCount}</p>
+              <p>{professors.length}</p>
             </div>
           </div>
           <div>
@@ -127,7 +100,7 @@ const SubjectDetail = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {professors.map(prof => (
+              {professors.map((prof: IProfessor) => (
                 <tr key={prof._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <Link to={`/facultad/${facultyId}/maestro/${prof._id}`} className="text-indigo-600 font-medium">

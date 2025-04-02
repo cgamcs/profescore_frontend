@@ -1,44 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { FacultyListLoader } from './SkeletonLoader';
 import api from '../api';
 
-interface Faculty {
-  _id: string;
-  name: string;
-  abbreviation: string;
-}
-
 const FacultyList: React.FC = () => {
-  const [faculties, setFaculties] = useState<Faculty[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>('');
+  const { data: faculties = [], isLoading, error } = useQuery({
+    queryKey: ['faculties'],
+    queryFn: () => api.get('/faculties').then(res => res.data.faculties),
+    staleTime: 5 * 60 * 1000 // 5 minutos
+  });
 
-  useEffect(() => {
-    api.get('/faculties')
-      .then(response => {
-        console.log('Respuesta de la API:', response.data); // Verifica que la API responde bien
-  
-        // Acceder correctamente al array de facultades
-        if (Array.isArray(response.data.faculties)) {
-          setFaculties(response.data.faculties);
-        } else {
-          console.error('La API no devolvió un array en `faculties`:', response.data);
-          setFaculties([]); // Evita errores en el render
-        }
-        
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error al obtener facultades:', err);
-        setError('Error al cargar las facultades');
-        setLoading(false);
-      });
-  }, []);
-  
-
-  if (loading) return <FacultyListLoader />;
-  if (error) return <div className="text-center text-red-500 py-10">{error}</div>;
+  if (isLoading) return <FacultyListLoader />;
+  if (error) return <div className="text-center text-red-500 py-10">Error al cargar las facultades</div>;
 
   return (
     <section className="pb-12 bg-white">

@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import ReCAPTCHA from 'react-google-recaptcha';
 import api from '../api';
@@ -13,13 +14,18 @@ interface Subject {
     name: string;
 }
 
+interface ProfessorFormData {
+    name: string;
+    department: string;
+    subject: string;
+    biography: string;
+}
+
 const ProfessorAdd = () => {
-    const { facultyId } = useParams<{ facultyId: string }>();
+    const queryClient = useQueryClient();
+    const { facultyId } = useParams();
     const navigate = useNavigate();
-    const [departments, setDepartments] = useState<Department[]>([]);
-    const [subjects, setSubjects] = useState<Subject[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<ProfessorFormData>({
         name: '',
         department: '',
         subject: '',
@@ -27,36 +33,38 @@ const ProfessorAdd = () => {
     });
     const [captchaValue, setCaptchaValue] = useState('');
     const [captchaError, setCaptchaError] = useState('');
+  
+    // Mutación para crear profesor
+    const { mutate, isPending } = useMutation({
+      mutationFn: (newProfessor: ProfessorFormData & { captcha: string }) => 
+        api.post(`/faculties/${facultyId}/professors`, newProfessor),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ 
+          queryKey: ['professors', facultyId] 
+        });
+        navigate(`/facultad/${facultyId}/maestros?success=true`);
+      }
+    });
+  
+    // Obtener departamentos y materias
+    const { data: departments = [], isLoading: departmentsLoading } = useQuery({
+      queryKey: ['departments', facultyId],
+      queryFn: () => api.get(`/faculties/${facultyId}/departments`).then(res => res.data),
+    });
+  
+    const { data: subjects = [], isLoading: subjectsLoading } = useQuery({
+      queryKey: ['subjects', facultyId],
+      queryFn: () => api.get(`/faculties/${facultyId}/subjects`).then(res => 
+        res.data.sort((a: Subject, b: Subject) => a.name.localeCompare(b.name))
+      ),
+    });
 
+    const isLoading = departmentsLoading || subjectsLoading;
     const SITE_KEY = import.meta.env.VITE_SITE_KEY || '';
 
     if (!SITE_KEY) {
         console.error('La clave del sitio de reCAPTCHA no está configurada.');
     }
-
-    console.log('Clave del sitio de reCAPTCHA:', SITE_KEY);
-
-    // Obtener departamentos y materias
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [deptRes, subjRes] = await Promise.all([
-                    api.get(`/faculties/${facultyId}/departments`),
-                    api.get(`/faculties/${facultyId}/subjects`)
-                ]);
-
-                setDepartments(deptRes.data);
-                // Ordenar las materias alfabéticamente antes de establecerlas en el estado
-                const sortedSubjects = subjRes.data.sort((a: Subject, b: Subject) => a.name.localeCompare(b.name));
-                setSubjects(sortedSubjects);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, [facultyId]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -66,16 +74,10 @@ const ProfessorAdd = () => {
             return;
         }
 
-        try {
-            await api.post(`/faculties/${facultyId}/professors`, {
-                ...formData,
-                subject: formData.subject,
-                captcha: captchaValue
-            });
-            navigate(`/facultad/${facultyId}/maestros?success=true`);
-        } catch (error) {
-            console.error('Error creating professor:', error);
-        }
+        mutate({
+            ...formData,
+            captcha: captchaValue
+        });
     };
 
     const handleCaptchaChange = (value: string | null) => {
@@ -87,7 +89,7 @@ const ProfessorAdd = () => {
         }
     };
 
-    if (loading) return <div className="text-center py-8">Cargando...</div>;
+    if (isLoading) return <div className="text-center py-8">Cargando...</div>;
 
     return (
         <div className="bg-white min-h-screen">
@@ -119,7 +121,7 @@ const ProfessorAdd = () => {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 >
                                     <option value="">Selecciona un departamento</option>
-                                    {departments.map(dept => (
+                                    {departments.map((dept: Department) => (
                                         <option key={dept._id} value={dept._id}>{dept.name}</option>
                                     ))}
                                 </select>
@@ -135,7 +137,7 @@ const ProfessorAdd = () => {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 >
                                     <option value="">Selecciona una materia</option>
-                                    {subjects.map(subj => (
+                                    {subjects.map((subj: Subject) => (
                                         <option key={subj._id} value={subj._id}>{subj.name}</option>
                                     ))}
                                 </select>
@@ -173,9 +175,10 @@ const ProfessorAdd = () => {
                                 </Link>
                                 <button
                                     type="submit"
+                                    disabled={isPending}
                                     className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
                                 >
-                                    Guardar Maestro
+                                    {isPending ? 'Guardando...' : 'Guardar Maestro'}
                                 </button>
                             </div>
                         </form>

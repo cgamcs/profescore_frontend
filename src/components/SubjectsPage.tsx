@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useParams, Link } from 'react-router-dom';
 import { SubjectPageLoader } from './SkeletonLoader';
 import api from '../api';
@@ -34,60 +35,39 @@ interface IDepartment {
 
 const SubjectsPage = () => {
   const { facultyId } = useParams();
-  const [subjects, setSubjects] = useState<ISubject[]>([]);
-  const [professors, setProfessors] = useState<IProfessor[]>([]);
-  const [departments, setDepartments] = useState<{ [key: string]: string }>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        console.log('Fetching data for facultyId:', facultyId);
-        const [subjectsRes, professorsRes, departmentsRes] = await Promise.all([
-          api.get(`/faculties/${facultyId}/subjects`),
-          api.get(`/faculties/${facultyId}/professors`),
-          api.get(`/faculties/${facultyId}/departments`)
-        ]);
+  const { data: subjects = [], isLoading: subjectsLoading } = useQuery({
+    queryKey: ['subjects', facultyId],
+    queryFn: () => api.get(`/faculties/${facultyId}/subjects`).then(res => res.data),
+  });
 
-        console.log('Subjects data:', subjectsRes.data);
-        console.log('Professors data:', professorsRes.data);
+  const { data: professors = [], isLoading: professorsLoading } = useQuery({
+    queryKey: ['professors', facultyId],
+    queryFn: () => api.get(`/faculties/${facultyId}/professors`).then(res => res.data),
+  });
 
-        const departmentsMap = departmentsRes.data.reduce((acc: { [key: string]: string }, department: IDepartment) => {
-          acc[department._id] = department.name;
-          return acc;
-        }, {});
+  const { data: departments = [], isLoading: departmentsLoading } = useQuery({
+    queryKey: ['departments', facultyId],
+    queryFn: () => api.get(`/faculties/${facultyId}/departments`).then(res => res.data),
+  });
 
-        setSubjects(subjectsRes.data);
-        setProfessors(professorsRes.data);
-        setDepartments(departmentsMap);
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Error al cargar la información');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [facultyId]);
+  const isLoading = subjectsLoading || professorsLoading || departmentsLoading;
 
   // Función para normalizar el texto (eliminar acentos y convertir a minúsculas)
   const normalizeText = (text: string) => {
     return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   };
 
-  const filteredSubjects = subjects.filter(subject =>
+  const filteredSubjects = subjects.filter((subject: ISubject) =>
     searchQuery === '' || normalizeText(subject.name).includes(normalizeText(searchQuery))
   );
 
-  const filteredProfessors = professors.filter(professor =>
+  const filteredProfessors = professors.filter((professor: IProfessor) =>
     searchQuery !== '' && normalizeText(professor.name).includes(normalizeText(searchQuery))
   );
 
-  if (loading) return <SubjectPageLoader />;
-  if (error) return <div className="text-red-500 text-center py-4">{error}</div>;
+  if (isLoading) return <SubjectPageLoader />;
 
   return (
     <main className="container mx-auto px-4 py-6">
@@ -113,7 +93,7 @@ const SubjectsPage = () => {
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
         <ul className="divide-y divide-gray-200">
           {/* Mostrar materias filtradas */}
-          {filteredSubjects.map(subject => (
+          {filteredSubjects.map((subject: ISubject) => (
             <li key={subject._id}>
               <Link to={`/facultad/${facultyId}/materia/${subject._id}`} className="block hover:bg-gray-50 p-4">
                 <div className="flex justify-between items-center">
@@ -130,7 +110,7 @@ const SubjectsPage = () => {
           ))}
 
           {/* Mostrar profesores filtrados si la búsqueda coincide con ellos */}
-          {filteredProfessors.map(professor => (
+          {filteredProfessors.map((professor: IProfessor) => (
             <li key={professor._id}>
               <Link to={`/facultad/${facultyId}/profesor/${professor._id}`} className="block hover:bg-gray-50 p-4">
                 <div className="flex justify-between items-center">
@@ -138,8 +118,8 @@ const SubjectsPage = () => {
                     <h3 className="text-lg font-medium text-indigo-600">{professor.name}</h3>
                     <p className="text-sm text-gray-500">
                       {Array.isArray(professor.department)
-                        ? professor.department.map(deptId => departments[deptId]).join(', ')
-                        : departments[professor.department]}
+                        ? professor.department.map((deptId: string) => departments.find((d: IDepartment) => d._id === deptId)?.name).join(', ')
+                        : departments.find((d: IDepartment) => d._id === professor.department)?.name}
                     </p>
                   </div>
                   <div className="text-sm text-gray-500">

@@ -1,28 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams, useLocation } from 'react-router-dom';
 import { FaRegStar, FaStar, FaStarHalfAlt, FaHeart, FaRegHeart } from 'react-icons/fa';
 import ReCAPTCHA from 'react-google-recaptcha';
 import api from '../api';
 import { ProfessorDetailLoader } from './SkeletonLoader'; // Importa el SkeletonLoader
-
-interface Professor {
-    _id: string;
-    name: string;
-    department: {
-        _id: string;
-        name: string;
-    };
-    biography: string;
-    subjects: Subject[];
-    ratingStats: {
-        totalRatings: number;
-        averageGeneral: number;
-        averageExplanation: number;
-        averageAccessibility: number;
-        averageDifficulty: number;
-        averageAttendance: number;
-    };
-}
 
 interface RatingType {
     _id: string;
@@ -39,21 +21,32 @@ interface Subject {
 }
 
 const ProfessorDetail = () => {
-    const { facultyId, professorId } = useParams<{ facultyId: string; professorId: string }>();
+    const { facultyId, professorId } = useParams();
     const location = useLocation();
-    const [professor, setProfessor] = useState<Professor | null>(null);
-    const [ratings, setRatings] = useState<RatingType[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const queryClient = useQueryClient();
     const [userId, setUserId] = useState<string>('');
     const [showReportModal, setShowReportModal] = useState(false);
     const [selectedComment, setSelectedComment] = useState<RatingType | null>(null);
     const [reportSent, setReportSent] = useState(false);
     const [captchaValue, setCaptchaValue] = useState('');
     const [captchaError, setCaptchaError] = useState('');
-    const [showNotification, setShowNotification] = useState(false); // Estado para la notificación
+    const [showNotification, setShowNotification] = useState(false);
+    const [ , setError] = useState('');
 
     const SITE_KEY = import.meta.env.VITE_SITE_KEY || '';
+
+    const { data: professor, isLoading: professorLoading } = useQuery({
+      queryKey: ['professor', facultyId, professorId],
+      queryFn: () => api.get(`/faculties/${facultyId}/professors/${professorId}`).then(res => res.data),
+      staleTime: 5 * 60 * 1000
+    });
+  
+    const { data: ratings = [], isLoading: ratingsLoading } = useQuery({
+      queryKey: ['ratings', facultyId, professorId],
+      queryFn: () => api.get(`/faculties/${facultyId}/professors/${professorId}/ratings`).then(res => res.data),
+    });
+
+    const isLoading = professorLoading || ratingsLoading;
 
     if (!SITE_KEY) {
         console.error('La clave del sitio de reCAPTCHA no está configurada.');
@@ -70,29 +63,6 @@ const ProfessorDetail = () => {
             setUserId(storedUserId);
         }
     }, []);
-
-    useEffect(() => {
-        const fetchProfessorDetails = async () => {
-            try {
-                setLoading(true);
-                const [professorRes, ratingsRes] = await Promise.all([
-                    api.get(`/faculties/${facultyId}/professors/${professorId}`),
-                    api.get(`/faculties/${facultyId}/professors/${professorId}/ratings`)
-                ]);
-
-                console.log(professorRes.data)
-                setProfessor(professorRes.data);
-                setRatings(ratingsRes.data);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                setError('Error al cargar los detalles del profesor');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchProfessorDetails();
-    }, [facultyId, professorId]);
 
     useEffect(() => {
         const urlParams = new URLSearchParams(location.search);
@@ -152,12 +122,11 @@ const ProfessorDetail = () => {
             );
 
             if (res.status === 200) {
-                setRatings(prev =>
-                    prev.map(r =>
-                        r._id === ratingId ? res.data : r
-                    )
+                const updatedRatings = ratings.map((rating: RatingType) =>
+                    rating._id === ratingId ? res.data : rating
                 );
-                setCaptchaValue(''); // Reset CAPTCHA after successful vote
+                queryClient.setQueryData(['ratings', facultyId, professorId], updatedRatings);
+                setCaptchaValue('');
             }
         } catch (error) {
             console.error('Error votando:', error);
@@ -181,7 +150,7 @@ const ProfessorDetail = () => {
     const closeReportModal = () => {
         setSelectedComment(null);
         setShowReportModal(false);
-        setCaptchaValue(''); // Reset CAPTCHA when closing the modal
+        setCaptchaValue('');
     };
 
     const handleReport = async (event: React.FormEvent) => {
@@ -189,7 +158,7 @@ const ProfessorDetail = () => {
         const reason = (document.getElementById('report-reason') as HTMLSelectElement).value;
         const details = (document.getElementById('report-details') as HTMLTextAreaElement).value;
 
-        if (!reason) { // Validar que se seleccionó un motivo
+        if (!reason) {
             setError('Por favor selecciona un motivo de reporte');
             return;
         }
@@ -199,22 +168,15 @@ const ProfessorDetail = () => {
             return;
         }
 
-        const reportUrl = `/faculties/${facultyId}/professors/${professorId}/ratings/${selectedComment?._id}/report`;
-        console.log('Reporting to URL:', reportUrl);
-        console.log('Payload:', { commentId: selectedComment?._id, reasons: [reason], reportComment: details || undefined, captcha: captchaValue });
-        // Enviar el reporte al backend
         try {
             const res = await api.post(
-                reportUrl,
+                `/faculties/${facultyId}/professors/${professorId}/ratings/${selectedComment?._id}/report`,
                 { commentId: selectedComment?._id, reasons: [reason], reportComment: details || undefined, captcha: captchaValue }
             );
 
-            console.log(res)
-
             if (res.status === 201) {
-                console.log('Reporte enviado exitosamente:', res.data);
                 setReportSent(true);
-                setTimeout(() => setReportSent(false), 3000); // Ocultar la notificación después de 3 segundos
+                setTimeout(() => setReportSent(false), 3000);
                 closeReportModal();
             }
         } catch (error) {
@@ -222,8 +184,7 @@ const ProfessorDetail = () => {
         }
     };
 
-    if (loading) return <ProfessorDetailLoader />; // Mostrar el SkeletonLoader mientras se cargan los datos
-    if (error) return <div className="text-red-500 text-center py-4">{error}</div>;
+    if (isLoading) return <ProfessorDetailLoader />;
     if (!professor) return <div className='text-center text-red-500 py-4'>Profesor no encontrado</div>;
 
     return (
@@ -292,7 +253,7 @@ const ProfessorDetail = () => {
                                 <div>
                                     <h3 className="text-sm font-medium text-gray-500">Materias</h3>
                                     <ul className="list-disc list-inside text-sm">
-                                        {professor.subjects?.slice(0).map((subject) => (
+                                        {professor.subjects?.slice(0).map((subject: Subject) => (
                                             <li key={subject._id}>
                                                 {subject.name}
                                             </li>
@@ -319,7 +280,7 @@ const ProfessorDetail = () => {
                         <div>
                             <h2 className="font-semibold text-lg mb-4">Reseñas de Estudiantes</h2>
                             <div className="space-y-4">
-                                {ratings.map(rating => (
+                                {ratings.map((rating: RatingType) => (
                                     <div key={rating._id} className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
                                         <div className="flex justify-between items-start mb-2">
                                             <div>

@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { TopProfessorsLoader } from './SkeletonLoader';
 import api from '../api';
 
@@ -17,30 +18,46 @@ interface Professor {
   };
 }
 
+const STALE_TIME = 5 * 60 * 1000; // 5 minutos
+
 const TopRatedProfessors: React.FC = () => {
-  const [professors, setProfessors] = useState<Professor[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>('');
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await api.get('/faculties');
-        console.log('Professors data:', response.data.topProfessors);
-        setProfessors(response.data.topProfessors);
-      } catch (err) {
-        setError('Error al cargar los profesores');
-        console.error('Error fetching professors:', err);
-      } finally {
-        setLoading(false);
+  const { data: professors = [], isLoading, error } = useQuery({
+    queryKey: ['topProfessors'],
+    queryFn: () => api.get('/faculties').then(res => res.data.topProfessors),
+    staleTime: STALE_TIME,
+    select: (data) => data.map((prof: Professor) => ({
+      _id: prof._id,
+      name: prof.name,
+      department: prof.department,
+      faculty: prof.faculty,
+      subjects: prof.subjects,
+      ratingStats: {
+        averageGeneral: prof.ratingStats.averageGeneral,
+        totalRatings: prof.ratingStats.totalRatings
       }
-    };
+    }))
+  });
 
-    fetchData();
+  // Memoizar el renderizado de estrellas
+  const renderStars = useMemo(() => (rating: number) => {
+    return (
+      <div className="flex">
+        {[...Array(5)].map((_, index) => (
+          <i
+            key={index}
+            className={`fas fa-star ${
+              index < Math.round(rating)
+                ? 'text-indigo-500'
+                : 'text-gray-300'
+            }`}
+          />
+        ))}
+      </div>
+    );
   }, []);
 
-  if (loading) return <TopProfessorsLoader />;
-  if (error) return <div className="text-center text-red-500 py-10">{error}</div>;
+  if (isLoading) return <TopProfessorsLoader />;
+  if (error) return <div className="text-center text-red-500 py-10">Error al cargar los profesores</div>;
   if (professors.length === 0) return <div className="text-center py-10">No hay profesores disponibles</div>;
 
   return (
@@ -52,7 +69,7 @@ const TopRatedProfessors: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {professors.map((professor) => (
+          {professors.map((professor: Professor) => (
             <div key={professor._id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex items-center justify-between gap-1 mb-4">
                 <div>
@@ -64,23 +81,10 @@ const TopRatedProfessors: React.FC = () => {
                 </div>
               </div>
               <p className="text-gray-600 mb-4">
-                {professor.department && professor.department.name 
-                  ? professor.department.name 
-                  : 'Departamento no especificado'}
+                {professor.department?.name || 'Departamento no especificado'}
               </p>
               <div className="flex items-center justify-between">
-                <div className="flex">
-                  {[...Array(5)].map((_, index) => (
-                    <i
-                      key={index}
-                      className={`fas fa-star ${
-                        index < Math.round(professor.ratingStats.averageGeneral)
-                          ? 'text-indigo-500'
-                          : 'text-gray-300'
-                      }`}
-                    ></i>
-                  ))}
-                </div>
+                {renderStars(professor.ratingStats.averageGeneral)}
                 <span className="text-gray-500 text-sm">{professor.ratingStats.totalRatings} reseñas</span>
               </div>
             </div>
