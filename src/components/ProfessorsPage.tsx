@@ -32,41 +32,41 @@ const ProfessorsPage = () => {
     const location = useLocation();
     const [searchQuery, setSearchQuery] = useState('');
     const [showNotification, setShowNotification] = useState(false);
-  
+
     const { data: professors = [], isLoading: professorsLoading } = useQuery({
-      queryKey: ['professors', facultyId],
-      queryFn: () => api.get(`/faculties/${facultyId}/professors`).then(res => res.data),
-      staleTime: STALE_TIME,
-      select: (data) => data.map((prof: IProfessor) => ({
-        _id: prof._id,
-        name: prof.name,
-        department: prof.department,
-        subjects: prof.subjects,
-        ratingStats: {
-          averageGeneral: prof.ratingStats.averageGeneral,
-          totalRatings: prof.ratingStats.totalRatings
-        }
-      }))
+        queryKey: ['professors', facultyId],
+        queryFn: () => api.get(`/faculties/${facultyId}/professors`).then(res => res.data),
+        staleTime: STALE_TIME,
+        select: (data) => data.map((prof: IProfessor) => ({
+            _id: prof._id,
+            name: prof.name,
+            department: prof.department,
+            subjects: prof.subjects,
+            ratingStats: {
+                averageGeneral: prof.ratingStats.averageGeneral,
+                totalRatings: prof.ratingStats.totalRatings
+            }
+        }))
     });
-  
+
     const { data: subjects = [], isLoading: subjectsLoading } = useQuery({
-      queryKey: ['subjects', facultyId],
-      queryFn: () => api.get(`/faculties/${facultyId}/subjects`).then(res => res.data),
-      staleTime: STALE_TIME,
-      select: (data) => data.map((subj: ISubject) => ({
-        _id: subj._id,
-        name: subj.name
-      }))
+        queryKey: ['subjects', facultyId],
+        queryFn: () => api.get(`/faculties/${facultyId}/subjects`).then(res => res.data),
+        staleTime: STALE_TIME,
+        select: (data) => data.map((subj: ISubject) => ({
+            _id: subj._id,
+            name: subj.name
+        }))
     });
-  
+
     const { data: departments = [], isLoading: departmentsLoading } = useQuery({
-      queryKey: ['departments', facultyId],
-      queryFn: () => api.get(`/faculties/${facultyId}/departments`).then(res => res.data),
-      staleTime: STALE_TIME,
-      select: (data) => data.map((dept: IDepartment) => ({
-        _id: dept._id,
-        name: dept.name
-      }))
+        queryKey: ['departments', facultyId],
+        queryFn: () => api.get(`/faculties/${facultyId}/departments`).then(res => res.data),
+        staleTime: STALE_TIME,
+        select: (data) => data.map((dept: IDepartment) => ({
+            _id: dept._id,
+            name: dept.name
+        }))
     });
 
     const isLoading = professorsLoading || subjectsLoading || departmentsLoading;
@@ -90,7 +90,7 @@ const ProfessorsPage = () => {
     // Memoizar el filtrado de profesores
     const filteredProfessors = useMemo(() => {
         if (!searchQuery) return professors;
-        
+
         const query = normalizeText(searchQuery);
         return professors.filter((professor: IProfessor) => {
             const nameMatches = normalizeText(professor.name).includes(query);
@@ -127,9 +127,8 @@ const ProfessorsPage = () => {
     return (
         <main className="container mx-auto px-4 py-6">
             {showNotification && (
-                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-                    <strong className="font-bold">¡Éxito!</strong>
-                    <span className="block sm:inline"> Maestro agregado correctamente.</span>
+                <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg" role="alert">
+                    Maestro agregado correctamente.
                 </div>
             )}
             <div className="flex justify-between items-center mb-6">

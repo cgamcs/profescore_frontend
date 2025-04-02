@@ -70,7 +70,7 @@ const ProfessorDetail = () => {
             setShowNotification(true);
             const timer = setTimeout(() => {
                 setShowNotification(false);
-            }, 7000);
+            }, 3000);
             return () => clearTimeout(timer);
         }
     }, [location.search]);
