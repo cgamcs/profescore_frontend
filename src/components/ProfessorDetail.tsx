@@ -70,7 +70,7 @@ const ProfessorDetail = () => {
             setShowNotification(true);
             const timer = setTimeout(() => {
                 setShowNotification(false);
-            }, 3000);
+            }, 8000);
             return () => clearTimeout(timer);
         }
     }, [location.search]);
@@ -176,7 +176,7 @@ const ProfessorDetail = () => {
 
             if (res.status === 201) {
                 setReportSent(true);
-                setTimeout(() => setReportSent(false), 3000);
+                setTimeout(() => setReportSent(false), 8000);
                 closeReportModal();
             }
         } catch (error) {
@@ -397,14 +397,14 @@ const ProfessorDetail = () => {
 
             {/* Notificación de reporte enviado */}
             {reportSent && (
-                <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification">
+                <div className="fixed top-15 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification">
                     Reporte enviado exitosamente
                 </div>
             )}
 
             {/* Notificación de calificación enviada */}
             {showNotification && (
-                <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification">
+                <div className="fixed top-15 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification">
                     Calificación enviada correctamente
                 </div>
             )}
