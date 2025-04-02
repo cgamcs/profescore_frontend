@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { ProfessorPageLoader } from './SkeletonLoader';
 import api from '../api';
 
@@ -29,8 +29,9 @@ const STALE_TIME = 5 * 60 * 1000; // 5 minutos
 
 const ProfessorsPage = () => {
     const { facultyId } = useParams();
+    const location = useLocation();
     const [searchQuery, setSearchQuery] = useState('');
-    const [showNotification] = useState(false);
+    const [showNotification, setShowNotification] = useState(false);
   
     const { data: professors = [], isLoading: professorsLoading } = useQuery({
       queryKey: ['professors', facultyId],
@@ -69,6 +70,17 @@ const ProfessorsPage = () => {
     });
 
     const isLoading = professorsLoading || subjectsLoading || departmentsLoading;
+
+    useEffect(() => {
+        const urlParams = new URLSearchParams(location.search);
+        if (urlParams.get('success') === 'true') {
+            setShowNotification(true);
+            const timer = setTimeout(() => {
+                setShowNotification(false);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [location.search]);
 
     // Función para normalizar el texto (eliminar acentos y convertir a minúsculas)
     const normalizeText = (text: string) => {
