@@ -160,56 +160,59 @@ const ProfessorsPage = () => {
                 <div className="p-4 bg-indigo-600 text-white">
                     <h2 className="font-medium">Maestros</h2>
                 </div>
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Departamento</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Materias</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Calificación</th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                        {filteredProfessors.map((professor: IProfessor) => (
-                            <tr key={professor._id} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <Link
-                                        to={`/facultad/${facultyId}/maestro/${professor._id}`}
-                                        className="text-indigo-600 font-medium"
-                                    >
-                                        {professor.name}
-                                    </Link>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {departments.find((d: IDepartment) => d._id === professor.department)?.name || 'Cargando...'}
-                                </td>
-                                <td className="px-6 py-4 text-sm text-gray-500">
-                                    <div className="flex flex-wrap gap-1">
-                                        {professor.subjects?.slice(0, 2).map((subjectId: string) => {
-                                            const subject = subjects.find((s: ISubject) => s._id === subjectId);
-                                            return subject ? (
-                                                <span
-                                                    key={subjectId}
-                                                    className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800"
-                                                >
-                                                    {subject.name}
-                                                </span>
-                                            ) : null;
-                                        })}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex items-center">
-                                        <span className="bg-indigo-100 text-indigo-800 font-bold rounded px-2 py-1 text-sm mr-2">
-                                            {professor.ratingStats.averageGeneral.toFixed(1)}
-                                        </span>
-                                        {renderStars(professor.ratingStats.averageGeneral)}
-                                    </div>
-                                </td>
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Departamento</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Materias</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Calificación</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {filteredProfessors.map((professor: IProfessor) => (
+                                <tr key={professor._id} className="hover:bg-gray-50">
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <Link
+                                            to={`/facultad/${facultyId}/maestro/${professor._id}`}
+                                            className="text-indigo-600 font-medium"
+                                        >
+                                            {professor.name}
+                                        </Link>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {departments.find((d: IDepartment) => d._id === professor.department)?.name || 'Cargando...'}
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-gray-500">
+                                        <div className="flex flex-wrap gap-1">
+                                            {professor.subjects?.slice(0, 2).map((subjectId: string) => {
+                                                const subject = subjects.find((s: ISubject) => s._id === subjectId);
+                                                return subject ? (
+                                                    <span
+                                                        key={subjectId}
+                                                        className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800"
+                                                    >
+                                                        {subject.name}
+                                                    </span>
+                                                ) : null;
+                                            })}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="flex items-center">
+                                            <span className="bg-indigo-100 text-indigo-800 font-bold rounded px-2 py-1 text-sm mr-2">
+                                                {professor.ratingStats.averageGeneral.toFixed(1)}
+                                            </span>
+                                            {renderStars(professor.ratingStats.averageGeneral)}
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
         </main>
     );
