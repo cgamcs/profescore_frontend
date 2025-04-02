@@ -54,7 +54,7 @@
 }
 
 .notification {
-    animation: slide .8s ease;
+    animation: slide 4s ease-in-out forwards;
 }
 
 @keyframes slide {
