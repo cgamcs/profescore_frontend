@@ -14,16 +14,17 @@
     display: inline-block;
     box-sizing: border-box;
     animation: rotation 1s linear infinite;
-    }
+}
 
-    @keyframes rotation {
+@keyframes rotation {
     0% {
         transform: rotate(0deg);
     }
+
     100% {
         transform: rotate(360deg);
     }
-    } 
+}
 
 .link {
     position: relative;
@@ -50,4 +51,26 @@
 .link:hover::after {
     background-color: oklch(0.585 0.233 277.117);
     transform: scaleX(1);
+}
+
+.notification {
+    animation: slide .8s ease;
+}
+
+@keyframes slide {
+    0% {
+        transform: translate(200%);
+    }
+
+    10% {
+        transform: translateX(0);
+    }
+
+    9% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(200%);
+    }
 }
