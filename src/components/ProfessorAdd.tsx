@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import ReCAPTCHA from 'react-google-recaptcha';
@@ -18,14 +18,12 @@ interface ProfessorFormData {
     name: string;
     department: string;
     subject: string;
-    biography: string;
 }
 
 interface FormErrors {
     name: string;
     department: string;
     subject: string;
-    biography: string;
     captcha: string;
 }
 
@@ -36,19 +34,16 @@ const ProfessorAdd = () => {
     const [formData, setFormData] = useState<ProfessorFormData>({
         name: '',
         department: '',
-        subject: '',
-        biography: ''
+        subject: ''
     });
     const [captchaValue, setCaptchaValue] = useState('');
     const [errors, setErrors] = useState<FormErrors>({
         name: '',
         department: '',
         subject: '',
-        biography: '',
         captcha: ''
     });
 
-    // Mutación para crear profesor
     const { mutate, isPending } = useMutation({
         mutationFn: (newProfessor: ProfessorFormData & { captcha: string }) =>
             api.post(`/faculties/${facultyId}/professors`, newProfessor),
@@ -66,14 +61,12 @@ const ProfessorAdd = () => {
                     name: '',
                     department: '',
                     subject: '',
-                    biography: '',
                     captcha: 'Error al enviar el formulario. Por favor, inténtalo de nuevo.'
                 });
             }
         }
     });
 
-    // Obtener departamentos y materias
     const { data: departments = [], isLoading: departmentsLoading } = useQuery({
         queryKey: ['departments', facultyId],
         queryFn: () => api.get(`/faculties/${facultyId}/departments`).then(res => res.data),
@@ -126,7 +119,6 @@ const ProfessorAdd = () => {
 
                     <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
                         <form onSubmit={handleSubmit} className="space-y-6">
-                            {/* Campo Nombre */}
                             <div className="space-y-2">
                                 <label className="block text-sm font-medium text-gray-700">Nombre completo</label>
                                 <input
@@ -139,7 +131,6 @@ const ProfessorAdd = () => {
                                 {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
                             </div>
 
-                            {/* Select Departamento */}
                             <div className="space-y-2">
                                 <label className="block text-sm font-medium text-gray-700">Departamento</label>
                                 <select
@@ -156,7 +147,6 @@ const ProfessorAdd = () => {
                                 {errors.department && <p className="text-red-600 text-sm mt-1">{errors.department}</p>}
                             </div>
 
-                            {/* Select Materia */}
                             <div className="space-y-2">
                                 <label className="block text-sm font-medium text-gray-700">Materia que imparte</label>
                                 <select
@@ -173,20 +163,6 @@ const ProfessorAdd = () => {
                                 {errors.subject && <p className="text-red-600 text-sm mt-1">{errors.subject}</p>}
                             </div>
 
-                            {/* Biografía */}
-                            <div className="space-y-2">
-                                <label className="block text-sm font-medium text-gray-700">Biografía</label>
-                                <textarea
-                                    value={formData.biography}
-                                    onChange={(e) => setFormData({ ...formData, biography: e.target.value })}
-                                    rows={4}
-                                    placeholder="Información sobre la formación académica y experiencia del profesor..."
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                ></textarea>
-                                {errors.biography && <p className="text-red-600 text-sm mt-1">{errors.biography}</p>}
-                            </div>
-
-                            {/* Verificación CAPTCHA */}
                             <div className="space-y-2">
                                 <label className="block text-sm font-medium text-gray-700">Verificación CAPTCHA</label>
                                 <ReCAPTCHA
@@ -196,7 +172,6 @@ const ProfessorAdd = () => {
                                 {errors.captcha && <p className="text-red-600 text-sm mt-1">{errors.captcha}</p>}
                             </div>
 
-                            {/* Botones */}
                             <div className="pt-4 flex justify-end space-x-4">
                                 <Link
                                     to={`/facultad/${facultyId}/maestros`}

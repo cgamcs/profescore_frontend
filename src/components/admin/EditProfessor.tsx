@@ -19,7 +19,6 @@ const EditProfessor: React.FC = () => {
     const [name, setName] = useState('');
     const [departmentId, setDepartmentId] = useState('');
     const [selectedSubjectIds, setSelectedSubjectIds] = useState<string[]>([]);
-    const [biography, setBiography] = useState('');
     const [departments, setDepartments] = useState<Department[]>([]);
     const [allSubjects, setAllSubjects] = useState<Subject[]>([]);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -75,7 +74,6 @@ const EditProfessor: React.FC = () => {
                 setName(professorData.name);
                 setDepartmentId(professorData.department._id || professorData.department.id || '');
                 setSelectedSubjectIds(professorData.subjects.map((subject: Subject) => subject._id || subject.id || ''));
-                setBiography(professorData.biography);
             } catch (error) {
                 console.error('Error fetching professor data:', error);
             }
@@ -106,11 +104,6 @@ const EditProfessor: React.FC = () => {
             isValid = false;
         }
 
-        if (!biography.trim()) {
-            newErrors.biography = 'La biografía es obligatoria';
-            isValid = false;
-        }
-
         if (!isValid) {
             setErrors(newErrors);
             return;
@@ -120,7 +113,6 @@ const EditProfessor: React.FC = () => {
             const payload = {
                 name,
                 department: departmentId,
-                biography,
                 subjects: selectedSubjectIds,
             };
 
@@ -202,20 +194,6 @@ const EditProfessor: React.FC = () => {
                                 ))}
                             </select>
                             {errors.subjects && <p className="text-red-500 text-sm mt-1">{errors.subjects}</p>}
-                        </div>
-                        <div className="space-y-2">
-                            <label htmlFor="biografia" className="block text-sm font-medium text-gray-700">
-                                Biografía
-                            </label>
-                            <textarea
-                                id="biografia"
-                                name="biografia"
-                                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 ${errors.biography ? 'border-red-500' : 'border-gray-300'}`}
-                                placeholder="Información sobre la formación académica y experiencia del profesor..."
-                                value={biography}
-                                onChange={(e) => setBiography(e.target.value)}
-                            ></textarea>
-                            {errors.biography && <p className="text-red-500 text-sm mt-1">{errors.biography}</p>}
                         </div>
                         <div className="pt-4 flex justify-end space-x-4">
                             <Link to="/admin/maestros" className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">

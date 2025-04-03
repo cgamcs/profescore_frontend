@@ -31,19 +31,19 @@ const ProfessorDetail = () => {
     const [captchaValue, setCaptchaValue] = useState('');
     const [captchaError, setCaptchaError] = useState('');
     const [showNotification, setShowNotification] = useState(false);
-    const [ , setError] = useState('');
+    const [, setError] = useState('');
 
     const SITE_KEY = import.meta.env.VITE_SITE_KEY || '';
 
     const { data: professor, isLoading: professorLoading } = useQuery({
-      queryKey: ['professor', facultyId, professorId],
-      queryFn: () => api.get(`/faculties/${facultyId}/professors/${professorId}`).then(res => res.data),
-      staleTime: 5 * 60 * 1000
+        queryKey: ['professor', facultyId, professorId],
+        queryFn: () => api.get(`/faculties/${facultyId}/professors/${professorId}`).then(res => res.data),
+        staleTime: 5 * 60 * 1000
     });
-  
+
     const { data: ratings = [], isLoading: ratingsLoading } = useQuery({
-      queryKey: ['ratings', facultyId, professorId],
-      queryFn: () => api.get(`/faculties/${facultyId}/professors/${professorId}/ratings`).then(res => res.data),
+        queryKey: ['ratings', facultyId, professorId],
+        queryFn: () => api.get(`/faculties/${facultyId}/professors/${professorId}/ratings`).then(res => res.data),
     });
 
     const isLoading = professorLoading || ratingsLoading;
@@ -52,7 +52,6 @@ const ProfessorDetail = () => {
         console.error('La clave del sitio de reCAPTCHA no está configurada.');
     }
 
-    // Generar o recuperar userId al cargar el componente
     useEffect(() => {
         const storedUserId = localStorage.getItem('userId');
         if (!storedUserId) {
@@ -191,7 +190,6 @@ const ProfessorDetail = () => {
         <div className="bg-white min-h-screen">
             <main className="container mx-auto px-4 py-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Columna izquierda */}
                     <div className="md:col-span-1">
                         <div className="bg-indigo-600 text-white p-6 rounded-lg shadow-md mb-6">
                             <div className="text-3xl font-bold mb-2">
@@ -270,14 +268,8 @@ const ProfessorDetail = () => {
                         </div>
                     </div>
 
-                    {/* Columna derecha */}
                     <div className="md:col-span-2">
                         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-6">
-                            <h2 className="font-semibold text-lg mb-4">Biografía</h2>
-                            <p className="text-gray-700 mb-4">{professor.biography}</p>
-                        </div>
-
-                        <div>
                             <h2 className="font-semibold text-lg mb-4">Reseñas de Estudiantes</h2>
                             <div className="space-y-4">
                                 {ratings.map((rating: RatingType) => (
@@ -324,25 +316,24 @@ const ProfessorDetail = () => {
                 </div>
             </main>
 
-            {/* Modal de Reporte */}
             {showReportModal && (
                 <div className="fixed inset-0 backdrop-brightness-50 backdrop-opacity-60 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
-                        <div className="bg-indigo-600 px-6 py-4 flex justify-between items-center">
+                        <div className="bg-indigo-600 px-4 py-3 flex justify-between items-center">
                             <h3 className="text-lg font-medium text-white">Reportar comentario</h3>
-                            <button className="text-white hover:text-gray-200 focus:outline-none" onClick={closeReportModal}>
+                            <button className="text-white hover:text-gray-200 focus:outline-none hover:cursor-pointer" onClick={closeReportModal}>
                                 <i className="fas fa-times"></i>
                             </button>
                         </div>
-                        <div className="p-6">
-                            <div className="mb-6">
+                        <div className="p-4">
+                            <div className="mb-4">
                                 <h4 className="text-sm font-medium text-gray-500 mb-2">Comentario reportado:</h4>
-                                <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+                                <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
                                     <p className="text-gray-700 text-sm">{selectedComment?.comment}</p>
                                 </div>
                             </div>
                             <form id="report-form" onSubmit={handleReport}>
-                                <div className="mb-6">
+                                <div className="mb-4">
                                     <label htmlFor="report-reason" className="block text-sm font-medium text-gray-700 mb-2">Motivo del reporte</label>
                                     <select id="report-reason" className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                                         <option value="" disabled>Selecciona un motivo</option>
@@ -353,7 +344,7 @@ const ProfessorDetail = () => {
                                         <option value="other">Otro motivo</option>
                                     </select>
                                 </div>
-                                <div className="mb-6">
+                                <div className="mb-4">
                                     <label htmlFor="report-details" className="block text-sm font-medium text-gray-700 mb-2">Detalles adicionales (opcional)</label>
                                     <textarea
                                         id="report-details"
@@ -361,7 +352,7 @@ const ProfessorDetail = () => {
                                         placeholder="Proporciona más información sobre por qué estás reportando este comentario..."
                                     ></textarea>
                                 </div>
-                                <div className="mb-6">
+                                <div className="mb-4">
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Verificación CAPTCHA</label>
                                     <ReCAPTCHA
                                         sitekey={SITE_KEY}
@@ -369,7 +360,7 @@ const ProfessorDetail = () => {
                                     />
                                     {captchaError && <p className="text-red-600 text-sm mt-1">{captchaError}</p>}
                                 </div>
-                                <div className="bg-gray-50 p-4 rounded-md border border-gray-200 mb-6">
+                                <div className="bg-gray-50 p-3 rounded-md border border-gray-200 mb-4">
                                     <div className="flex items-start">
                                         <div className="flex-shrink-0">
                                             <i className="fas fa-info-circle text-indigo-500 mt-0.5"></i>
@@ -382,10 +373,10 @@ const ProfessorDetail = () => {
                                     </div>
                                 </div>
                                 <div className="flex justify-end space-x-3">
-                                    <button type="button" className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" onClick={closeReportModal}>
+                                    <button type="button" className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 hover:cursor-pointer" onClick={closeReportModal}>
                                         Cancelar
                                     </button>
-                                    <button type="submit" className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    <button type="submit" className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 hover:cursor-pointer">
                                         Enviar reporte
                                     </button>
                                 </div>
@@ -395,14 +386,12 @@ const ProfessorDetail = () => {
                 </div>
             )}
 
-            {/* Notificación de reporte enviado */}
             {reportSent && (
                 <div className="fixed top-15 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification">
                     Reporte enviado exitosamente
                 </div>
             )}
 
-            {/* Notificación de calificación enviada */}
             {showNotification && (
                 <div className="fixed top-15 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification">
                     Calificación enviada correctamente

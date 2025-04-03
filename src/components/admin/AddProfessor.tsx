@@ -19,7 +19,6 @@ const AddProfessor: React.FC = () => {
     const [name, setName] = useState('');
     const [departmentId, setDepartmentId] = useState('');
     const [selectedSubjectIds, setSelectedSubjectIds] = useState<string[]>([]);
-    const [biography, setBiography] = useState('');
     const [departments, setDepartments] = useState<Department[]>([]);
     const [allSubjects, setAllSubjects] = useState<Subject[]>([]);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -33,14 +32,10 @@ const AddProfessor: React.FC = () => {
                     }
                 });
 
-                console.log('Respuesta completa de Deparments', response.data)
-
                 const processedDepartments = response.data.map((department: Department) => ({
                     id: department._id || department.id || '',
                     name: department.name
                 }));
-
-                console.log('Deparments procesados:', processedDepartments);
 
                 setDepartments(processedDepartments);
             } catch (error) {
@@ -56,16 +51,10 @@ const AddProfessor: React.FC = () => {
                     }
                 });
 
-                // Depuración: Imprimir la respuesta completa
-                console.log('Respuesta completa de subjects:', response.data);
-
-                // Manipular los datos para asegurar que tenemos un ID
                 const processedSubjects = response.data.map((subject: Subject) => ({
-                    id: subject._id || subject.id || '', // Priorizar _id, luego id
+                    id: subject._id || subject.id || '',
                     name: subject.name
                 }));
-
-                console.log('Subjects procesados:', processedSubjects);
 
                 setAllSubjects(processedSubjects);
             } catch (error) {
@@ -97,11 +86,6 @@ const AddProfessor: React.FC = () => {
             isValid = false;
         }
 
-        if (!biography.trim()) {
-            newErrors.biography = 'La biografía es obligatoria';
-            isValid = false;
-        }
-
         if (!isValid) {
             setErrors(newErrors);
             return;
@@ -110,12 +94,9 @@ const AddProfessor: React.FC = () => {
         try {
             const payload = {
                 name,
-                department: departmentId, // Enviamos el ID del departamento
-                biography,
+                department: departmentId,
                 subjects: selectedSubjectIds,
             };
-
-            console.log('Payload being sent:', payload);
 
             const endpoint = selectedSubjectIds.length > 1 ? 'multiple' : '';
             const response = await axios.post(`${import.meta.env.VITE_API_URL}/admin/faculty/${facultyId}/professor/${endpoint}`, payload, {
@@ -124,11 +105,10 @@ const AddProfessor: React.FC = () => {
                 }
             });
 
-            console.log('Server response:', response.data);
+            console.log(response.data)
             window.location.href = '/admin/maestros';
         } catch (error) {
             console.error('Error adding professor:', error);
-            // Aquí podrías agregar lógica adicional para manejar errores específicos y mostrar mensajes al usuario
         }
     };
 
@@ -197,20 +177,6 @@ const AddProfessor: React.FC = () => {
                                 ))}
                             </select>
                             {errors.subjects && <p className="text-red-500 text-sm mt-1">{errors.subjects}</p>}
-                        </div>
-                        <div className="space-y-2">
-                            <label htmlFor="biografia" className="block text-sm font-medium text-gray-700">
-                                Biografía
-                            </label>
-                            <textarea
-                                id="biografia"
-                                name="biografia"
-                                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 ${errors.biography ? 'border-red-500' : 'border-gray-300'}`}
-                                placeholder="Información sobre la formación académica y experiencia del profesor..."
-                                value={biography}
-                                onChange={(e) => setBiography(e.target.value)}
-                            ></textarea>
-                            {errors.biography && <p className="text-red-500 text-sm mt-1">{errors.biography}</p>}
                         </div>
                         <div className="pt-4 flex justify-end space-x-4">
                             <Link to="/admin/maestros" className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">

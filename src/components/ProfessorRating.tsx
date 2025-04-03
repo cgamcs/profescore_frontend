@@ -240,6 +240,7 @@ const ProfessorRating = () => {
             <div>
               <label htmlFor="comment" className="block text-sm font-medium text-gray-700">Comentario</label>
               <textarea
+                required
                 id="comment"
                 name="comment"
                 placeholder="Comparte tu experiencia con este profesor..."
