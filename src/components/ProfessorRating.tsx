@@ -103,6 +103,12 @@ const ProfessorRating = () => {
       return;
     }
 
+    // Validación del comentario
+    if (!formData.comment.trim()) {
+      setError('Por favor proporciona un comentario válido');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -125,6 +131,18 @@ const ProfessorRating = () => {
       setError('Error al enviar la calificación. Intenta nuevamente.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setFormData(prev => ({ ...prev, comment: value }));
+
+    // Validación en tiempo real
+    if (!value.trim()) {
+      setError('Por favor proporciona un comentario válido');
+    } else {
+      setError('');
     }
   };
 
@@ -247,7 +265,7 @@ const ProfessorRating = () => {
                 rows={5}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 value={formData.comment}
-                onChange={(e) => setFormData(prev => ({ ...prev, comment: e.target.value }))}
+                onChange={handleCommentChange}
               ></textarea>
             </div>
 
