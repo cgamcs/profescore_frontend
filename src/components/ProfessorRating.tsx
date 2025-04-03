@@ -39,7 +39,7 @@ const ProfessorRating = () => {
   const [error, setError] = useState('');
   const [captchaValue, setCaptchaValue] = useState('');
   const [captchaError, setCaptchaError] = useState('');
-  const [notification] = useState(false); // Estado para la notificación
+  const [notification, setNotification] = useState(false); // Estado para la notificación
 
   const SITE_KEY = import.meta.env.VITE_SITE_KEY || '';
 
@@ -124,7 +124,19 @@ const ProfessorRating = () => {
       console.log(response);
 
       if (response.status === 201) {
-        navigate(`/facultad/${facultyId}/maestro/${professorId}?success=true`, { replace: true });
+        setNotification(true);
+        setError('');
+        setFormData({
+          general: 5,
+          explanation: 3,
+          accessibility: 3,
+          difficulty: 3,
+          attendance: 3,
+          wouldRetake: true,
+          comment: '',
+          subject: ''
+        });
+        setCaptchaValue('');
       }
     } catch (error) {
       console.log(error);
@@ -145,10 +157,6 @@ const ProfessorRating = () => {
       setError('');
     }
   };
-
-  if (error) {
-    return <p className="text-red-600 text-center">{error}</p>;
-  }
 
   const renderRatingButtons = (field: keyof RatingForm) => {
     return [1, 2, 3, 4, 5].map(value => (
@@ -174,6 +182,11 @@ const ProfessorRating = () => {
           <h1 className="text-2xl font-bold mb-6">Calificar a {professor?.name}</h1>
 
           <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 space-y-6">
+            {notification && (
+              <div className="bg-green-500 text-white px-4 py-2 rounded-md shadow-lg">
+                Calificación enviada correctamente
+              </div>
+            )}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">Calificación General</label>
               <div className="flex space-x-2">
@@ -267,6 +280,7 @@ const ProfessorRating = () => {
                 value={formData.comment}
                 onChange={handleCommentChange}
               ></textarea>
+              {error && <p className="text-red-600 text-center">{error}</p>}
             </div>
 
             <div className="space-y-2">
@@ -297,13 +311,6 @@ const ProfessorRating = () => {
           </form>
         </div>
       </main>
-
-      {/* Notificación de calificación enviada */}
-      {notification && (
-        <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg">
-          Calificación enviada correctamente
-        </div>
-      )}
     </div>
   );
 };
