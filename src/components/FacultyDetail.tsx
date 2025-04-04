@@ -31,18 +31,18 @@ const FacultyDetails = () => {
     const [searchQuery, setSearchQuery] = useState('');
 
     const { data: subjects = [], isLoading: subjectsLoading } = useQuery({
-      queryKey: ['subjects', facultyId],
-      queryFn: () => api.get(`/faculties/${facultyId}/subjects`).then(res => res.data),
+        queryKey: ['subjects', facultyId],
+        queryFn: () => api.get(`/faculties/${facultyId}/subjects`).then(res => res.data),
     });
-  
+
     const { data: professors = [], isLoading: professorsLoading } = useQuery({
-      queryKey: ['professors', facultyId],
-      queryFn: () => api.get(`/faculties/${facultyId}/professors`).then(res => res.data),
+        queryKey: ['professors', facultyId],
+        queryFn: () => api.get(`/faculties/${facultyId}/professors`).then(res => res.data),
     });
-  
+
     const { data: departments = [], isLoading: departmentsLoading } = useQuery({
-      queryKey: ['departments', facultyId],
-      queryFn: () => api.get(`/faculties/${facultyId}/departments`).then(res => res.data),
+        queryKey: ['departments', facultyId],
+        queryFn: () => api.get(`/faculties/${facultyId}/departments`).then(res => res.data),
     });
 
     const isLoading = subjectsLoading || professorsLoading || departmentsLoading;
@@ -60,9 +60,12 @@ const FacultyDetails = () => {
         normalizeText(professor.name).includes(normalizeText(searchQuery))
     );
 
+    // Determinar si se está buscando un profesor
+    const isSearchingProfessor = filteredProfessors.length > 0 && searchQuery.trim() !== '';
+
     // Limitar la cantidad de materias y profesores mostrados
-    const displayedSubjects = searchQuery ? filteredSubjects : filteredSubjects.slice(0, 6);
-    const displayedProfessors = searchQuery ? filteredProfessors : filteredProfessors.slice(0, 3);
+    const displayedSubjects = isSearchingProfessor ? [] : filteredSubjects.slice(0, 6);
+    const displayedProfessors = filteredProfessors.slice(0, 3);
 
     const renderStars = (rating: number) => {
         const fullStars = Math.floor(rating);
@@ -104,31 +107,33 @@ const FacultyDetails = () => {
             </div>
 
             {/* Sección de Materias */}
-            <section className="mb-12">
-                <h2 className="text-xl font-semibold mb-4">Tabla de Materias</h2>
-                <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Materia</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Departamento</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Créditos</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {displayedSubjects.map((subject: ISubject) => (
-                                <tr key={subject._id} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
-                                        <Link to={`materia/${subject._id}`}>{subject.name}</Link>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{subject.department?.name || 'Sin departamento'}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{subject.credits}</td>
+            {!isSearchingProfessor && (
+                <section className="mb-12">
+                    <h2 className="text-xl font-semibold mb-4">Tabla de Materias</h2>
+                    <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Materia</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Departamento</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Créditos</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {displayedSubjects.map((subject: ISubject) => (
+                                    <tr key={subject._id} className="hover:bg-gray-50">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
+                                            <Link to={`materia/${subject._id}`}>{subject.name}</Link>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{subject.department?.name || 'Sin departamento'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{subject.credits}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            )}
 
             {/* Sección de Profesores Destacados */}
             <section>
