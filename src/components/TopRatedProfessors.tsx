@@ -47,7 +47,7 @@ const TopRatedProfessors: React.FC = () => {
             key={index}
             className={`fas fa-star ${
               index < Math.round(rating)
-                ? 'text-indigo-500'
+                ? 'text-indigo-500 dark:text-indigo-500/90'
                 : 'text-gray-300'
             }`}
           />
@@ -61,28 +61,28 @@ const TopRatedProfessors: React.FC = () => {
   if (professors.length === 0) return <div className="text-center py-10">No hay profesores disponibles</div>;
 
   return (
-    <section className="py-12 bg-gray-50">
+    <section className="py-12 bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Maestros Mejor Calificados</h2>
-          <p className="text-gray-600">Descubre a los maestros con las mejores calificaciones</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-300/90 mb-2">Maestros Mejor Calificados</h2>
+          <p className="text-gray-600 dark:text-gray-400">Descubre a los maestros con las mejores calificaciones</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {professors.map((professor: Professor) => (
-            <div key={professor._id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div key={professor._id} className="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6">
               <div className="flex items-center justify-between gap-1 mb-4">
                 <div>
-                  <h3 className="font-bold text-lg text-gray-900">{professor.name}</h3>
-                  <p className="text-indigo-600 text-sm">{professor.faculty.abbreviation}</p>
+                  <h3 className="font-bold text-lg text-gray-900 dark:text-white">{professor.name}</h3>
+                  <p className="text-indigo-600 dark:text-indigo-400 text-sm">{professor.faculty.abbreviation}</p>
                 </div>
-                <div className="bg-indigo-100 text-indigo-800 font-bold rounded px-2 py-1 text-sm">
+                <div className="bg-indigo-100 dark:bg-indigo-500 text-indigo-800 dark:text-indigo-100 font-bold rounded px-2 py-1 text-sm">
                   {professor.ratingStats.averageGeneral.toFixed(1)}
                 </div>
               </div>
               <div className="flex items-center justify-between">
                 {renderStars(professor.ratingStats.averageGeneral)}
-                <span className="text-gray-500 text-sm">{professor.ratingStats.totalRatings} reseñas</span>
+                <span className="text-gray-500 dark:text-gray-300/90 text-sm">{professor.ratingStats.totalRatings} reseñas</span>
               </div>
             </div>
           ))}

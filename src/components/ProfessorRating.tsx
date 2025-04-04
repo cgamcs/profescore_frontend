@@ -25,7 +25,7 @@ const ProfessorRating = () => {
   const navigate = useNavigate();
   const [professor, setProfessor] = useState<{ name: string } | null>(null);
   const [formData, setFormData] = useState<RatingForm>({
-    general: 5,
+    general: 3,
     explanation: 3,
     accessibility: 3,
     difficulty: 3,
@@ -153,44 +153,44 @@ const ProfessorRating = () => {
         <button
           type="button"
           onClick={() => handleRatingChange(field, value)}
-          className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${formData[field] === value ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${formData[field] === value ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-500 dark:text-gray-300 dark:hover:bg-gray-600'
             }`}
         >
           {value}
         </button>
-        {(value === 1 && field === 'general') && <span className="text-xs mt-1">Malo</span>}
-        {(value === 5 && field === 'general') && <span className="text-xs mt-1">Excelente</span>}
+        {(value === 1 && field === 'general') && <span className="text-xs mt-1 dark:text-white">Malo</span>}
+        {(value === 5 && field === 'general') && <span className="text-xs mt-1 dark:text-white">Excelente</span>}
       </div>
     ));
   };
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-white dark:bg-gray-900 min-h-screen">
       <main className="container mx-auto px-4 py-6">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-2xl font-bold mb-6">Calificar a {professor?.name}</h1>
+          <h1 className="text-2xl dark:text-white font-bold mb-6">Calificar a {professor?.name}</h1>
 
-          <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 space-y-6">
+          <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm p-6 space-y-6">
             {notification && (
               <div className="bg-green-500 text-white px-4 py-2 rounded-md shadow-lg">
                 Calificación enviada correctamente
               </div>
             )}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Calificación General</label>
+            <div className="space-y-2 dark:text-white">
+              <label className="block text-sm font-medium text-gray-700 dark:text-white">Calificación General</label>
               <div className="flex space-x-2">
                 {renderRatingButtons('general')}
               </div>
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="subject" className="block text-sm font-medium text-gray-700">Materia</label>
+              <label htmlFor="subject" className="block text-sm font-medium text-gray-700 dark:text-white">Materia</label>
               <select
                 id="subject"
                 name="subject"
                 value={formData.subject}
                 onChange={handleSubjectChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-600"
               >
                 <option value="" disabled>Selecciona una materia</option>
                 {subjects.map(subject => (
@@ -202,35 +202,35 @@ const ProfessorRating = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Explicación</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-white">Explicación</label>
               <div className="flex space-x-2">
                 {renderRatingButtons('explanation')}
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Accesibilidad</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-white">Accesibilidad</label>
               <div className="flex space-x-2">
                 {renderRatingButtons('accessibility')}
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Dificultad</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-white">Dificultad</label>
               <div className="flex space-x-2">
                 {renderRatingButtons('difficulty')}
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Asistencia</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-white">Asistencia</label>
               <div className="flex space-x-2">
                 {renderRatingButtons('attendance')}
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">¿Tomarías clase con este profesor nuevamente?</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-white">¿Tomarías clase con este profesor nuevamente?</label>
               <div className="flex space-x-4">
                 <div className="flex items-center">
                   <input
@@ -239,9 +239,9 @@ const ProfessorRating = () => {
                     type="radio"
                     checked={formData.wouldRetake === true}
                     onChange={() => handleWouldRetakeChange(true)}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600"
                   />
-                  <label htmlFor="wouldTakeAgain-yes" className="ml-2 block text-sm text-gray-700">Sí</label>
+                  <label htmlFor="wouldTakeAgain-yes" className="ml-2 block text-sm text-gray-700 dark:text-white">Sí</label>
                 </div>
                 <div className="flex items-center">
                   <input
@@ -250,9 +250,9 @@ const ProfessorRating = () => {
                     type="radio"
                     checked={formData.wouldRetake === false}
                     onChange={() => handleWouldRetakeChange(false)}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600"
                   />
-                  <label htmlFor="wouldTakeAgain-no" className="ml-2 block text-sm text-gray-700">No</label>
+                  <label htmlFor="wouldTakeAgain-no" className="ml-2 block text-sm text-gray-700 dark:text-white">No</label>
                 </div>
               </div>
             </div>
@@ -265,7 +265,7 @@ const ProfessorRating = () => {
                 name="comment"
                 placeholder="Comparte tu experiencia con este profesor..."
                 rows={5}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 dark:text-white border-2 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 value={formData.comment}
                 onChange={handleCommentChange}
               ></textarea>
@@ -285,7 +285,9 @@ const ProfessorRating = () => {
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:cursor-pointer hover:bg-gray-50"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white
+                dark:bg-gray-500 rounded-md shadow-sm text-sm font-medium text-gray-700 
+                dark:text-gray-200 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600"
               >
                 Cancelar
               </button>

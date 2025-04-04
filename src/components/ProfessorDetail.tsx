@@ -70,7 +70,7 @@ const ProfessorDetail = () => {
             queryClient.invalidateQueries({
                 queryKey: ['professor', facultyId, professorId]
             });
-            
+
             const timer = setTimeout(() => {
                 setShowSuccessMessage(false);
             }, 5000); // Ocultar el mensaje después de 5 segundos
@@ -192,7 +192,7 @@ const ProfessorDetail = () => {
     if (!professor) return <div className='text-center text-red-500 py-4'>Profesor no encontrado</div>;
 
     return (
-        <div className="bg-white min-h-screen">
+        <div className="bg-white dark:bg-gray-900 min-h-screen">
             <main className="container mx-auto px-4 py-6">
                 {showSuccessMessage && (
                     <div className="fixed top-15 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification">
@@ -213,33 +213,33 @@ const ProfessorDetail = () => {
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-6">
-                            <div className="mb-1 font-medium">Explicación</div>
-                            <div className="w-full bg-gray-200 rounded-full h-1.5 mb-4">
+                        <div className="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm p-6 mb-6">
+                            <div className="mb-1 dark:text-white font-medium">Explicación</div>
+                            <div className="w-full bg-gray-200 dark:bg-gray-400 rounded-full h-1.5 mb-4">
                                 <div
                                     className="bg-indigo-600 h-1.5 rounded-full"
                                     style={{ width: `${(professor.ratingStats.averageExplanation / 5) * 100}%` }}
                                 ></div>
                             </div>
 
-                            <div className="mb-1 font-medium">Accesible</div>
-                            <div className="w-full bg-gray-200 rounded-full h-1.5 mb-4">
+                            <div className="mb-1 dark:text-white font-medium">Accesible</div>
+                            <div className="w-full bg-gray-200 dark:bg-gray-400 rounded-full h-1.5 mb-4">
                                 <div
                                     className="bg-indigo-600 h-1.5 rounded-full"
                                     style={{ width: `${(professor.ratingStats.averageAccessibility / 5) * 100}%` }}
                                 ></div>
                             </div>
 
-                            <div className="mb-1 font-medium">Dificultad</div>
-                            <div className="w-full bg-gray-200 rounded-full h-1.5 mb-4">
+                            <div className="mb-1 dark:text-white font-medium">Dificultad</div>
+                            <div className="w-full bg-gray-200 dark:bg-gray-400 rounded-full h-1.5 mb-4">
                                 <div
                                     className="bg-indigo-600 h-1.5 rounded-full"
                                     style={{ width: `${(professor.ratingStats.averageDifficulty / 5) * 100}%` }}
                                 ></div>
                             </div>
 
-                            <div className="mb-1 font-medium">Asistencia</div>
-                            <div className="w-full bg-gray-200 rounded-full h-1.5 mb-4">
+                            <div className="mb-1 dark:text-white font-medium">Asistencia</div>
+                            <div className="w-full bg-gray-200 dark:bg-gray-400 rounded-full h-1.5 mb-4">
                                 <div
                                     className="bg-indigo-600 h-1.5 rounded-full"
                                     style={{ width: `${(professor.ratingStats.averageAttendance / 5) * 100}%` }}
@@ -247,18 +247,18 @@ const ProfessorDetail = () => {
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-                            <h2 className="font-semibold text-lg mb-4">Información del Profesor</h2>
+                        <div className="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm p-6">
+                            <h2 className="dark:text-white font-semibold text-lg mb-4">Información del Profesor</h2>
                             <div className="space-y-4">
                                 <div>
-                                    <h3 className="text-sm font-medium text-gray-500">Nombre</h3>
-                                    <p>{professor.name}</p>
+                                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Nombre</h3>
+                                    <p className='dark:text-white'>{professor.name}</p>
                                 </div>
                                 <div>
-                                    <h3 className="text-sm font-medium text-gray-500">Materias</h3>
+                                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Materias</h3>
                                     <ul className="list-disc list-inside text-sm">
                                         {professor.subjects?.slice(0).map((subject: Subject) => (
-                                            <li key={subject._id}>
+                                            <li className='dark:text-white' key={subject._id}>
                                                 {subject.name}
                                             </li>
                                         ))}
@@ -275,48 +275,46 @@ const ProfessorDetail = () => {
                     </div>
 
                     <div className="md:col-span-2">
-                        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-6">
-                            <h2 className="font-semibold text-lg mb-4">Reseñas de Estudiantes</h2>
-                            <div className="space-y-4">
-                                {ratings.map((rating: RatingType) => (
-                                    <div key={rating._id} className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <div>
-                                                {renderCommentStars(rating.general)}
-                                                <p className="text-sm text-gray-500 mt-1">
-                                                    {rating.subject?.name || 'Materia no encontrada'}
-                                                </p>
-                                            </div>
-                                            <div className="text-sm text-gray-500">
-                                                {new Date(rating.createdAt).toLocaleDateString()}
-                                            </div>
+                        <h2 className="dark:text-white font-semibold text-lg mb-4">Reseñas de Estudiantes</h2>
+                        <div className="space-y-4">
+                            {ratings.map((rating: RatingType) => (
+                                <div key={rating._id} className="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm p-4">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div>
+                                            {renderCommentStars(rating.general)}
+                                            <p className="text-sm text-gray-500 dark:text-gray-300/70 mt-1">
+                                                {rating.subject?.name || 'Materia no encontrada'}
+                                            </p>
                                         </div>
-                                        <p className="text-gray-700 mb-2">{rating.comment}</p>
-                                        <p className="text-sm text-gray-500 mb-2">A {rating.likes.length} personas les resultó útil</p>
-                                        <div className="flex items-center gap-5">
-                                            <button
-                                                className="flex items-center gap-2 border border-gray-200 rounded-full py-2 px-4 hover:cursor-pointer"
-                                                onClick={() => handleLike(rating._id)}
-                                            >
-                                                {
-                                                    rating.likes.includes(userId) ? (
-                                                        <FaHeart className="text-indigo-600" />
-                                                    ) : (
-                                                        <FaRegHeart className="text-gray-500" />
-                                                    )
-                                                }
-                                                <span className="text-sm text-gray-500">Me gusta</span>
-                                            </button>
+                                        <div className="text-sm text-gray-500 dark:text-white">
+                                            {new Date(rating.createdAt).toLocaleDateString()}
+                                        </div>
+                                    </div>
+                                    <p className="text-gray-700 dark:text-white mb-2">{rating.comment}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-300/70 mb-2">A {rating.likes.length} personas les resultó útil</p>
+                                    <div className="flex items-center gap-5">
+                                        <button
+                                            className="flex items-center gap-2 border border-gray-200 dark:border-gray-400 rounded-full py-2 px-4 hover:cursor-pointer"
+                                            onClick={() => handleLike(rating._id)}
+                                        >
+                                            {
+                                                rating.likes.includes(userId) ? (
+                                                    <FaHeart className="text-indigo-600" />
+                                                ) : (
+                                                    <FaRegHeart className="text-gray-500 dark:text-gray-400" />
+                                                )
+                                            }
+                                            <span className="text-sm text-gray-500 dark:text-gray-400">Me gusta</span>
+                                        </button>
 
-                                            <div className="border-l border-gray-200 pl-5">
-                                                <div className="flex items-center gap-2">
-                                                    <a href="#" className="text-sm text-gray-500 hover:cursor-pointer" onClick={() => openReportModal(rating)}>Reportar</a>
-                                                </div>
+                                        <div className="border-l border-gray-200 dark:border-gray-400 pl-5">
+                                            <div className="flex items-center gap-2">
+                                                <a href="#" className="text-sm text-gray-500 dark:text-gray-400 hover:cursor-pointer" onClick={() => openReportModal(rating)}>Reportar</a>
                                             </div>
                                         </div>
                                     </div>
-                                ))}
-                            </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>

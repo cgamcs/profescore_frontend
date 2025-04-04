@@ -56,50 +56,50 @@ const SubjectDetail = () => {
     <>
       <main className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">{subjectData.name}</h1>
+          <h1 className="text-2xl dark:text-white font-bold">{subjectData.name}</h1>
         </div>
 
         {/* Subject Info */}
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-8">
+        <div className="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm p-6 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
-              <h3 className="text-sm font-medium text-gray-500">Departamento</h3>
-              <p>{subjectData.department?.name || 'Sin departamento'}</p>
+              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Departamento</h3>
+              <p className="dark:text-white">{subjectData.department?.name || 'Sin departamento'}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-500">Créditos</h3>
-              <p>{subjectData.credits}</p>
+              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Créditos</h3>
+              <p className="dark:text-white">{subjectData.credits}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-500">Profesores</h3>
-              <p>{professorsData?.length || 0}</p>
+              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Profesores</h3>
+              <p className="dark:text-white">{professorsData?.length || 0}</p>
             </div>
           </div>
           <div>
-            <h3 className="text-sm font-medium text-gray-500 mb-1">Descripción</h3>
-            <p className="text-gray-700">{subjectData.description || 'Sin descripción'}</p>
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Descripción</h3>
+            <p className="text-gray-700 dark:text-white">{subjectData.description || 'Sin descripción'}</p>
           </div>
         </div>
 
         {/* Teachers List */}
-        <h2 className="text-xl font-semibold mb-4">Profesores que imparten esta materia</h2>
+        <h2 className="text-xl dark:text-white font-semibold mb-4">Profesores que imparten esta materia</h2>
         <div className="space-y-4">
           {professorsData?.map((professor: IProfessor) => (
             <Link
               key={professor._id}
               to={`/facultad/${facultyId}/maestro/${professor._id}`}
-              className="block bg-white rounded-lg border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow"
+              className="block bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm p-4 hover:shadow-md transition-shadow"
             >
               <div className="flex justify-between items-center gap-1">
-                <h3 className="font-medium text-lg">{professor.name}</h3>
+                <h3 className="font-medium text-lg dark:text-white">{professor.name}</h3>
                 <div className="flex items-center md:gap-2 space-x-4">
                   <div className="flex items-center">
-                    <span className="bg-indigo-100 text-indigo-800 font-bold rounded px-2 py-1 text-sm mr-2">
+                    <span className="bg-indigo-100 dark:bg-indigo-600 text-indigo-800 dark:text-indigo-100 font-bold rounded px-2 py-1 text-sm mr-2">
                       {professor.ratingStats.averageGeneral.toFixed(1)}
                     </span>
                     {renderStars(professor.ratingStats.averageGeneral)}
                   </div>
-                  <span className="text-gray-500 text-sm text-center">
+                  <span className="text-gray-500 dark:text-gray-400 text-sm text-center">
                     {professor.ratingStats.totalRatings} reseñas
                   </span>
                 </div>

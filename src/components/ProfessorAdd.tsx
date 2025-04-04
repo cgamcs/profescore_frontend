@@ -129,35 +129,35 @@ const ProfessorAdd = () => {
         }
     };
 
-    if (isLoading) return <div className="text-center py-8">Cargando...</div>;
+    if (isLoading) return <div className="dark:text-white text-center py-8">Cargando...</div>;
 
     return (
-        <div className="bg-white min-h-screen">
+        <div className="bg-white dark:bg-gray-900 min-h-screen">
             <main className="container mx-auto px-4 py-6">
                 <div className="max-w-2xl mx-auto">
-                    <h1 className="text-2xl font-bold mb-6">Agregar Nuevo Maestro</h1>
+                    <h1 className="dark:text-white text-2xl font-bold mb-6">Agregar Nuevo Maestro</h1>
 
-                    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                    <div className="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm p-6">
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="space-y-2">
-                                <label className="block text-sm font-medium text-gray-700">Nombre completo</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-white">Nombre completo</label>
                                 <input
                                     required
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     placeholder="Ej. Juan Pérez Rodríguez"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="w-full px-3 py-2 dark:text-white dark:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 />
                                 {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
                             </div>
 
                             <div className="space-y-2">
-                                <label className="block text-sm font-medium text-gray-700">Materia que imparte</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-white">Materia que imparte</label>
                                 <select
                                     required
                                     value={formData.subject}
                                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="w-full px-3 py-2 dark:text-white dark:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 >
                                     <option value="">Selecciona una materia</option>
                                     {subjects.map((subj: Subject) => (
@@ -168,7 +168,7 @@ const ProfessorAdd = () => {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="block text-sm font-medium text-gray-700">Verificación CAPTCHA</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-white">Verificación CAPTCHA</label>
                                 <ReCAPTCHA
                                     sitekey={SITE_KEY}
                                     onChange={handleCaptchaChange}
@@ -179,7 +179,7 @@ const ProfessorAdd = () => {
                             <div className="pt-4 flex justify-end space-x-4">
                                 <Link
                                     to={`/facultad/${facultyId}/maestros`}
-                                    className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-500 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600"
                                 >
                                     Cancelar
                                 </Link>
