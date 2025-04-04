@@ -73,10 +73,16 @@ const AddProfessor: React.FC = () => {
                 }
             });
 
-            console.log(response.data)
-            window.location.href = '/admin/maestros';
+            if (response.status === 201 || response.status === 200) {
+                // Redirigir a la página de profesores con mensaje de éxito
+                window.location.href = `/admin/maestros?addSuccess=true`;
+            } else {
+                console.error('Error al agregar profesor:', response.data);
+                setErrors({ submit: 'Error al agregar el profesor. Por favor, inténtalo de nuevo.' });
+            }
         } catch (error) {
             console.error('Error adding professor:', error);
+            setErrors({ submit: 'Error al agregar el profesor. Por favor, inténtalo de nuevo.' });
         }
     };
 
