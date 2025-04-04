@@ -39,7 +39,7 @@ const ProfessorRating = () => {
   const [error, setError] = useState('');
   const [captchaValue, setCaptchaValue] = useState('');
   const [captchaError, setCaptchaError] = useState('');
-  const [notification, setNotification] = useState(false); // Estado para la notificación
+  const [notification] = useState(false); // Estado para la notificación
 
   const SITE_KEY = import.meta.env.VITE_SITE_KEY || '';
 
@@ -124,19 +124,8 @@ const ProfessorRating = () => {
       console.log(response);
 
       if (response.status === 201) {
-        setNotification(true);
-        setError('');
-        setFormData({
-          general: 5,
-          explanation: 3,
-          accessibility: 3,
-          difficulty: 3,
-          attendance: 3,
-          wouldRetake: true,
-          comment: '',
-          subject: ''
-        });
-        setCaptchaValue('');
+        // Redirigir a la página del profesor con mensaje de éxito
+        navigate(`/profesor/${professorId}?ratingSuccess=true`);
       }
     } catch (error) {
       console.log(error);

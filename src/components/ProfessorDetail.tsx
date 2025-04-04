@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useParams, useLocation } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { FaRegStar, FaStar, FaStarHalfAlt, FaHeart, FaRegHeart } from 'react-icons/fa';
 import ReCAPTCHA from 'react-google-recaptcha';
 import api from '../api';
@@ -22,7 +22,6 @@ interface Subject {
 
 const ProfessorDetail = () => {
     const { facultyId, professorId } = useParams();
-    const location = useLocation();
     const queryClient = useQueryClient();
     const [userId, setUserId] = useState<string>('');
     const [showReportModal, setShowReportModal] = useState(false);
@@ -30,8 +29,11 @@ const ProfessorDetail = () => {
     const [reportSent, setReportSent] = useState(false);
     const [captchaValue, setCaptchaValue] = useState('');
     const [captchaError, setCaptchaError] = useState('');
-    const [showNotification, setShowNotification] = useState(false);
     const [, setError] = useState('');
+    const [searchParams] = useSearchParams();
+    const ratingSuccess = searchParams.get('ratingSuccess') === 'true';
+    const addSuccess = searchParams.get('addSuccess') === 'true';
+    const [showSuccessMessage, setShowSuccessMessage] = useState(ratingSuccess || addSuccess);
 
     const SITE_KEY = import.meta.env.VITE_SITE_KEY || '';
 
@@ -64,15 +66,18 @@ const ProfessorDetail = () => {
     }, []);
 
     useEffect(() => {
-        const urlParams = new URLSearchParams(location.search);
-        if (urlParams.get('success') === 'true') {
-            setShowNotification(true);
+        if (ratingSuccess || addSuccess) {
+            queryClient.invalidateQueries({
+                queryKey: ['professor', facultyId, professorId]
+            });
+            
             const timer = setTimeout(() => {
-                setShowNotification(false);
-            }, 8000);
+                setShowSuccessMessage(false);
+            }, 5000); // Ocultar el mensaje después de 5 segundos
+
             return () => clearTimeout(timer);
         }
-    }, [location.search]);
+    }, [ratingSuccess, addSuccess, queryClient, facultyId, professorId]);
 
     const renderStars = (rating: number) => {
         const fullStars = Math.floor(rating);
@@ -189,6 +194,11 @@ const ProfessorDetail = () => {
     return (
         <div className="bg-white min-h-screen">
             <main className="container mx-auto px-4 py-6">
+                {showSuccessMessage && (
+                    <div className="fixed top-15 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification">
+                        {addSuccess ? 'Profesor agregado correctamente' : 'Calificación enviada correctamente'}
+                    </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="md:col-span-1">
                         <div className="bg-indigo-600 text-white p-6 rounded-lg shadow-md mb-6">
@@ -385,12 +395,6 @@ const ProfessorDetail = () => {
             {reportSent && (
                 <div className="fixed top-15 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification">
                     Reporte enviado exitosamente
-                </div>
-            )}
-
-            {showNotification && (
-                <div className="fixed top-15 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification">
-                    Calificación enviada correctamente
                 </div>
             )}
         </div>

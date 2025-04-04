@@ -46,7 +46,7 @@ const ProfessorAdd = () => {
             queryClient.invalidateQueries({
                 queryKey: ['professors', facultyId]
             });
-            navigate(`/facultad/${facultyId}/maestros?success=true`);
+            navigate(`/facultad/${facultyId}/maestros?addSuccess=true`);
         },
         onError: (error: any) => {
             if (error.response && error.response.data) {
@@ -78,16 +78,46 @@ const ProfessorAdd = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        let isValid = true;
+        const newErrors: FormErrors = {
+            name: '',
+            department: '',
+            subject: '',
+            captcha: ''
+        };
+
+        if (!formData.name.trim()) {
+            newErrors.name = 'El nombre es obligatorio';
+            isValid = false;
+        }
+
+        if (formData.subject.length === 0) {
+            newErrors.subject = 'Debe seleccionar al menos una materia';
+            isValid = false;
+        }
 
         if (!captchaValue) {
-            setErrors({ ...errors, captcha: 'Por favor completa el CAPTCHA' });
+            newErrors.captcha = 'Por favor completa el CAPTCHA';
+            isValid = false;
+        }
+
+        if (!isValid) {
+            setErrors(newErrors);
             return;
         }
 
-        mutate({
-            ...formData,
-            captcha: captchaValue
-        });
+        try {
+            const payload = {
+                name: formData.name,
+                department: formData.department,
+                subject: formData.subject,
+                captcha: captchaValue
+            };
+
+            mutate(payload);
+        } catch (error) {
+            console.error('Error adding professor:', error);
+        }
     };
 
     const handleCaptchaChange = (value: string | null) => {
