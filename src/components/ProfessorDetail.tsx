@@ -245,10 +245,6 @@ const ProfessorDetail = () => {
                                     <p>{professor.name}</p>
                                 </div>
                                 <div>
-                                    <h3 className="text-sm font-medium text-gray-500">Departamento</h3>
-                                    <p>{professor.department.name}</p>
-                                </div>
-                                <div>
                                     <h3 className="text-sm font-medium text-gray-500">Materias</h3>
                                     <ul className="list-disc list-inside text-sm">
                                         {professor.subjects?.slice(0).map((subject: Subject) => (

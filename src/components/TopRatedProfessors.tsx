@@ -6,7 +6,7 @@ import api from '../api';
 interface Professor {
   _id: string;
   name: string;
-  department: {
+  department?: {
     _id: string;
     name: string;
   };
@@ -80,9 +80,6 @@ const TopRatedProfessors: React.FC = () => {
                   {professor.ratingStats.averageGeneral.toFixed(1)}
                 </div>
               </div>
-              <p className="text-gray-600 mb-4">
-                {professor.department?.name || 'Departamento no especificado'}
-              </p>
               <div className="flex items-center justify-between">
                 {renderStars(professor.ratingStats.averageGeneral)}
                 <span className="text-gray-500 text-sm">{professor.ratingStats.totalRatings} reseñas</span>

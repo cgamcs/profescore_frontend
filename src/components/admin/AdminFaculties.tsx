@@ -132,7 +132,6 @@ const AdminFaculties: React.FC = () => {
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Abreviatura</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Departamentos</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
@@ -141,7 +140,6 @@ const AdminFaculties: React.FC = () => {
                   <tr key={faculty._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap font-medium">{faculty.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{faculty.abbreviation}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{faculty.departments.length}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <div className="flex space-x-2">
                         <Link

@@ -8,41 +8,15 @@ interface Subject {
     name: string;
 }
 
-interface Department {
-    _id?: string;
-    id?: string;
-    name: string;
-}
-
 const EditProfessor: React.FC = () => {
     const { facultyId, professorId } = useParams<{ facultyId: string; professorId: string }>();
     const [name, setName] = useState('');
     const [departmentId, setDepartmentId] = useState('');
     const [selectedSubjectIds, setSelectedSubjectIds] = useState<string[]>([]);
-    const [departments, setDepartments] = useState<Department[]>([]);
     const [allSubjects, setAllSubjects] = useState<Subject[]>([]);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
     useEffect(() => {
-        const fetchDepartments = async () => {
-            try {
-                const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/faculty/${facultyId}/departments`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-
-                const processedDepartments = response.data.map((department: Department) => ({
-                    id: department._id || department.id || '',
-                    name: department.name
-                }));
-
-                setDepartments(processedDepartments);
-            } catch (error) {
-                console.error('Error fetching departments:', error);
-            }
-        };
-
         const fetchSubjects = async () => {
             try {
                 const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/faculty/${facultyId}/subjects`, {
@@ -51,10 +25,12 @@ const EditProfessor: React.FC = () => {
                     }
                 });
 
-                const processedSubjects = response.data.map((subject: Subject) => ({
-                    id: subject._id || subject.id || '',
-                    name: subject.name
-                }));
+                const processedSubjects = response.data
+                    .map((subject: Subject) => ({
+                        id: subject._id || subject.id || '',
+                        name: subject.name
+                    }))
+                    .sort((a: Subject, b: Subject) => a.name.localeCompare(b.name));
 
                 setAllSubjects(processedSubjects);
             } catch (error) {
@@ -72,14 +48,13 @@ const EditProfessor: React.FC = () => {
 
                 const professorData = response.data;
                 setName(professorData.name);
-                setDepartmentId(professorData.department._id || professorData.department.id || '');
+                setDepartmentId(professorData.department?._id || professorData.department?.id || '');
                 setSelectedSubjectIds(professorData.subjects.map((subject: Subject) => subject._id || subject.id || ''));
             } catch (error) {
                 console.error('Error fetching professor data:', error);
             }
         };
 
-        fetchDepartments();
         fetchSubjects();
         fetchProfessor();
     }, [facultyId, professorId]);
@@ -91,11 +66,6 @@ const EditProfessor: React.FC = () => {
 
         if (!name.trim()) {
             newErrors.name = 'El nombre es obligatorio';
-            isValid = false;
-        }
-
-        if (!departmentId) {
-            newErrors.department = 'El departamento es obligatorio';
             isValid = false;
         }
 
@@ -112,7 +82,7 @@ const EditProfessor: React.FC = () => {
         try {
             const payload = {
                 name,
-                department: departmentId,
+                department: departmentId || undefined,
                 subjects: selectedSubjectIds,
             };
 
@@ -149,26 +119,6 @@ const EditProfessor: React.FC = () => {
                                 onChange={(e) => setName(e.target.value)}
                             />
                             {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-                        </div>
-                        <div className="space-y-2">
-                            <label htmlFor="departamento" className="block text-sm font-medium text-gray-700">
-                                Departamento
-                            </label>
-                            <select
-                                id="departamento"
-                                name="departamento"
-                                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 ${errors.department ? 'border-red-500' : 'border-gray-300'}`}
-                                value={departmentId}
-                                onChange={(e) => setDepartmentId(e.target.value)}
-                            >
-                                <option value="">Selecciona un departamento</option>
-                                {departments.map(dept => (
-                                    <option key={dept.id} value={dept.id}>
-                                        {dept.name}
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.department && <p className="text-red-500 text-sm mt-1">{errors.department}</p>}
                         </div>
                         <div className="space-y-2">
                             <label htmlFor="materias" className="block text-sm font-medium text-gray-700">

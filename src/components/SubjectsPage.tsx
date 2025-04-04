@@ -7,7 +7,7 @@ import api from '../api';
 interface ISubject {
   _id: string;
   name: string;
-  department: {
+  department?: {
     _id: string;
     name: string;
   };
@@ -28,11 +28,6 @@ interface IProfessor {
   };
 }
 
-interface IDepartment {
-  _id: string;
-  name: string;
-}
-
 const SubjectsPage = () => {
   const { facultyId } = useParams();
   const [searchQuery, setSearchQuery] = useState('');
@@ -47,12 +42,7 @@ const SubjectsPage = () => {
     queryFn: () => api.get(`/faculties/${facultyId}/professors`).then(res => res.data),
   });
 
-  const { data: departments = [], isLoading: departmentsLoading } = useQuery({
-    queryKey: ['departments', facultyId],
-    queryFn: () => api.get(`/faculties/${facultyId}/departments`).then(res => res.data),
-  });
-
-  const isLoading = subjectsLoading || professorsLoading || departmentsLoading;
+  const isLoading = subjectsLoading || professorsLoading;
 
   // Función para normalizar el texto (eliminar acentos y convertir a minúsculas)
   const normalizeText = (text: string) => {
@@ -99,7 +89,6 @@ const SubjectsPage = () => {
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="text-lg font-medium text-indigo-600">{subject.name}</h3>
-                    <p className="text-sm text-gray-500">{subject.department.name}</p>
                   </div>
                   <div className="text-sm text-gray-500">
                     {subject.professors.length} profesor{subject.professors.length !== 1 && 'es'}
@@ -116,11 +105,6 @@ const SubjectsPage = () => {
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="text-lg font-medium text-indigo-600">{professor.name}</h3>
-                    <p className="text-sm text-gray-500">
-                      {Array.isArray(professor.department)
-                        ? professor.department.map((deptId: string) => departments.find((d: IDepartment) => d._id === deptId)?.name).join(', ')
-                        : departments.find((d: IDepartment) => d._id === professor.department)?.name}
-                    </p>
                   </div>
                   <div className="text-sm text-gray-500">
                     {professor.ratingStats.totalRatings} reseña{professor.ratingStats.totalRatings !== 1 && 's'}

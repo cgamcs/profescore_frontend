@@ -40,12 +40,7 @@ const FacultyDetails = () => {
         queryFn: () => api.get(`/faculties/${facultyId}/professors`).then(res => res.data),
     });
 
-    const { data: departments = [], isLoading: departmentsLoading } = useQuery({
-        queryKey: ['departments', facultyId],
-        queryFn: () => api.get(`/faculties/${facultyId}/departments`).then(res => res.data),
-    });
-
-    const isLoading = subjectsLoading || professorsLoading || departmentsLoading;
+    const isLoading = subjectsLoading || professorsLoading;
 
     // Función para normalizar el texto (eliminar acentos y convertir a minúsculas)
     const normalizeText = (text: string) => {
@@ -115,7 +110,6 @@ const FacultyDetails = () => {
                             <thead className="bg-gray-50">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Materia</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Departamento</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Créditos</th>
                                 </tr>
                             </thead>
@@ -125,7 +119,6 @@ const FacultyDetails = () => {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
                                             <Link to={`materia/${subject._id}`}>{subject.name}</Link>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{subject.department?.name || 'Sin departamento'}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{subject.credits}</td>
                                     </tr>
                                 ))}
@@ -143,11 +136,6 @@ const FacultyDetails = () => {
                         <Link key={professor._id} to={`/facultad/${facultyId}/maestro/${professor._id}`} className="block">
                             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 hover:shadow-md transition-shadow">
                                 <h3 className="font-medium text-lg mb-1">{professor.name}</h3>
-                                <p className="text-gray-500 text-sm mb-3">
-                                    {Array.isArray(professor.department)
-                                        ? professor.department.map((deptId: string) => departments.find((d: { _id: string; }) => d._id === deptId)?.name).join(', ')
-                                        : departments.find((d: { _id: string[]; }) => d._id === professor.department)?.name}
-                                </p>
                                 <div className="flex items-center">
                                     <div className="flex items-center">
                                         <span className="bg-indigo-100 text-indigo-800 font-bold rounded px-2 py-1 text-sm mr-2">

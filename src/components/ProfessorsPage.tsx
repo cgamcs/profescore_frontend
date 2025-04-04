@@ -7,17 +7,12 @@ import api from '../api';
 interface IProfessor {
     _id: string;
     name: string;
-    department: string;
+    department?: string;
     subjects: string[];
     ratingStats: {
         averageGeneral: number;
         totalRatings: number;
     };
-}
-
-interface IDepartment {
-    _id: string;
-    name: string;
 }
 
 interface ISubject {
@@ -59,17 +54,7 @@ const ProfessorsPage = () => {
         }))
     });
 
-    const { data: departments = [], isLoading: departmentsLoading } = useQuery({
-        queryKey: ['departments', facultyId],
-        queryFn: () => api.get(`/faculties/${facultyId}/departments`).then(res => res.data),
-        staleTime: STALE_TIME,
-        select: (data) => data.map((dept: IDepartment) => ({
-            _id: dept._id,
-            name: dept.name
-        }))
-    });
-
-    const isLoading = professorsLoading || subjectsLoading || departmentsLoading;
+    const isLoading = professorsLoading || subjectsLoading;
 
     useEffect(() => {
         const urlParams = new URLSearchParams(location.search);
@@ -165,7 +150,6 @@ const ProfessorsPage = () => {
                         <thead className="bg-gray-50">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Departamento</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Materias</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Calificación</th>
                             </tr>
@@ -180,9 +164,6 @@ const ProfessorsPage = () => {
                                         >
                                             {professor.name}
                                         </Link>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {departments.find((d: IDepartment) => d._id === professor.department)?.name || 'Cargando...'}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-500">
                                         <div className="flex flex-wrap gap-1">

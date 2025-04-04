@@ -26,7 +26,6 @@ const EditFaculty: React.FC = () => {
   const [ isEditing, setIsEditing ] = useState(false);
   const [ nombreError, setNombreError ] = useState(false);
   const [ abreviaturaError, setAbreviaturaError]  = useState(false);
-  const [ departamentosError, setDepartamentosError ] = useState(false);
 
   useEffect(() => {
     const fetchFacultyData = async () => {
@@ -42,7 +41,7 @@ const EditFaculty: React.FC = () => {
           setFaculty(facultyData);
           setNombre(facultyData.name);
           setAbreviatura(facultyData.abbreviation);
-          setDepartamentos(facultyData.departments);
+          setDepartamentos(facultyData.departments || []);
           console.log(facultyData.departments)
         } catch (error) {
           console.error('Error al obtener los datos de la facultad:', error);
@@ -52,22 +51,6 @@ const EditFaculty: React.FC = () => {
 
     fetchFacultyData();
   }, [facultyId]);
-
-  const handleAddDepartamento = () => {
-    setDepartamentos([...departamentos, { name: '' }]);
-  };
-
-  const handleRemoveDepartamento = (index: number) => {
-    const newDepartamentos = [...departamentos];
-    newDepartamentos.splice(index, 1);
-    setDepartamentos(newDepartamentos);
-  };
-
-  const handleDepartamentoChange = (index: number, value: string) => {
-    const newDepartamentos = [...departamentos];
-    newDepartamentos[index].name = value;
-    setDepartamentos(newDepartamentos);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,13 +70,6 @@ const EditFaculty: React.FC = () => {
       setAbreviaturaError(false);
     }
 
-    if (departamentos.every(dep => !dep.name.trim())) {
-      setDepartamentosError(true);
-      isValid = false;
-    } else {
-      setDepartamentosError(false);
-    }
-
     if (isValid) {
       const updatedFaculty = {
         name: nombre,
@@ -111,7 +87,6 @@ const EditFaculty: React.FC = () => {
             }
           }
         );
-        // Redirigir a la lista de facultades o mostrar un mensaje de éxito
         window.location.href = '/admin/facultades';
       } catch (error) {
         console.error('Error al actualizar la facultad:', error);
@@ -155,35 +130,6 @@ const EditFaculty: React.FC = () => {
                 onChange={(e) => { setAbreviatura(e.target.value); setAbreviaturaError(false); }}
               />
               {abreviaturaError && <p className="text-red-500 text-sm mt-1">La abreviatura es obligatoria</p>}
-            </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Departamentos
-              </label>
-              <div className="flex flex-col space-y-2">
-                {departamentos.map((dep, index) => (
-                  <div key={index} className="departamento-item flex items-center space-x-2">
-                    <input
-                      type="text"
-                      className="departamento-input flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                      placeholder="Nombre del departamento"
-                      value={dep.name}
-                      onChange={(e) => handleDepartamentoChange(index, e.target.value)}
-                    />
-                    <button type="button" className="remove-departamento text-red-500 hover:text-red-700" onClick={() => handleRemoveDepartamento(index)}>
-                      <i className="fas fa-times"></i>
-                    </button>
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  onClick={handleAddDepartamento}
-                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  <i className="fas fa-plus mr-2"></i> Agregar Departamento
-                </button>
-              </div>
-              {departamentosError && <p className="text-red-500 text-sm mt-1">Debe agregar al menos un departamento</p>}
             </div>
             <div className="pt-4 flex justify-end space-x-4">
               <a href="/admin/facultades" className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">

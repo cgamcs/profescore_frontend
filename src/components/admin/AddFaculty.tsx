@@ -43,22 +43,6 @@ const AddFaculty: React.FC = () => {
     setFaculty(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleAddDepartment = () => {
-    setFaculty(prev => ({ ...prev, departments: [...prev.departments, ''] }));
-  };
-
-  const handleDepartmentChange = (index: number, value: string) => {
-    const newDepartments = [...faculty.departments];
-    newDepartments[index] = value;
-    setFaculty(prev => ({ ...prev, departments: newDepartments }));
-  };
-
-  const handleRemoveDepartment = (index: number) => {
-    const newDepartments = [...faculty.departments];
-    newDepartments.splice(index, 1);
-    setFaculty(prev => ({ ...prev, departments: newDepartments }));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const validationErrors: { [key: string]: string } = {};
@@ -68,9 +52,6 @@ const AddFaculty: React.FC = () => {
     }
     if (!faculty.abbreviation.trim()) {
       validationErrors.abbreviation = 'La abreviatura es obligatoria';
-    }
-    if (faculty.departments.length === 0 || faculty.departments.some(dep => !dep.trim())) {
-      validationErrors.departments = 'Debe agregar al menos un departamento';
     }
 
     if (Object.keys(validationErrors).length > 0) {
@@ -136,38 +117,6 @@ const AddFaculty: React.FC = () => {
                 onChange={handleChange}
               />
               {errors.abbreviation && <p className="text-red-500 text-sm mt-1">{errors.abbreviation}</p>}
-            </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Departamentos
-              </label>
-              <div className="flex flex-col space-y-2">
-                <div id="departamentos-container">
-                  {faculty.departments.map((dep, index) => (
-                    <div key={index} className="departamento-item flex items-center space-x-2 mt-2">
-                      <input
-                        type="text"
-                        className="departamento-input flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="Nombre del departamento"
-                        value={dep}
-                        onChange={(e) => handleDepartmentChange(index, e.target.value)}
-                      />
-                      <button type="button" className="remove-departamento text-red-500 hover:text-red-700" onClick={() => handleRemoveDepartment(index)}>
-                        <i className="fas fa-times"></i>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  id="add-departamento"
-                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  onClick={handleAddDepartment}
-                >
-                  <i className="fas fa-plus mr-2"></i> Agregar Departamento
-                </button>
-              </div>
-              {errors.departments && <p className="text-red-500 text-sm mt-1">{errors.departments}</p>}
             </div>
             <div className="pt-4 flex justify-end space-x-4">
               <Link to="/admin/facultades" className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">

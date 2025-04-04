@@ -4,11 +4,6 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import ReCAPTCHA from 'react-google-recaptcha';
 import api from '../api';
 
-interface Department {
-    _id: string;
-    name: string;
-}
-
 interface Subject {
     _id: string;
     name: string;
@@ -67,11 +62,6 @@ const ProfessorAdd = () => {
         }
     });
 
-    const { data: departments = [], isLoading: departmentsLoading } = useQuery({
-        queryKey: ['departments', facultyId],
-        queryFn: () => api.get(`/faculties/${facultyId}/departments`).then(res => res.data),
-    });
-
     const { data: subjects = [], isLoading: subjectsLoading } = useQuery({
         queryKey: ['subjects', facultyId],
         queryFn: () => api.get(`/faculties/${facultyId}/subjects`).then(res =>
@@ -79,7 +69,7 @@ const ProfessorAdd = () => {
         ),
     });
 
-    const isLoading = departmentsLoading || subjectsLoading;
+    const isLoading = subjectsLoading;
     const SITE_KEY = import.meta.env.VITE_SITE_KEY || '';
 
     if (!SITE_KEY) {
@@ -129,22 +119,6 @@ const ProfessorAdd = () => {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 />
                                 {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="block text-sm font-medium text-gray-700">Departamento</label>
-                                <select
-                                    required
-                                    value={formData.department}
-                                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                >
-                                    <option value="">Selecciona un departamento</option>
-                                    {departments.map((dept: Department) => (
-                                        <option key={dept._id} value={dept._id}>{dept.name}</option>
-                                    ))}
-                                </select>
-                                {errors.department && <p className="text-red-600 text-sm mt-1">{errors.department}</p>}
                             </div>
 
                             <div className="space-y-2">

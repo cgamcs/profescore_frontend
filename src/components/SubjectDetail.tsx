@@ -17,12 +17,12 @@ const SubjectDetail = () => {
   const { facultyId, subjectId } = useParams();
   const [error] = useState('');
 
-  const { data: subject, isLoading: subjectLoading } = useQuery({
+  const { data: subjectData, isLoading: subjectLoading } = useQuery({
     queryKey: ['subject', facultyId, subjectId],
     queryFn: () => api.get(`/faculties/${facultyId}/subjects/${subjectId}`).then(res => res.data),
   });
 
-  const { data: professors = [], isLoading: professorsLoading } = useQuery({
+  const { data: professorsData, isLoading: professorsLoading } = useQuery({
     queryKey: ['subjectProfessors', facultyId, subjectId],
     queryFn: () => api.get(`/faculties/${facultyId}/subjects/${subjectId}/professors`).then(res => res.data),
   });
@@ -50,13 +50,13 @@ const SubjectDetail = () => {
 
   if (isLoading) return <SubjectDetailLoader />;
   if (error) return <div className="text-red-500 text-center py-4">{error}</div>;
-  if (!subject) return <div className="text-center py-4">No se encontró la materia</div>;
+  if (!subjectData) return <div className="text-center py-4">No se encontró la materia</div>;
 
   return (
     <>
       <main className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">{subject.name}</h1>
+          <h1 className="text-2xl font-bold">{subjectData.name}</h1>
         </div>
 
         {/* Subject Info */}
@@ -64,64 +64,48 @@ const SubjectDetail = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
               <h3 className="text-sm font-medium text-gray-500">Departamento</h3>
-              <p>{subject.department.name}</p>
+              <p>{subjectData.department?.name || 'Sin departamento'}</p>
             </div>
             <div>
               <h3 className="text-sm font-medium text-gray-500">Créditos</h3>
-              <p>{subject.credits}</p>
+              <p>{subjectData.credits}</p>
             </div>
             <div>
               <h3 className="text-sm font-medium text-gray-500">Profesores</h3>
-              <p>{professors.length}</p>
+              <p>{professorsData?.length || 0}</p>
             </div>
           </div>
           <div>
             <h3 className="text-sm font-medium text-gray-500 mb-1">Descripción</h3>
-            <p className="text-gray-700">{subject.description}</p>
+            <p className="text-gray-700">{subjectData.description || 'Sin descripción'}</p>
           </div>
         </div>
 
         {/* Teachers List */}
         <h2 className="text-xl font-semibold mb-4">Profesores que imparten esta materia</h2>
-
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Profesor
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Calificación
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Reseñas
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {professors.map((prof: IProfessor) => (
-                <tr key={prof._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <Link to={`/facultad/${facultyId}/maestro/${prof._id}`} className="text-indigo-600 font-medium">
-                      {prof.name}
-                    </Link>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <span className="bg-indigo-100 text-indigo-800 font-bold rounded px-2 py-1 text-sm mr-2">
-                        {prof.ratingStats.averageGeneral.toFixed(1)}
-                      </span>
-                      {renderStars(prof.ratingStats.averageGeneral)}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {prof.ratingStats.totalRatings}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="space-y-4">
+          {professorsData?.map((professor: IProfessor) => (
+            <Link
+              key={professor._id}
+              to={`/facultad/${facultyId}/maestro/${professor._id}`}
+              className="block bg-white rounded-lg border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow"
+            >
+              <div className="flex justify-between items-center gap-1">
+                <h3 className="font-medium text-lg">{professor.name}</h3>
+                <div className="flex items-center md:gap-2 space-x-4">
+                  <div className="flex items-center">
+                    <span className="bg-indigo-100 text-indigo-800 font-bold rounded px-2 py-1 text-sm mr-2">
+                      {professor.ratingStats.averageGeneral.toFixed(1)}
+                    </span>
+                    {renderStars(professor.ratingStats.averageGeneral)}
+                  </div>
+                  <span className="text-gray-500 text-sm text-center">
+                    {professor.ratingStats.totalRatings} reseñas
+                  </span>
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
       </main>
     </>

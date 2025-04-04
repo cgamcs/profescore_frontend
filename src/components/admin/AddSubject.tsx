@@ -2,11 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 
-interface IDepartment {
-  _id: string;
-  name: string;
-}
-
 interface ISubject {
   _id: string;
   name: string;
@@ -30,14 +25,12 @@ const AddSubject: React.FC = () => {
     faculty: facultyId || ''
   });
 
-  const [departments, setDepartments] = useState<IDepartment[]>([]);
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = useState<{ [key: string]: string }>({
     name: '',
-    department: '',
     credits: '',
     description: ''
   });
-  const [notification, setNotification] = useState({ success: false, error: false }); // Estado para las notificaciones
+  const [notification, setNotification] = useState({ success: false, error: false });
 
   useEffect(() => {
     const fetchSubject = async () => {
@@ -55,22 +48,7 @@ const AddSubject: React.FC = () => {
       }
     };
 
-    const fetchDepartments = async () => {
-      try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/faculty/${facultyId}/departments`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        console.log(response.data)
-        setDepartments(response.data);
-      } catch (error) {
-        console.error('Error al obtener los departamentos:', error);
-      }
-    };
-
     fetchSubject();
-    fetchDepartments();
   }, [subjectId, facultyId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -83,69 +61,41 @@ const AddSubject: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    let isValid = true;
-    const newErrors = { ...errors };
+    const validationErrors: { [key: string]: string } = {
+      name: '',
+      credits: '',
+      description: ''
+    };
 
-    // Validar nombre
     if (!formData.name.trim()) {
-      newErrors.name = 'El nombre es obligatorio';
-      isValid = false;
-    } else {
-      newErrors.name = '';
+      validationErrors.name = 'El nombre es obligatorio';
+    }
+    if (!formData.credits || formData.credits < 1 || formData.credits > 22) {
+      validationErrors.credits = 'Los créditos deben estar entre 1 y 22';
+    }
+    if (formData.description && formData.description.length > 500) {
+      validationErrors.description = 'La descripción no puede exceder 500 caracteres';
     }
 
-    // Validar departamento
-    if (!formData.department) {
-      newErrors.department = 'El departamento es obligatorio';
-      isValid = false;
-    } else {
-      newErrors.department = '';
+    if (Object.keys(validationErrors).some(key => validationErrors[key] !== '')) {
+      setErrors(validationErrors);
+      return;
     }
 
-    // Validar créditos
-    if (!formData.credits) {
-      newErrors.credits = 'Los créditos son obligatorios';
-      isValid = false;
-    } else if (isNaN(Number(formData.credits)) || Number(formData.credits) <= 0) {
-      newErrors.credits = 'Los créditos deben ser un número positivo';
-      isValid = false;
-    } else {
-      newErrors.credits = '';
-    }
-
-    // Validar descripción
-    if (!formData.description.trim()) {
-      newErrors.description = 'La descripción es obligatoria';
-      isValid = false;
-    } else {
-      newErrors.description = '';
-    }
-
-    setErrors(newErrors);
-
-    if (isValid) {
-      try {
-        if (subjectId) {
-          await axios.put(`${import.meta.env.VITE_API_URL}/admin/faculty/${facultyId}/subject/${subjectId}`, formData, {
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-          });
-        } else {
-          await axios.post(`${import.meta.env.VITE_API_URL}/admin/faculty/${facultyId}/subject`, formData, {
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-          });
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/admin/faculty/${facultyId}/subject`,
+        formData,
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
         }
-        setNotification({ success: true, error: false }); // Mostrar notificación de éxito
-        setTimeout(() => setNotification({ success: false, error: false }), 3000); // Ocultar la notificación después de 3 segundos
-        navigate('/admin/materias');
-      } catch (error) {
-        console.error('Error al guardar la materia:', error);
-        setNotification({ success: false, error: true }); // Mostrar notificación de error
-        setTimeout(() => setNotification({ success: false, error: false }), 3000); // Ocultar la notificación después de 3 segundos
-      }
+      );
+      navigate(`/admin/facultad/${facultyId}/materias`);
+    } catch (error) {
+      console.error('Error al crear la materia:', error);
+      setNotification({ success: false, error: true });
     }
   };
 
@@ -173,27 +123,6 @@ const AddSubject: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="department" className="block text-sm font-medium text-gray-700">
-                Departamento
-              </label>
-              <select
-                id="department"
-                name="department"
-                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${errors.department ? 'border-red-500' : 'border-gray-300'}`}
-                value={formData.department}
-                onChange={handleChange}
-              >
-                <option value="">Selecciona un departamento</option>
-                {departments.map(department => (
-                  <option key={department._id} value={department._id}>
-                    {department.name}
-                  </option>
-                ))}
-              </select>
-              {errors.department && <p className="text-red-500 text-sm mt-1">{errors.department}</p>}
-            </div>
-
-            <div className="space-y-2">
               <label htmlFor="credits" className="block text-sm font-medium text-gray-700">
                 Créditos
               </label>
@@ -202,7 +131,7 @@ const AddSubject: React.FC = () => {
                 name="credits"
                 type="number"
                 min="1"
-                max="10"
+                max="22"
                 className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${errors.credits ? 'border-red-500' : 'border-gray-300'}`}
                 placeholder="Ej. 5"
                 value={formData.credits}
