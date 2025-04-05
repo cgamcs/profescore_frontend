@@ -5,6 +5,9 @@
 
     <link rel="icon" type="image/webp" href="/cgamcs.webp" />
     <link rel="shortcut icon" href="/cgamcs.webp" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+
+    <meta property="og:image" content="https://profescore.com/cgamcs.webp" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -16,13 +19,22 @@
     <meta name="author" content="ProfeScore">
 
     <title>ProfeScore - Calificación de Maestros</title>
-    
+
     <link href="/src/index.css" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "ProfeScore",
+        "url": "https://profescore.com",
+        "logo": "https://profescore.com/cgamcs.webp"
+      }
+    </script>
   </head>
 
   <body class="bg-white dark:bg-gray-900 min-h-screen">
@@ -38,5 +50,7 @@
 
       gtag('config', 'G-B3SHSFFN9B');
     </script>
+
+
   </body>
 </html>
