@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import LayoutWithHeader from './components/LayoutWithHeader';
 import FacultyList from './components/FacultyList';
@@ -27,7 +27,40 @@ import Privacity from './components/Privacity';
 import AdminReports from './components/admin/AdminReports';
 import EditProfessor from './components/admin/EditProfessor';
 
+const themeKeys = {
+  system: "system",
+  light: "light",
+  dark: "dark"
+} as const;
+
+type ThemeKey = keyof typeof themeKeys;
+
 const App: React.FC = () => {
+  const [theme] = useState<ThemeKey>(localStorage.getItem('theme') as ThemeKey || 'system');
+
+    useEffect(() => {
+        const root = document.documentElement;
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+        const applyThem = () => {
+            root.classList.toggle(
+                'dark',
+                theme === themeKeys.dark ||
+                (theme === themeKeys.system && mediaQuery.matches)
+            )
+
+            localStorage.setItem("theme", theme)
+        };
+
+        applyThem();
+
+        mediaQuery.addEventListener("change", applyThem)
+
+        return () => {
+            mediaQuery.removeEventListener("change", applyThem)
+        };
+    }, [theme]);
+    
   return (
     <Routes>
       {/* Ruta de login para admin */}
