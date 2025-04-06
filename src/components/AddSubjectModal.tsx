@@ -11,7 +11,6 @@ interface FormData {
     name: string;
     credits: number;
     description: string;
-    // Campos opcionales que espera el backend
     department?: string;
     professors?: string[];
 }
@@ -44,8 +43,9 @@ const AddSubjectModal: React.FC<AddSubjectModalProps> = ({ facultyId, onClose })
         description: ''
     });
     // Estados para la animación
-    const [isOpen, setIsOpen] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
     const { mutate } = useMutation({
         mutationFn: (newSubject: FormData) =>
@@ -57,6 +57,9 @@ const AddSubjectModal: React.FC<AddSubjectModalProps> = ({ facultyId, onClose })
             handleClose();
         },
         onError: (error: any) => {
+            // Desactivar estado de guardando
+            setIsSaving(false);
+
             console.error('Error response:', error.response);
             if (error.response && error.response.data) {
                 if (error.response.data.errors) {
@@ -81,12 +84,17 @@ const AddSubjectModal: React.FC<AddSubjectModalProps> = ({ facultyId, onClose })
 
     // Efecto para la animación de entrada al montar el componente
     useEffect(() => {
-        // Pequeño retraso para asegurar que la animación se ejecute correctamente
-        const timeout = setTimeout(() => {
-            setIsOpen(true);
-        }, 10);
+        // Usamos requestAnimationFrame para asegurar que los estilos iniciales estén aplicados
+        // antes de iniciar la transición
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                setIsVisible(true);
+            });
+        });
 
-        return () => clearTimeout(timeout);
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
     }, []);
 
     // Función para manejar el cierre con animación
@@ -135,21 +143,46 @@ const AddSubjectModal: React.FC<AddSubjectModalProps> = ({ facultyId, onClose })
             return;
         }
 
+        // Activar estado de guardando
+        setIsSaving(true);
+
         try {
             mutate(formData);
         } catch (error) {
             console.error('Error adding subject:', error);
+            // Desactivar estado de guardando en caso de error
+            setIsSaving(false);
         }
     };
 
+    // Bloqueamos el desplazamiento del body mientras el modal está abierto
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
+    }, []);
+
     return (
-        <div className="fixed inset-0 backdrop-brightness-50 backdrop-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300 ease-in-out"
-            style={{ opacity: isOpen && !isClosing ? 1 : 0 }}>
-            <div className={`bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 w-full max-w-md transition-all duration-300 ease-in-out ${
-                isOpen && !isClosing
-                    ? 'opacity-100 transform translate-y-0 scale-100'
-                    : 'opacity-0 transform -translate-y-4 scale-95'
-            }`}>
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            aria-modal="true"
+            role="dialog"
+        >
+            {/* Overlay con transición sincronizada */}
+            <div
+                className={`absolute inset-0 bg-black transition-opacity duration-300 ease-in-out ${isVisible && !isClosing ? 'opacity-60' : 'opacity-0'
+                    }`}
+                onClick={handleClose}
+            />
+
+            {/* Contenido del modal con transición sincronizada */}
+            <div
+                className={`relative bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 w-full max-w-md transition-all duration-300 ease-in-out ${isVisible && !isClosing
+                        ? 'opacity-100 transform translate-y-0 scale-100'
+                        : 'opacity-0 transform -translate-y-4 scale-95'
+                    }`}
+            >
                 <h2 className="text-xl font-bold mb-4 dark:text-white">Agregar Nueva Materia</h2>
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2">
@@ -188,7 +221,7 @@ const AddSubjectModal: React.FC<AddSubjectModalProps> = ({ facultyId, onClose })
 
                     <div className="space-y-2">
                         <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-white">
-                            Descripción
+                            Descripción (opcional)
                         </label>
                         <textarea
                             id="description"
@@ -211,9 +244,10 @@ const AddSubjectModal: React.FC<AddSubjectModalProps> = ({ facultyId, onClose })
                         </button>
                         <button
                             type="submit"
+                            disabled={isSaving}
                             className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md hover:cursor-pointer text-sm font-medium disabled:opacity-50"
                         >
-                            Guardar Materia
+                            {isSaving ? 'Guardando...' : 'Guardar Materia'}
                         </button>
                     </div>
                 </form>

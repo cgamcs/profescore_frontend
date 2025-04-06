@@ -11,6 +11,10 @@
     scrollbar-color: oklch(0.585 0.233 277.117) transparent;
 }
 
+.scrollbar-none {
+    scrollbar-width: none;
+}
+
 .loader {
     width: 48px;
     height: 48px;

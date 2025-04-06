@@ -42,8 +42,10 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
         captcha: ''
     });
     // Estados para la animación
-    const [isOpen, setIsOpen] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
     const { mutate, isPending } = useMutation({
         mutationFn: (newProfessor: ProfessorFormData & { captcha: string }) => {
@@ -56,6 +58,8 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
             queryClient.invalidateQueries({
                 queryKey: ['professors', facultyId]
             });
+            // Mostrar mensaje de éxito
+            setShowSuccessMessage(true);
             // Iniciamos el cierre del modal
             handleClose();
         },
@@ -71,6 +75,7 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
                     captcha: 'Error al enviar el formulario. Por favor, inténtalo de nuevo.'
                 });
             }
+            setIsSaving(false);
         }
     });
 
@@ -82,12 +87,17 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
 
     // Efecto para la animación de entrada al montar el componente
     useEffect(() => {
-        // Pequeño retraso para asegurar que la animación se ejecute correctamente
-        const timeout = setTimeout(() => {
-            setIsOpen(true);
-        }, 10);
-        
-        return () => clearTimeout(timeout);
+        // Usamos requestAnimationFrame para asegurar que los estilos iniciales estén aplicados
+        // antes de iniciar la transición
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                setIsVisible(true);
+            });
+        });
+
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
     }, []);
 
     // Función para manejar el cierre con animación
@@ -129,6 +139,9 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
             return;
         }
 
+        // Activar estado de guardando
+        setIsSaving(true);
+
         try {
             // Creamos el payload exactamente igual que en el componente original
             const payload = {
@@ -137,11 +150,13 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
                 subject: formData.subject,
                 captcha: captchaValue
             };
-            
+
             console.log("Enviando datos:", payload);
             mutate(payload);
         } catch (error) {
             console.error('Error al enviar el formulario:', error);
+            // Desactivar estado de guardando en caso de error
+            setIsSaving(false);
         }
     };
 
@@ -161,14 +176,44 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
         }
     };
 
+    // Bloqueamos el desplazamiento del body mientras el modal está abierto
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
+    }, []);
+
+    // Ocultar el mensaje de éxito después de 5 segundos
+    useEffect(() => {
+        if (showSuccessMessage) {
+            const timer = setTimeout(() => {
+                setShowSuccessMessage(false);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [showSuccessMessage]);
+
     return (
-        <div className="fixed inset-0 backdrop-brightness-50 backdrop-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300 ease-in-out"
-             style={{ opacity: isOpen && !isClosing ? 1 : 0 }}>
-            <div className={`bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 w-full max-w-md transition-all duration-300 ease-in-out ${
-                isOpen && !isClosing 
-                    ? 'opacity-100 transform translate-y-0 scale-100'
-                    : 'opacity-0 transform -translate-y-4 scale-95'
-            }`}>
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            aria-modal="true"
+            role="dialog"
+        >
+            {/* Overlay con transición sincronizada */}
+            <div
+                className={`absolute inset-0 bg-black transition-opacity duration-300 ease-in-out ${isVisible && !isClosing ? 'opacity-60' : 'opacity-0'
+                    }`}
+                onClick={handleClose}
+            />
+
+            {/* Contenido del modal con transición sincronizada */}
+            <div
+                className={`relative bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 w-full max-w-md transition-all duration-300 ease-in-out ${isVisible && !isClosing
+                        ? 'opacity-100 transform translate-y-0 scale-100'
+                        : 'opacity-0 transform -translate-y-4 scale-95'
+                    }`}
+            >
                 <h2 className="text-xl font-bold mb-4 dark:text-white">Agregar Nuevo Maestro</h2>
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2">
