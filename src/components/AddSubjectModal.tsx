@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import ReCAPTCHA from 'react-google-recaptcha';
 import api from '../api';
 
 interface Subject {
@@ -13,6 +14,7 @@ interface FormData {
     description: string;
     department?: string;
     professors?: string[];
+    captcha: string; // Nuevo campo para el CAPTCHA
 }
 
 interface FormErrors {
@@ -20,6 +22,7 @@ interface FormErrors {
     credits: string;
     description: string;
     department?: string;
+    captcha: string; // Nuevo campo para el CAPTCHA
 }
 
 interface AddSubjectModalProps {
@@ -36,12 +39,14 @@ const AddSubjectModal: React.FC<AddSubjectModalProps> = ({ facultyId, onClose, o
         credits: 0,
         description: '',
         department: '',
-        professors: []
+        professors: [],
+        captcha: '' // Inicializar el campo de CAPTCHA
     });
     const [errors, setErrors] = useState<FormErrors>({
         name: '',
         credits: '',
-        description: ''
+        description: '',
+        captcha: '' // Inicializar el campo de errores para el CAPTCHA
     });
     // Estados para la animación
     const [isVisible, setIsVisible] = useState(false);
@@ -71,14 +76,16 @@ const AddSubjectModal: React.FC<AddSubjectModalProps> = ({ facultyId, onClose, o
                     setErrors({
                         name: error.response.data.error,
                         credits: '',
-                        description: ''
+                        description: '',
+                        captcha: ''
                     });
                 }
             } else {
                 setErrors({
                     name: '',
                     credits: '',
-                    description: 'Error al enviar el formulario. Por favor, inténtalo de nuevo.'
+                    description: 'Error al enviar el formulario. Por favor, inténtalo de nuevo.',
+                    captcha: ''
                 });
             }
         }
@@ -116,13 +123,23 @@ const AddSubjectModal: React.FC<AddSubjectModalProps> = ({ facultyId, onClose, o
         });
     };
 
+    const handleCaptchaChange = (value: string | null) => {
+        if (value) {
+            setFormData({ ...formData, captcha: value });
+            setErrors({ ...errors, captcha: '' });
+        } else {
+            setFormData({ ...formData, captcha: '' });
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         let isValid = true;
         const newErrors: FormErrors = {
             name: '',
             credits: '',
-            description: ''
+            description: '',
+            captcha: ''
         };
 
         if (!formData.name.trim()) {
@@ -137,6 +154,11 @@ const AddSubjectModal: React.FC<AddSubjectModalProps> = ({ facultyId, onClose, o
 
         if (formData.description && formData.description.length > 500) {
             newErrors.description = 'La descripción no puede exceder 500 caracteres';
+            isValid = false;
+        }
+
+        if (!formData.captcha) {
+            newErrors.captcha = 'Por favor completa el CAPTCHA';
             isValid = false;
         }
 
@@ -164,6 +186,12 @@ const AddSubjectModal: React.FC<AddSubjectModalProps> = ({ facultyId, onClose, o
             document.body.style.overflow = 'auto';
         };
     }, []);
+
+    const SITE_KEY = import.meta.env.VITE_SITE_KEY || '';
+
+    if (!SITE_KEY) {
+        console.error('La clave del sitio de reCAPTCHA no está configurada.');
+    }
 
     return (
         <div
@@ -234,6 +262,15 @@ const AddSubjectModal: React.FC<AddSubjectModalProps> = ({ facultyId, onClose, o
                             onChange={handleChange}
                         ></textarea>
                         {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-white">Verificación CAPTCHA</label>
+                        <ReCAPTCHA
+                            sitekey={SITE_KEY}
+                            onChange={handleCaptchaChange}
+                        />
+                        {errors.captcha && <p className="text-red-500 text-sm mt-1">{errors.captcha}</p>}
                     </div>
 
                     <div className="pt-4 flex justify-end space-x-4">
