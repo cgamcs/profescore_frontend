@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, Link } from 'react-router-dom';
 import { SubjectPageLoader } from './SkeletonLoader';
-// import AddSubjectModal from './AddSubjectModal.tsx'; // Importa el modal
+import AddSubjectModal from './AddSubjectModal'; // Importa el modal
 import api from '../api';
 
 interface ISubject {
@@ -32,7 +32,7 @@ interface IProfessor {
 const SubjectsPage = () => {
   const { facultyId } = useParams();
   const [searchQuery, setSearchQuery] = useState('');
-  // const [isModalOpen, setIsModalOpen] = useState(false); // Estado para el modal
+  const [isModalOpen, setIsModalOpen] = useState(false); // Estado para el modal
 
   const { data: subjects = [], isLoading: subjectsLoading } = useQuery({
     queryKey: ['subjects', facultyId],
@@ -67,9 +67,8 @@ const SubjectsPage = () => {
         <h1 className="dark:text-white text-2xl font-bold">Materias</h1>
 
         <button
-          // onClick={() => setIsModalOpen(true)}
-          disabled
-          className="bg-gray-300/50 text-white px-4 py-2 rounded-md text-sm font-medium hover:cursor-pointer"
+          onClick={() => setIsModalOpen(true)}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium hover:cursor-pointer"
         >
           Agregar Materia
         </button>
@@ -126,13 +125,13 @@ const SubjectsPage = () => {
         </ul>
       </div>
 
-      {/* {isModalOpen && facultyId && (
-                <AddProfessorModal
-                    facultyId={facultyId}
-                    subjects={subjects}
-                    onClose={() => setIsModalOpen(false)}
-                />
-            )} */}
+      {isModalOpen && facultyId && (
+        <AddSubjectModal
+          facultyId={facultyId}
+          subjects={subjects}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </main>
   );
 };
