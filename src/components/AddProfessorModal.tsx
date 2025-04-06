@@ -11,7 +11,7 @@ interface Subject {
 interface ProfessorFormData {
     name: string;
     department: string;
-    subject: string;
+    subject: string; // Mantenemos subject como string para mantener consistencia con el backend
 }
 
 interface FormErrors {
@@ -46,14 +46,17 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
     const [isClosing, setIsClosing] = useState(false);
 
     const { mutate, isPending } = useMutation({
-        mutationFn: (newProfessor: ProfessorFormData & { captcha: string }) =>
-            api.post(`/faculties/${facultyId}/professors`, newProfessor),
+        mutationFn: (newProfessor: ProfessorFormData & { captcha: string }) => {
+            console.log("Datos a enviar:", newProfessor);
+            console.log("URL de la API:", `/faculties/${facultyId}/professors`);
+            return api.post(`/faculties/${facultyId}/professors`, newProfessor);
+        },
         onSuccess: () => {
-            // Invalidamos la query pero NO cerramos el modal aquí
+            // Invalidamos la query
             queryClient.invalidateQueries({
                 queryKey: ['professors', facultyId]
             });
-            // Iniciamos el cierre del modal solo cuando se confirma que la mutación fue exitosa
+            // Iniciamos el cierre del modal
             handleClose();
         },
         onError: (error: any) => {
@@ -111,7 +114,7 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
             isValid = false;
         }
 
-        if (formData.subject.length === 0) {
+        if (!formData.subject) { // Verificar que se haya seleccionado una materia
             newErrors.subject = 'Debe seleccionar al menos una materia';
             isValid = false;
         }
@@ -127,22 +130,16 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
         }
 
         try {
-            console.log("Enviando datos:", {
+            // Creamos el payload exactamente igual que en el componente original
+            const payload = {
                 name: formData.name,
                 department: formData.department,
                 subject: formData.subject,
                 captcha: captchaValue
-            });
+            };
             
-            // Llamamos a la mutación con los datos
-            mutate({
-                name: formData.name,
-                department: formData.department,
-                subject: formData.subject,
-                captcha: captchaValue
-            });
-            
-            // Nota: No cerramos el modal aquí, dejamos que onSuccess se encargue de eso
+            console.log("Enviando datos:", payload);
+            mutate(payload);
         } catch (error) {
             console.error('Error al enviar el formulario:', error);
         }
