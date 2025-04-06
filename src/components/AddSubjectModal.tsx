@@ -11,12 +11,16 @@ interface FormData {
     name: string;
     credits: number;
     description: string;
+    // Campos opcionales que espera el backend
+    department?: string;
+    professors?: string[];
 }
 
 interface FormErrors {
     name: string;
     credits: string;
     description: string;
+    department?: string;
 }
 
 interface AddSubjectModalProps {
@@ -30,7 +34,9 @@ const AddSubjectModal: React.FC<AddSubjectModalProps> = ({ facultyId, onClose })
     const [formData, setFormData] = useState<FormData>({
         name: '',
         credits: 0,
-        description: ''
+        description: '',
+        department: '',
+        professors: []
     });
     const [errors, setErrors] = useState<FormErrors>({
         name: '',
@@ -51,8 +57,18 @@ const AddSubjectModal: React.FC<AddSubjectModalProps> = ({ facultyId, onClose })
             handleClose();
         },
         onError: (error: any) => {
+            console.error('Error response:', error.response);
             if (error.response && error.response.data) {
-                setErrors(error.response.data.errors);
+                if (error.response.data.errors) {
+                    setErrors(error.response.data.errors);
+                } else if (error.response.data.error) {
+                    // Si el error viene como un solo mensaje
+                    setErrors({
+                        name: error.response.data.error,
+                        credits: '',
+                        description: ''
+                    });
+                }
             } else {
                 setErrors({
                     name: '',
@@ -86,7 +102,7 @@ const AddSubjectModal: React.FC<AddSubjectModalProps> = ({ facultyId, onClose })
         const { name, value } = e.target;
         setFormData({
             ...formData,
-            [name]: value
+            [name]: name === 'credits' ? parseInt(value) || 0 : value
         });
     };
 
