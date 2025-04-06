@@ -49,12 +49,15 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
         mutationFn: (newProfessor: ProfessorFormData & { captcha: string }) =>
             api.post(`/faculties/${facultyId}/professors`, newProfessor),
         onSuccess: () => {
+            // Invalidamos la query pero NO cerramos el modal aquí
             queryClient.invalidateQueries({
                 queryKey: ['professors', facultyId]
             });
+            // Iniciamos el cierre del modal solo cuando se confirma que la mutación fue exitosa
             handleClose();
         },
         onError: (error: any) => {
+            console.error("Error en la mutación:", error);
             if (error.response && error.response.data) {
                 setErrors(error.response.data.errors);
             } else {
@@ -124,16 +127,24 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
         }
 
         try {
-            const payload = {
+            console.log("Enviando datos:", {
                 name: formData.name,
                 department: formData.department,
                 subject: formData.subject,
                 captcha: captchaValue
-            };
-
-            mutate(payload);
+            });
+            
+            // Llamamos a la mutación con los datos
+            mutate({
+                name: formData.name,
+                department: formData.department,
+                subject: formData.subject,
+                captcha: captchaValue
+            });
+            
+            // Nota: No cerramos el modal aquí, dejamos que onSuccess se encargue de eso
         } catch (error) {
-            console.error('Error adding professor:', error);
+            console.error('Error al enviar el formulario:', error);
         }
     };
 
@@ -143,6 +154,13 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
             setErrors({ ...errors, captcha: '' });
         } else {
             setCaptchaValue('');
+        }
+    };
+
+    // Evitamos que se cierre el modal si estamos en medio de un envío
+    const triggerClose = () => {
+        if (!isPending) {
+            handleClose();
         }
     };
 
@@ -196,15 +214,16 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
                     <div className="pt-4 flex justify-end space-x-4">
                         <button
                             type="button"
-                            onClick={handleClose}
-                            className="px-4 py-2 border border-gray-300 dark:border-[#202024] bg-white dark:bg-[#383939] rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-[#ffffff0d]"
+                            onClick={triggerClose}
+                            disabled={isPending}
+                            className="px-4 py-2 border border-gray-300 dark:border-[#202024] bg-white dark:bg-[#383939] rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-[#ffffff0d] disabled:opacity-50"
                         >
                             Cancelar
                         </button>
                         <button
                             type="submit"
                             disabled={isPending}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md hover:cursor-pointer text-sm font-medium"
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md hover:cursor-pointer text-sm font-medium disabled:opacity-50"
                         >
                             {isPending ? 'Guardando...' : 'Guardar Maestro'}
                         </button>

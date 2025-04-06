@@ -149,7 +149,6 @@ const ProfessorsPage = () => {
                     <h1 className="text-2xl dark:text-white font-bold">Maestros</h1>
                     <button
                         onClick={() => setIsModalOpen(true)}
-                        disabled
                         className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium hover:cursor-pointer"
                     >
                         Agregar Maestro

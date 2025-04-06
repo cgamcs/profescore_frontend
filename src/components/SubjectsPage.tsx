@@ -68,7 +68,8 @@ const SubjectsPage = () => {
 
         <button
           // onClick={() => setIsModalOpen(true)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium hover:cursor-pointer"
+          disabled
+          className="bg-gray-300/50 text-white px-4 py-2 rounded-md text-sm font-medium hover:cursor-pointer"
         >
           Agregar Materia
         </button>
