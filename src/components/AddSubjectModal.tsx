@@ -26,9 +26,10 @@ interface AddSubjectModalProps {
     facultyId: string;
     subjects: Subject[];
     onClose: () => void;
+    onSuccess: () => void; // Nueva propiedad para el callback de éxito
 }
 
-const AddSubjectModal: React.FC<AddSubjectModalProps> = ({ facultyId, onClose }) => {
+const AddSubjectModal: React.FC<AddSubjectModalProps> = ({ facultyId, onClose, onSuccess }) => {
     const queryClient = useQueryClient();
     const [formData, setFormData] = useState<FormData>({
         name: '',
@@ -54,6 +55,7 @@ const AddSubjectModal: React.FC<AddSubjectModalProps> = ({ facultyId, onClose })
             queryClient.invalidateQueries({
                 queryKey: ['subjects', facultyId]
             });
+            onSuccess(); // Llamar al callback de éxito
             handleClose();
         },
         onError: (error: any) => {
