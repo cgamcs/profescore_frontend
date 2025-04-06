@@ -169,16 +169,13 @@ const ProfessorsPage = () => {
 
                 {/* Professors Table */}
                 <div className="bg-white dark:bg-[#181818] rounded-lg border border-gray-200 dark:border-[#383939] shadow-sm overflow-hidden">
-                    <div className="p-4 bg-indigo-600 dark:bg-indigo-500/80 text-white">
-                        <h2 className="font-medium">Maestros</h2>
-                    </div>
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200 dark:divide-[#383939]">
-                            <thead className="bg-gray-50 dark:bg-[#383939]">
+                            <thead className="bg-gray-50 dark:bg-indigo-600">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nombre</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Materias</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Calificación</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Nombre</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Materias</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Calificación</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white dark:bg-[#181818] divide-y divide-gray-200 dark:divide-[#383939]">
@@ -187,7 +184,7 @@ const ProfessorsPage = () => {
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <Link
                                                 to={`/facultad/${facultyId}/maestro/${professor._id}`}
-                                                className="text-indigo-600 dark:text-indigo-400/90 font-medium"
+                                                className="text-indigo-600 dark:text-white font-medium"
                                             >
                                                 {professor.name}
                                             </Link>
@@ -199,7 +196,7 @@ const ProfessorsPage = () => {
                                                     return subject ? (
                                                         <span
                                                             key={subjectId}
-                                                            className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 dark:bg-indigo-400/70 text-indigo-800 dark:text-white"
+                                                            className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 dark:bg-indigo-600 text-indigo-800 dark:text-white"
                                                         >
                                                             {subject.name}
                                                         </span>

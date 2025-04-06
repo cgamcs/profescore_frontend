@@ -107,7 +107,7 @@ const FacultyDetails = () => {
                     <h2 className="dark:text-white text-xl font-semibold mb-4">Tabla de Materias</h2>
                     <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-[#383939] shadow-sm">
                         <table className="min-w-full divide-y divide-gray-200 dark:divide-[#383939]">
-                            <thead className="bg-gray-50 dark:bg-[#383939]">
+                            <thead className="bg-gray-50 dark:bg-indigo-600">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Materia</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Créditos</th>
@@ -116,7 +116,7 @@ const FacultyDetails = () => {
                             <tbody className="bg-white dark:bg-[#181818] divide-y divide-gray-200 dark:divide-[#383939]">
                                 {displayedSubjects.map((subject: ISubject) => (
                                     <tr key={subject._id} className="hover:bg-gray-50 dark:hover:bg-[#ffffff0d]">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600 dark:text-white">
                                             <Link to={`materia/${subject._id}`}>{subject.name}</Link>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{subject.credits}</td>
