@@ -153,7 +153,7 @@ const ProfessorRating = () => {
         <button
           type="button"
           onClick={() => handleRatingChange(field, value)}
-          className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${formData[field] === value ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-500 dark:text-gray-300 dark:hover:bg-gray-600'
+          className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${formData[field] === value ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-[#383939] dark:text-[#979797] dark:hover:bg-gray-600'
             }`}
         >
           {value}
@@ -165,12 +165,12 @@ const ProfessorRating = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 min-h-screen">
+    <div className="bg-white dark:bg-[#0A0A0A] min-h-screen">
       <main className="container mx-auto px-4 py-6">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-2xl dark:text-white font-bold mb-6">Calificar a {professor?.name}</h1>
 
-          <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm p-6 space-y-6">
+          <form onSubmit={handleSubmit} className="bg-white dark:bg-[#181818] rounded-lg border border-gray-200 dark:border-[#383939] shadow-sm p-6 space-y-6">
             {notification && (
               <div className="bg-green-500 text-white px-4 py-2 rounded-md shadow-lg">
                 Calificación enviada correctamente
@@ -190,7 +190,7 @@ const ProfessorRating = () => {
                 name="subject"
                 value={formData.subject}
                 onChange={handleSubjectChange}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-600"
+                className="w-full px-3 py-2 dark:bg-[#383939] border border-gray-300 dark:border-[#383939] dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="" disabled>Selecciona una materia</option>
                 {subjects.map(subject => (
@@ -258,14 +258,14 @@ const ProfessorRating = () => {
             </div>
 
             <div>
-              <label htmlFor="comment" className="block text-sm font-medium text-gray-700">Comentario</label>
+              <label htmlFor="comment" className="block text-sm font-medium text-gray-700 dark:text-white">Comentario</label>
               <textarea
                 required
                 id="comment"
                 name="comment"
                 placeholder="Comparte tu experiencia con este profesor..."
                 rows={5}
-                className="w-full px-3 py-2 dark:text-white border-2 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 dark:text-white border-2 border-gray-300 dark:border-[#383939] rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 value={formData.comment}
                 onChange={handleCommentChange}
               ></textarea>
@@ -273,7 +273,7 @@ const ProfessorRating = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Verificación CAPTCHA</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-white">Verificación CAPTCHA</label>
               <ReCAPTCHA
                 sitekey={SITE_KEY}
                 onChange={handleCaptchaChange}
@@ -285,9 +285,7 @@ const ProfessorRating = () => {
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white
-                dark:bg-gray-500 rounded-md shadow-sm text-sm font-medium text-gray-700 
-                dark:text-gray-200 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600"
+                className="px-4 py-2 border border-gray-300 dark:border-[#383939] bg-white dark:bg-[#383939] rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-[#ffffff0d]"
               >
                 Cancelar
               </button>

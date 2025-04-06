@@ -108,10 +108,10 @@ const ProfessorsPage = () => {
             <div className="flex">
                 {[...Array(5)].map((_, index) => {
                     if (index < fullStars) {
-                        return <i key={index} className="fas fa-star text-indigo-500 text-sm" />;
+                        return <i key={index} className="fas fa-star text-indigo-500 dark:text-[#646464] text-sm" />;
                     }
                     if (index === fullStars && hasHalfStar) {
-                        return <i key={index} className="fas fa-star-half-alt text-indigo-500 text-sm" />;
+                        return <i key={index} className="fas fa-star-half-alt text-indigo-500 dark:text-[#646464] text-sm" />;
                     }
                     return <i key={index} className="far fa-star text-gray-300 text-sm" />;
                 })}
@@ -122,7 +122,7 @@ const ProfessorsPage = () => {
     if (isLoading) return <ProfessorPageLoader />;
 
     return (
-        <div className="bg-white dark:bg-gray-900 min-h-screen">
+        <div className="bg-white dark:bg-[#0A0A0A] min-h-screen">
             <main className="container mx-auto px-4 py-6">
                 {showSuccessMessage && (
                     <div className="fixed top-15 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification">
@@ -144,36 +144,36 @@ const ProfessorsPage = () => {
                     <input
                         type="text"
                         placeholder="Buscar por nombre del maestro o materia..."
-                        className="w-full border dark:text-white border-gray-200 dark:border-gray-600 px-4 py-3 rounded-xl shadow-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+                        className="w-full border dark:text-white border-gray-200 dark:border-[#383939] px-4 py-3 rounded-xl shadow-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                    <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black dark:text-gray-600 w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black dark:text-[#383939] w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
 
                 {/* Professors Table */}
-                <div className="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm overflow-hidden">
+                <div className="bg-white dark:bg-[#181818] rounded-lg border border-gray-200 dark:border-[#383939] shadow-sm overflow-hidden">
                     <div className="p-4 bg-indigo-600 dark:bg-indigo-500/80 text-white">
                         <h2 className="font-medium">Maestros</h2>
                     </div>
                     <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-400">
-                            <thead className="bg-gray-50 dark:bg-gray-600">
+                        <table className="min-w-full divide-y divide-gray-200 dark:divide-[#383939]">
+                            <thead className="bg-gray-50 dark:bg-[#383939]">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nombre</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Materias</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Calificación</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white dark:bg-gray-800/50 divide-y divide-gray-200 dark:divide-gray-600">
+                            <tbody className="bg-white dark:bg-[#181818] divide-y divide-gray-200 dark:divide-[#383939]">
                                 {filteredProfessors.map((professor: IProfessor) => (
-                                    <tr key={professor._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <tr key={professor._id} className="hover:bg-gray-50 dark:hover:bg-[#ffffff0d]">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <Link
                                                 to={`/facultad/${facultyId}/maestro/${professor._id}`}
-                                                className="text-indigo-600 dark:text-indigo-400 font-medium"
+                                                className="text-indigo-600 dark:text-indigo-400/90 font-medium"
                                             >
                                                 {professor.name}
                                             </Link>
@@ -185,7 +185,7 @@ const ProfessorsPage = () => {
                                                     return subject ? (
                                                         <span
                                                             key={subjectId}
-                                                            className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 dark:bg-indigo-500 text-indigo-800 dark:text-indigo-100"
+                                                            className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 dark:bg-indigo-400/70 text-indigo-800 dark:text-white"
                                                         >
                                                             {subject.name}
                                                         </span>
@@ -195,7 +195,7 @@ const ProfessorsPage = () => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
-                                                <span className="bg-indigo-100 dark:bg-indigo-500 text-indigo-800 dark:text-indigo-100 font-bold rounded px-2 py-1 text-sm mr-2">
+                                                <span className="bg-indigo-100 dark:bg-[#646464] text-indigo-800 dark:text-white font-bold rounded px-2 py-1 text-sm mr-2">
                                                     {professor.ratingStats.averageGeneral.toFixed(1)}
                                                 </span>
                                                 {renderStars(professor.ratingStats.averageGeneral)}

@@ -41,7 +41,7 @@ const Header = () => {
     }, [theme]);
 
     return (
-        <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+        <header className="bg-white dark:bg-[#0A0A0A] border-b border-gray-200 dark:border-[#383939]">
             <div className="container mx-auto px-4 py-3 flex items-center justify-between">
                 <Link
                     to={facultyId ? `/` : "/"}
@@ -84,10 +84,10 @@ const Header = () => {
 
                 </nav>
 
-                <div className="hidden md:flex gap-2 rounded-full bg-gray-100 dark:bg-gray-800 p-1">
+                <div className="hidden md:flex gap-2 rounded-full bg-gray-100 dark:bg-[#383939] p-1">
                     {Object.keys(themeKeys).map((key) => (
                         <button
-                            className={`rounded-full p-1 text-black dark:text-white ${theme === key ? 'bg-gray-300 dark:bg-gray-400' : 'bg-transparent'}`}
+                            className={`rounded-full p-2 text-black dark:text-white ${theme === key ? 'bg-gray-300 dark:bg-[#1A1A1A]' : 'bg-transparent'}`}
                             key={key}
                             onClick={() => setTheme(key as ThemeKey)}
                         >
@@ -107,7 +107,7 @@ const Header = () => {
 
             {/* Menú móvil */}
             {showMobileMenu && (
-                <div className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-600 py-2">
+                <div className="md:hidden bg-white dark:bg-[#0A0A0A] border-t border-gray-200 dark:border-[#383939] py-2">
                     <nav className="container mx-auto px-4 flex flex-col space-y-3">
                         <NavLink
                             end
@@ -135,10 +135,10 @@ const Header = () => {
                             Maestros
                         </NavLink>
 
-                        <div className="flex gap-2 w-fit rounded-full bg-gray-100 dark:bg-gray-800 p-1">
+                        <div className="flex gap-2 w-fit rounded-full bg-gray-100 dark:bg-[#383939] p-1">
                             {Object.keys(themeKeys).map((key) => (
                                 <button
-                                    className={`rounded-full p-1 text-black dark:text-white ${theme === key ? 'bg-gray-300 dark:bg-gray-400' : 'bg-transparent'}`}
+                                    className={`rounded-full p-1 text-black dark:text-white ${theme === key ? 'bg-gray-300 dark:bg-[#1A1A1A]' : 'bg-transparent'}`}
                                     key={key}
                                     onClick={() => setTheme(key as ThemeKey)}
                                 >
