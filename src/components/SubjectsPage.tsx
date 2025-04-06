@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, Link } from 'react-router-dom';
 import { SubjectPageLoader } from './SkeletonLoader';
+import AddSubjectModal from './AddSubjectModal.tsx'; // Importa el modal
 import api from '../api';
 
 interface ISubject {
@@ -31,6 +32,7 @@ interface IProfessor {
 const SubjectsPage = () => {
   const { facultyId } = useParams();
   const [searchQuery, setSearchQuery] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false); // Estado para el modal
 
   const { data: subjects = [], isLoading: subjectsLoading } = useQuery({
     queryKey: ['subjects', facultyId],
@@ -63,6 +65,13 @@ const SubjectsPage = () => {
     <main className="container mx-auto px-4 py-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="dark:text-white text-2xl font-bold">Materias</h1>
+
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium hover:cursor-pointer"
+        >
+          Agregar Materia
+        </button>
       </div>
 
       {/* Barra de búsqueda */}
@@ -115,6 +124,14 @@ const SubjectsPage = () => {
           ))}
         </ul>
       </div>
+
+      {isModalOpen && facultyId && (
+                <AddProfessorModal
+                    facultyId={facultyId}
+                    subjects={subjects}
+                    onClose={() => setIsModalOpen(false)}
+                />
+            )}
     </main>
   );
 };

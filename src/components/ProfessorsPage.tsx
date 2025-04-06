@@ -2,8 +2,8 @@ import { useEffect, useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, Link, useLocation, useSearchParams } from 'react-router-dom';
 import { ProfessorPageLoader } from './SkeletonLoader';
-import api from '../api';
 import AddProfessorModal from './AddProfessorModal'; // Importa el modal
+import api from '../api';
 
 interface IProfessor {
     _id: string;
@@ -149,7 +149,8 @@ const ProfessorsPage = () => {
                     <h1 className="text-2xl dark:text-white font-bold">Maestros</h1>
                     <button
                         onClick={() => setIsModalOpen(true)}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                        disabled
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium hover:cursor-pointer"
                     >
                         Agregar Maestro
                     </button>
