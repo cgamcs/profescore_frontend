@@ -44,7 +44,7 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
     // Estados para la animación
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
+    const [, setIsSaving] = useState(false);
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
     const { mutate, isPending } = useMutation({
