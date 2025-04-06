@@ -84,14 +84,26 @@ const Header = () => {
 
                 </nav>
 
-                <div className="hidden md:flex gap-2 rounded-full bg-gray-100 dark:bg-[#383939] p-1">
+                {/* Sección de botones de tema para escritorio */}
+                <div className="hidden md:flex gap-2 rounded-full bg-gray-100 dark:bg-[#383939] p-1 relative">
+                    {/* Indicador móvil */}
+                    <div
+                        className={`absolute top-1 left-1 h-8 transition-all duration-300 ease-out rounded-full bg-gray-300 dark:bg-[#1A1A1A] 
+                            ${theme === 'system' ? 'translate-x-0' :
+                                theme === 'light' ? 'translate-x-[calc(100%+0.5rem)]' :
+                                    'translate-x-[calc(200%+1rem)]'}`}
+                        style={{ width: '2rem' }}
+                    ></div>
+
                     {Object.keys(themeKeys).map((key) => (
                         <button
-                            className={`rounded-full p-2 text-black dark:text-white ${theme === key ? 'bg-gray-300 dark:bg-[#1A1A1A]' : 'bg-transparent'}`}
+                            className={`relative rounded-full p-2 transition-all duration-300 ${theme === key ? 'text-black dark:text-white' : 'text-gray-500 dark:text-gray-300'}`}
                             key={key}
                             onClick={() => setTheme(key as ThemeKey)}
+                            style={{ width: '2rem', height: '2rem' }}
                         >
-                            {key === 'system' ? <HiComputerDesktop /> : key === 'light' ? <IoSunnyOutline /> : <FaRegMoon />}
+                            {key === 'system' ? <HiComputerDesktop /> :
+                                key === 'light' ? <IoSunnyOutline /> : <FaRegMoon />}
                         </button>
                     ))}
                 </div>
@@ -135,14 +147,26 @@ const Header = () => {
                             Maestros
                         </NavLink>
 
-                        <div className="flex gap-2 w-fit rounded-full bg-gray-100 dark:bg-[#383939] p-1">
+                        {/* Sección de botones de tema para móvil */}
+                        <div className="flex gap-2 w-fit rounded-full bg-gray-100 dark:bg-[#383939] p-1 relative">
+                            {/* Indicador móvil */}
+                            <div
+                                className={`absolute top-1 left-1 h-6 transition-all duration-300 ease-out rounded-full bg-gray-300 dark:bg-[#1A1A1A]
+                                    ${theme === 'system' ? 'translate-x-0' :
+                                        theme === 'light' ? 'translate-x-[calc(100%+0.5rem)]' :
+                                            'translate-x-[calc(200%+1rem)]'}`}
+                                style={{ width: '1.5rem' }}
+                            ></div>
+
                             {Object.keys(themeKeys).map((key) => (
                                 <button
-                                    className={`rounded-full p-1 text-black dark:text-white ${theme === key ? 'bg-gray-300 dark:bg-[#1A1A1A]' : 'bg-transparent'}`}
+                                    className={`relative rounded-full p-1 transition-all duration-300 ${theme === key ? 'text-black dark:text-white' : 'text-gray-500 dark:text-gray-300'}`}
                                     key={key}
                                     onClick={() => setTheme(key as ThemeKey)}
+                                    style={{ width: '1.5rem', height: '1.5rem' }}
                                 >
-                                    {key === 'system' ? <HiComputerDesktop /> : key === 'light' ? <IoSunnyOutline /> : <FaRegMoon />}
+                                    {key === 'system' ? <HiComputerDesktop /> :
+                                        key === 'light' ? <IoSunnyOutline /> : <FaRegMoon />}
                                 </button>
                             ))}
                         </div>

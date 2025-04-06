@@ -2,10 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { FaRegStar, FaStar, FaStarHalfAlt, FaHeart, FaRegHeart } from 'react-icons/fa';
-import { X } from 'react-feather'; // Import X icon for the close button
-import ReCAPTCHA from 'react-google-recaptcha';
 import api from '../api';
 import { ProfessorDetailLoader } from './SkeletonLoader';
+import ReportModal from './ReportModal';
 
 interface RatingType {
     _id: string;
@@ -26,6 +25,7 @@ const ProfessorDetail = () => {
     const queryClient = useQueryClient();
     const [userId, setUserId] = useState<string>('');
     const [showReportModal, setShowReportModal] = useState(false);
+    const [isClosing, setIsClosing] = useState(false);
     const [selectedComment, setSelectedComment] = useState<RatingType | null>(null);
     const [reportSent, setReportSent] = useState(false);
     const [captchaValue, setCaptchaValue] = useState('');
@@ -79,6 +79,22 @@ const ProfessorDetail = () => {
             return () => clearTimeout(timer);
         }
     }, [ratingSuccess, addSuccess, queryClient, facultyId, professorId]);
+
+    // Control de desplazamiento cuando el modal está abierto
+    useEffect(() => {
+        if (showReportModal) {
+            // Bloquear el desplazamiento cuando el modal está abierto
+            document.body.style.overflow = 'hidden';
+        } else {
+            // Restaurar el desplazamiento cuando el modal está cerrado
+            document.body.style.overflow = 'auto';
+        }
+
+        // Limpiar efecto al desmontar
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
+    }, [showReportModal]);
 
     const renderStars = (rating: number) => {
         const fullStars = Math.floor(rating);
@@ -145,12 +161,27 @@ const ProfessorDetail = () => {
     const openReportModal = (comment: RatingType) => {
         setSelectedComment(comment);
         setShowReportModal(true);
+        setIsClosing(false);
+        // Agregar un timeout para que el estado del formulario se resetee
+        setTimeout(() => {
+            if (document.getElementById('report-form')) {
+                (document.getElementById('report-form') as HTMLFormElement).reset();
+            }
+        }, 100);
     };
 
     const closeReportModal = () => {
-        setSelectedComment(null);
-        setShowReportModal(false);
-        setCaptchaValue('');
+        // Iniciar animación de cierre
+        setIsClosing(true);
+
+        // Esperar a que termine la animación antes de ocultar completamente
+        setTimeout(() => {
+            setSelectedComment(null);
+            setShowReportModal(false);
+            setCaptchaValue('');
+            setCaptchaError('');
+            setIsClosing(false);
+        }, 300); // Tiempo de la animación
     };
 
     const handleReport = async (event: React.FormEvent) => {
@@ -176,13 +207,30 @@ const ProfessorDetail = () => {
 
             if (res.status === 201) {
                 setReportSent(true);
-                setTimeout(() => setReportSent(false), 8000);
                 closeReportModal();
+                setTimeout(() => setReportSent(false), 8000);
             }
         } catch (error) {
             console.error('Error al enviar el reporte:', error);
         }
     };
+
+    // Manejador de tecla ESC para cerrar el modal
+    useEffect(() => {
+        const handleEscKey = (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && showReportModal) {
+                closeReportModal();
+            }
+        };
+
+        if (showReportModal) {
+            document.addEventListener('keydown', handleEscKey);
+        }
+
+        return () => {
+            document.removeEventListener('keydown', handleEscKey);
+        };
+    }, [showReportModal]);
 
     if (isLoading) return <ProfessorDetailLoader />;
     if (!professor) return <div className='text-center text-red-500 py-4'>Profesor no encontrado</div>;
@@ -191,7 +239,7 @@ const ProfessorDetail = () => {
         <div className="bg-white dark:bg-[#0A0A0A] min-h-screen">
             <main className="container mx-auto px-4 py-6">
                 {showSuccessMessage && (
-                    <div className="fixed top-15 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification">
+                    <div className="fixed top-15 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification z-10">
                         {addSuccess ? 'Profesor agregado correctamente' : 'Calificación enviada correctamente'}
                     </div>
                 )}
@@ -305,7 +353,7 @@ const ProfessorDetail = () => {
 
                                         <div className="border-l border-gray-200 dark:border-[#979797] pl-5">
                                             <div className="flex items-center gap-2">
-                                                <a href="#" className="text-sm text-gray-500 dark:text-[#979797] hover:cursor-pointer" onClick={() => openReportModal(rating)}>Reportar</a>
+                                                <a href="#" className="text-sm text-gray-500 dark:text-[#979797] hover:cursor-pointer" onClick={(e) => {e.preventDefault(); openReportModal(rating);}}>Reportar</a>
                                             </div>
                                         </div>
                                     </div>
@@ -316,98 +364,20 @@ const ProfessorDetail = () => {
                 </div>
             </main>
 
-            {/* Animated Report Modal */}
-            <div
-                onClick={closeReportModal}
-                className={`
-                    fixed inset-0 flex justify-center items-center transition-colors z-50
-                    ${showReportModal ? "visible backdrop-brightness-50 backdrop-opacity-60" : "invisible"}
-                `}
-            >
-                {/* Modal Content */}
-                <div
-                    onClick={(e) => e.stopPropagation()}
-                    className={`
-                        inset-0 bg-white dark:bg-[#202024] rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden transition-all relative
-                        ${showReportModal ? "scale-100 opacity-100" : "scale-125 opacity-0"}
-                    `}
-                >
-                    {/* Close button */}
-                    <button
-                        onClick={closeReportModal}
-                        className="absolute top-2 right-2 p-1 rounded-lg text-white hover:text-[#202024] hover:cursor-pointer z-10"
-                    >
-                        <X size={20} />
-                    </button>
-                    
-                    {/* Header */}
-                    <div className="bg-indigo-600 px-4 py-3">
-                        <h3 className="text-lg font-medium text-white">Reportar comentario</h3>
-                    </div>
-                    
-                    {/* Body */}
-                    <div className="p-4">
-                        <div className="mb-4">
-                            <h4 className="text-sm font-medium text-gray-500 dark:text-white mb-2">Comentario reportado:</h4>
-                            <div className="bg-gray-50 dark:bg-[#383939] p-3 rounded-md border border-gray-200 dark:border-[#202024]">
-                                <p className="text-gray-700 dark:text-white text-sm">{selectedComment?.comment}</p>
-                            </div>
-                        </div>
-                        <form id="report-form" onSubmit={handleReport}>
-                            <div className="mb-4">
-                                <label htmlFor="report-reason" className="block text-sm font-medium text-gray-700 dark:text-white mb-2">Motivo del reporte</label>
-                                <select id="report-reason" className="w-full dark:bg-[#383939] dark:text-white border border-gray-300 dark:border-[#202024] rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                                    <option value="" disabled>Selecciona un motivo</option>
-                                    <option value="offensive">Contenido ofensivo o inapropiado</option>
-                                    <option value="false">Información falsa o engañosa</option>
-                                    <option value="personal">Contiene información personal</option>
-                                    <option value="spam">Spam o publicidad</option>
-                                    <option value="other">Otro motivo</option>
-                                </select>
-                            </div>
-                            <div className="mb-4">
-                                <label htmlFor="report-details" className="block text-sm font-medium text-gray-700 dark:text-white mb-2">Detalles adicionales (opcional)</label>
-                                <textarea
-                                    id="report-details"
-                                    className="w-full dark:bg-[#383939] dark:text-white border border-gray-300 dark:border-[#202024] rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                    placeholder="Proporciona más información sobre por qué estás reportando este comentario..."
-                                ></textarea>
-                            </div>
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">Verificación CAPTCHA</label>
-                                <ReCAPTCHA
-                                    sitekey={SITE_KEY}
-                                    onChange={handleCaptchaChange}
-                                />
-                                {captchaError && <p className="text-red-600 text-sm mt-1">{captchaError}</p>}
-                            </div>
-                            <div className="bg-gray-50 dark:bg-[#363639] p-3 rounded-md border border-gray-200 dark:border-[#363639] mb-4">
-                                <div className="flex items-start">
-                                    <div className="flex-shrink-0">
-                                        <i className="fas fa-info-circle text-indigo-500 mt-0.5"></i>
-                                    </div>
-                                    <div className="ml-3">
-                                        <p className="text-sm text-gray-600 dark:text-white">
-                                            Tu reporte será revisado por nuestro equipo de moderación. Los reportes ayudan a mantener nuestra comunidad segura y respetuosa.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="flex justify-end space-x-3">
-                                <button type="button" className="px-4 py-2 border border-gray-300 dark:border-[#202024] bg-white dark:bg-[#383939] rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-[#ffffff0d]" onClick={closeReportModal}>
-                                    Cancelar
-                                </button>
-                                <button type="submit" className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 hover:cursor-pointer">
-                                    Enviar reporte
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
+            <ReportModal
+                showReportModal={showReportModal}
+                isClosing={isClosing}
+                selectedComment={selectedComment}
+                captchaValue={captchaValue}
+                captchaError={captchaError}
+                closeReportModal={closeReportModal}
+                handleReport={handleReport}
+                handleCaptchaChange={handleCaptchaChange}
+                SITE_KEY={SITE_KEY}
+            />
 
             {reportSent && (
-                <div className="fixed top-15 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification">
+                <div className="fixed top-15 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification z-10 animate-fadeIn">
                     Reporte enviado exitosamente
                 </div>
             )}

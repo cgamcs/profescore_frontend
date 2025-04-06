@@ -192,8 +192,8 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
         >
             {/* Overlay con transición sincronizada */}
             <div
-                className={`absolute inset-0 bg-black transition-opacity duration-300 ease-in-out ${isVisible && !isClosing ? 'opacity-60' : 'opacity-0'
-                    }`}
+                className={`absolute inset-0 bg-black transition-opacity duration-300 ease-in-out 
+                            ${isVisible && !isClosing ? 'opacity-60' : 'opacity-0'}`}
                 onClick={handleClose}
             />
 
