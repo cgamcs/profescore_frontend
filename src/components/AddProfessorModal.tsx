@@ -25,9 +25,10 @@ interface AddProfessorModalProps {
     facultyId: string;
     subjects: Subject[];
     onClose: () => void;
+    onSuccess: () => void; // Nueva propiedad para el callback de éxito
 }
 
-const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjects, onClose }) => {
+const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjects, onClose, onSuccess }) => {
     const queryClient = useQueryClient();
     const [formData, setFormData] = useState<ProfessorFormData>({
         name: '',
@@ -45,7 +46,6 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const [, setIsSaving] = useState(false);
-    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
     const { mutate, isPending } = useMutation({
         mutationFn: (newProfessor: ProfessorFormData & { captcha: string }) => {
@@ -58,8 +58,8 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
             queryClient.invalidateQueries({
                 queryKey: ['professors', facultyId]
             });
-            // Mostrar mensaje de éxito
-            setShowSuccessMessage(true);
+            // Llamamos al callback de éxito
+            onSuccess();
             // Iniciamos el cierre del modal
             handleClose();
         },
@@ -184,16 +184,6 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
         };
     }, []);
 
-    // Ocultar el mensaje de éxito después de 5 segundos
-    useEffect(() => {
-        if (showSuccessMessage) {
-            const timer = setTimeout(() => {
-                setShowSuccessMessage(false);
-            }, 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [showSuccessMessage]);
-
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center"
@@ -272,13 +262,6 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
                     </div>
                 </form>
             </div>
-
-            {/* Notificación de éxito */}
-            {showSuccessMessage && (
-                <div className="fixed top-15 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification">
-                    Maestro guardado
-                </div>
-            )}
         </div>
     );
 };

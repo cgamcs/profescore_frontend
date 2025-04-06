@@ -247,12 +247,13 @@ const ProfessorsPage = () => {
                     </div>
                 </div>
             </main>
-            
+
             {isModalOpen && facultyId && (
                 <AddProfessorModal
                     facultyId={facultyId}
                     subjects={subjects}
                     onClose={() => setIsModalOpen(false)}
+                    onSuccess={() => setShowSuccessMessage(true)} // Pasamos la función de callback
                 />
             )}
         </div>
