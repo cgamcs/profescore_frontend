@@ -5,8 +5,8 @@ const Privacity: React.FC = () => {
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const { facultyId } = useParams<{ facultyId?: string }>();
     return (
-        <div className="bg-white dark:bg-gray-900 min-h-screen flex flex-col">
-            <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-600">
+        <div className="bg-white dark:bg-[#0A0A0A] min-h-screen flex flex-col">
+            <header className="bg-white dark:bg-[#0A0A0A] border-b border-gray-200 dark:border-[#202024]">
                 <div className="container mx-auto px-4 py-3 flex items-center justify-between">
                     <Link
                         to={facultyId ? `/` : "/"}
@@ -24,13 +24,13 @@ const Privacity: React.FC = () => {
                         <NavLink
                             to="/faq"
                             className={({ isActive }) =>
-                                `text-sm ${isActive ? 'text-indigo-600 font-medium' : 'text-gray-600 dark:text-white'}`
+                                `text-sm ${isActive ? 'text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-600 dark:text-white'}`
                             }
                         >Preguntas Frecuentes</NavLink>
                         <NavLink
                             to="/privacity"
                             className={({ isActive }) =>
-                                `text-sm ${isActive ? 'text-indigo-600 font-medium' : 'text-gray-600 dark:text-white'}`
+                                `text-sm ${isActive ? 'text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-600 dark:text-white'}`
                             }
                         >Términos de Privacidad</NavLink>
                     </nav>
@@ -38,20 +38,20 @@ const Privacity: React.FC = () => {
 
                 {/* Menú móvil */}
                 {showMobileMenu && (
-                    <div className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-600 py-2">
+                    <div className="md:hidden bg-white dark:bg-[#0A0A0A] border-t border-gray-200 dark:border-[#202024] py-2">
                         <nav className="container mx-auto px-4 flex flex-col space-y-3">
 
 
                             <NavLink
                                 to="/faq"
                                 className={({ isActive }) =>
-                                    `text-sm ${isActive ? 'text-indigo-600 font-medium' : 'text-gray-600 dark:text-white'}`
+                                    `text-sm ${isActive ? 'text-indigo-600 font-medium dark:text-indigo-400' : 'text-gray-600 dark:text-white'}`
                                 }
                             >Preguntas Frecuentes</NavLink>
                             <NavLink
                                 to="/privacity"
                                 className={({ isActive }) =>
-                                    `text-sm ${isActive ? 'text-indigo-600 font-medium' : 'text-gray-600 dark:text-white'}`
+                                    `text-sm ${isActive ? 'text-indigo-600 font-medium dark:text-indigo-400' : 'text-gray-600 dark:text-white'}`
                                 }
                             >Términos de Privacidad</NavLink>
                         </nav>
@@ -67,7 +67,7 @@ const Privacity: React.FC = () => {
                     </div>
 
                     {/* Table of Contents - Desktop */}
-                    <div className="hidden lg:block sticky top-4 float-right w-64 ml-8 bg-white dark:bg-gray-500 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm p-4">
+                    <div className="hidden lg:block sticky top-4 float-right w-64 ml-8 bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-4">
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Contenido</h3>
                         <ul className="space-y-2 text-sm">
                             <li>
@@ -96,7 +96,7 @@ const Privacity: React.FC = () => {
 
                     {/* Privacy Terms Content */}
                     <div className="prose prose-indigo max-w-none">
-                        <div className="bg-white dark:bg-gray-500 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm p-6 mb-6">
+                        <div className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 mb-6">
                             <p className="text-gray-700 dark:text-white mb-4">
                                 En ProfeScore, nos comprometemos a proteger tu privacidad y a ser transparentes sobre cómo utilizamos la información.
                                 Estos términos de privacidad explican qué información recopilamos, cómo la utilizamos y tus derechos respecto a ella.
@@ -104,7 +104,7 @@ const Privacity: React.FC = () => {
                         </div>
 
                         {/* Section 1 */}
-                        <section id="info-recopilada" className="bg-white dark:bg-gray-500 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm p-6 mb-6">
+                        <section id="info-recopilada" className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 mb-6">
                             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">1. Información que recopilamos</h2>
 
                             <div className="mb-6">
@@ -130,7 +130,7 @@ const Privacity: React.FC = () => {
                         </section>
 
                         {/* Section 2 */}
-                        <section id="uso-info" className="bg-white dark:bg-gray-500 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm p-6 mb-6">
+                        <section id="uso-info" className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 mb-6">
                             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">2. Uso de la información</h2>
 
                             <p className="text-gray-700 dark:text-gray-300 mb-4">
@@ -145,7 +145,7 @@ const Privacity: React.FC = () => {
                         </section>
 
                         {/* Section 3 */}
-                        <section id="compartir-info" className="bg-white dark:bg-gray-500 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm p-6 mb-6">
+                        <section id="compartir-info" className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 mb-6">
                             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">3. Compartir información con terceros</h2>
 
                             <p className="text-gray-700 dark:text-gray-300 mb-4">
@@ -167,7 +167,7 @@ const Privacity: React.FC = () => {
                         </section>
 
                         {/* Section 4 */}
-                        <section id="seguridad" className="bg-white dark:bg-gray-500 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm p-6 mb-6">
+                        <section id="seguridad" className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 mb-6">
                             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">4. Seguridad de los datos</h2>
 
                             <div className="mb-6">
@@ -186,7 +186,7 @@ const Privacity: React.FC = () => {
                         </section>
 
                         {/* Section 5 */}
-                        <section id="derechos" className="bg-white dark:bg-gray-500 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm p-6 mb-6">
+                        <section id="derechos" className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 mb-6">
                             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">5. Tus derechos</h2>
 
                             <div className="mb-6">
@@ -212,7 +212,7 @@ const Privacity: React.FC = () => {
                         </section>
 
                         {/* Section 6 */}
-                        <section id="cambios" className="bg-white dark:bg-gray-500 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm p-6 mb-6">
+                        <section id="cambios" className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 mb-6">
                             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">6. Cambios en estos términos</h2>
 
                             <p className="text-gray-700 dark:text-gray-300">
@@ -221,7 +221,7 @@ const Privacity: React.FC = () => {
                         </section>
 
                         {/* Section 7 */}
-                        <section id="contacto" className="bg-white dark:bg-gray-500 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm p-6 mb-6">
+                        <section id="contacto" className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 mb-6">
                             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">7. Contacto</h2>
 
                             <p className="text-gray-700 dark:text-gray-300 mb-4">
@@ -244,14 +244,14 @@ const Privacity: React.FC = () => {
 
                         {/* Print Button */}
                         <div className="flex justify-end mb-8">
-                            <button onClick={() => window.print()} className="flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-500 hover:bg-gray-50 dark:hover:bg-gray-600">
+                            <button onClick={() => window.print()} className="flex items-center px-4 py-2 border border-gray-300 dark:border-[#202024] rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-white bg-white dark:bg-[#383939] hover:bg-gray-50 dark:hover:bg-[#ffffff0d] hover:cursor-pointer">
                                 <i className="fas fa-print mr-2"></i> Imprimir términos
                             </button>
                         </div>
                     </div>
                 </div>
             </main>
-            <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-600">
+            <footer className="bg-white dark:bg-[#0A0A0A] border-t border-gray-200 dark:border-[#202024]">
                 <div className='container mx-auto dark:text-white px-4 py-3 flex items-center justify-between'>
                     <p>&copy; ProfeScore - {new Date().getFullYear()}</p>
 

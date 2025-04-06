@@ -67,8 +67,8 @@ const Faq: React.FC = () => {
     };
 
     return (
-        <div className="bg-white dark:bg-gray-900 min-h-screen flex flex-col">
-            <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-600">
+        <div className="bg-white dark:bg-[#0A0A0A] min-h-screen flex flex-col">
+            <header className="bg-white dark:bg-[#0A0A0A] border-b border-gray-200 dark:border-[#202024]">
                 <div className="container mx-auto px-4 py-3 flex items-center justify-between">
                     <Link
                         to={facultyId ? `/` : "/"}
@@ -86,13 +86,13 @@ const Faq: React.FC = () => {
                         <NavLink
                             to="/faq"
                             className={({ isActive }) =>
-                                `text-sm ${isActive ? 'text-indigo-600 font-medium' : 'text-gray-600'}`
+                                `text-sm ${isActive ? 'text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-600 dark:text-white'}`
                             }
                         >Preguntas Frecuentes</NavLink>
                         <NavLink
                             to="/privacity"
                             className={({ isActive }) =>
-                                `text-sm ${isActive ? 'text-indigo-600 font-medium' : 'text-gray-600'}`
+                                `text-sm ${isActive ? 'text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-600 dark:text-white'}`
                             }
                         >Términos de Privacidad</NavLink>
                     </nav>
@@ -100,20 +100,20 @@ const Faq: React.FC = () => {
 
                 {/* Menú móvil */}
                 {showMobileMenu && (
-                    <div className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-600 py-2">
+                    <div className="md:hidden bg-white dark:bg-[#0A0A0A] border-t border-gray-200 dark:border-[#202024] py-2">
                         <nav className="container mx-auto px-4 flex flex-col space-y-3">
 
 
                             <NavLink
                                 to="/faq"
                                 className={({ isActive }) =>
-                                    `text-sm ${isActive ? 'text-indigo-600 font-medium' : 'text-gray-600 dark:text-white'}`
+                                    `text-sm ${isActive ? 'text-indigo-600 font-medium dark:text-indigo-400' : 'text-gray-600 dark:text-white'}`
                                 }
                             >Preguntas Frecuentes</NavLink>
                             <NavLink
                                 to="/privacity"
                                 className={({ isActive }) =>
-                                    `text-sm ${isActive ? 'text-indigo-600 font-medium' : 'text-gray-600 dark:text-white'}`
+                                    `text-sm ${isActive ? 'text-indigo-600 font-medium dark:text-indigo-400' : 'text-gray-600 dark:text-white'}`
                                 }
                             >Términos de Privacidad</NavLink>
                         </nav>
@@ -129,11 +129,11 @@ const Faq: React.FC = () => {
                     <div className="mb-8">
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i className="fas fa-search text-gray-400"></i>
+                                <i className="fas fa-search text-gray-400 dark:text-[#383939]"></i>
                             </div>
                             <input
                                 type="text"
-                                className="w-full pl-10 pr-4 py-3 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="w-full pl-10 pr-4 py-3 dark:text-white border border-gray-300 dark:border-[#2B2B2D] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                 placeholder="Buscar preguntas..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -165,9 +165,9 @@ const Faq: React.FC = () => {
                     <div className="space-y-6" id="faq-container">
                         {filteredFaqData.length > 0 ? (
                             filteredFaqData.map((faq, index) => (
-                                <div key={index} className="faq-item border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
+                                <div key={index} className="faq-item border border-gray-200 dark:border-[#202024] rounded-lg overflow-hidden">
                                     <button
-                                        className="faq-question w-full flex items-center justify-between px-6 py-4 bg-white dark:bg-gray-500 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none"
+                                        className="faq-question w-full flex items-center justify-between px-6 py-4 bg-white dark:bg-[#202024] hover:bg-gray-50 dark:hover:bg-[#ffffff0d] focus:outline-none"
                                         onClick={() => toggleAccordion(index)}
                                     >
                                         <span className="text-left font-medium text-gray-900 dark:text-white">{faq.question}</span>
@@ -186,7 +186,7 @@ const Faq: React.FC = () => {
                             </div>
                         )}
                     </div>
-                    <div className="mt-12 bg-indigo-50 dark:bg-gray-500 rounded-lg p-6 border border-indigo-100 dark:border-gray-600">
+                    <div className="mt-12 bg-indigo-50 dark:bg-[#202024] rounded-lg p-6 border border-indigo-100 dark:border-[#202024]">
                         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">¿No encontraste lo que buscabas?</h2>
                         <p className="text-gray-700 dark:text-gray-300/90 mb-4">Si tienes alguna pregunta que no está respondida aquí, no dudes en contactarnos.</p>
                         <a href="mailto:contacto.profescore@gmail.com" className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -195,7 +195,7 @@ const Faq: React.FC = () => {
                     </div>
                 </div>
             </main>
-            <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-600">
+            <footer className="bg-white dark:bg-[#0A0A0A] border-t border-gray-200 dark:border-[#202024]">
                 <div className='container mx-auto dark:text-white px-4 py-3 flex items-center justify-between'>
                     <p>&copy; ProfeScore - {new Date().getFullYear()}</p>
 

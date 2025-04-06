@@ -129,12 +129,13 @@ const SubjectPageLoader = () => {
     return (
         <main className="container mx-auto px-4 py-6 dark:bg-[#0A0A0A]">
             <div className="flex justify-between items-center mb-6">
-                <div className="bg-gray-200 h-8 w-32 rounded-md animate-pulse"></div>
+                <div className="bg-gray-200 dark:bg-[#383939] h-8 w-32 rounded-md animate-pulse"></div>
+                <div className="bg-gray-200 dark:bg-[#383939] h-10 w-32 rounded-md animate-pulse"></div>
             </div>
 
             {/* Barra de búsqueda */}
             <div className="relative max-w-2xl mx-auto mb-8">
-                <div className="bg-gray-200 h-12 w-full rounded-xl animate-pulse"></div>
+                <div className="bg-gray-200 dark:bg-[#383939] h-12 w-full rounded-xl animate-pulse"></div>
             </div>
 
             {/* Lista de materias y profesores */}
