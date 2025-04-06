@@ -170,7 +170,7 @@ const ProfessorRating = () => {
         <div className="max-w-2xl mx-auto">
           <h1 className="text-2xl dark:text-white font-bold mb-6">Calificar a {professor?.name}</h1>
 
-          <form onSubmit={handleSubmit} className="bg-white dark:bg-[#181818] rounded-lg border border-gray-200 dark:border-[#383939] shadow-sm p-6 space-y-6">
+          <form onSubmit={handleSubmit} className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 space-y-6">
             {notification && (
               <div className="bg-green-500 text-white px-4 py-2 rounded-md shadow-lg">
                 Calificación enviada correctamente
@@ -190,7 +190,7 @@ const ProfessorRating = () => {
                 name="subject"
                 value={formData.subject}
                 onChange={handleSubjectChange}
-                className="w-full px-3 py-2 dark:bg-[#383939] border border-gray-300 dark:border-[#383939] dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 dark:bg-[#383939] border border-gray-300 dark:border-[#202024] dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="" disabled>Selecciona una materia</option>
                 {subjects.map(subject => (
@@ -265,7 +265,7 @@ const ProfessorRating = () => {
                 name="comment"
                 placeholder="Comparte tu experiencia con este profesor..."
                 rows={5}
-                className="w-full px-3 py-2 dark:text-white border-2 border-gray-300 dark:border-[#383939] rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 dark:text-white border-2 border-gray-300 dark:border-[#202024] rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 value={formData.comment}
                 onChange={handleCommentChange}
               ></textarea>
@@ -285,7 +285,7 @@ const ProfessorRating = () => {
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="px-4 py-2 border border-gray-300 dark:border-[#383939] bg-white dark:bg-[#383939] rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-[#ffffff0d]"
+                className="px-4 py-2 border border-gray-300 dark:border-[#202024] bg-white dark:bg-[#383939] rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-[#ffffff0d]"
               >
                 Cancelar
               </button>

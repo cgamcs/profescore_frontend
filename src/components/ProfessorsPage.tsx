@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useParams, Link, useLocation, useSearchParams } from 'react-router-dom';
 import { ProfessorPageLoader } from './SkeletonLoader';
 import api from '../api';
+import AddProfessorModal from './AddProfessorModal'; // Importa el modal
 
 interface IProfessor {
     _id: string;
@@ -23,12 +24,13 @@ interface ISubject {
 const STALE_TIME = 5 * 60 * 1000; // 5 minutos
 
 const ProfessorsPage = () => {
-    const { facultyId } = useParams();
+    const { facultyId } = useParams<{ facultyId: string }>(); // Asegúrate de que facultyId sea una cadena
     const location = useLocation();
     const [searchQuery, setSearchQuery] = useState('');
     const [searchParams] = useSearchParams();
     const addSuccess = searchParams.get('addSuccess') === 'true';
     const [showSuccessMessage, setShowSuccessMessage] = useState(addSuccess);
+    const [isModalOpen, setIsModalOpen] = useState(false); // Estado para el modal
 
     const { data: professors = [], isLoading: professorsLoading } = useQuery({
         queryKey: ['professors', facultyId],
@@ -122,10 +124,10 @@ const ProfessorsPage = () => {
             <div className="flex">
                 {[...Array(5)].map((_, index) => {
                     if (index < fullStars) {
-                        return <i key={index} className="fas fa-star text-indigo-500 dark:text-[#646464] text-sm" />;
+                        return <i key={index} className="fas fa-star text-indigo-500 dark:text-[#83838B] text-sm" />;
                     }
                     if (index === fullStars && hasHalfStar) {
-                        return <i key={index} className="fas fa-star-half-alt text-indigo-500 dark:text-[#646464] text-sm" />;
+                        return <i key={index} className="fas fa-star-half-alt text-indigo-500 dark:text-[#83838B] text-sm" />;
                     }
                     return <i key={index} className="far fa-star text-gray-300 text-sm" />;
                 })}
@@ -145,12 +147,12 @@ const ProfessorsPage = () => {
                 )}
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl dark:text-white font-bold">Maestros</h1>
-                    <Link
-                        to={`/facultad/${facultyId}/maestros/agregar-maestro`}
+                    <button
+                        onClick={() => setIsModalOpen(true)}
                         className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
                     >
                         Agregar Maestro
-                    </Link>
+                    </button>
                 </div>
 
                 {/* Search Bar */}
@@ -158,7 +160,7 @@ const ProfessorsPage = () => {
                     <input
                         type="text"
                         placeholder="Buscar por nombre del maestro o materia..."
-                        className="w-full border dark:text-white border-gray-200 dark:border-[#383939] px-4 py-3 rounded-xl shadow-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+                        className="w-full border dark:text-white border-gray-200 dark:border-[#2B2B2D] px-4 py-3 rounded-xl shadow-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -168,7 +170,7 @@ const ProfessorsPage = () => {
                 </div>
 
                 {/* Professors Table */}
-                <div className="bg-white dark:bg-[#181818] rounded-lg border border-gray-200 dark:border-[#383939] shadow-sm overflow-hidden">
+                <div className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200 dark:divide-[#383939]">
                             <thead className="bg-gray-50 dark:bg-indigo-600">
@@ -178,7 +180,7 @@ const ProfessorsPage = () => {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Calificación</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white dark:bg-[#181818] divide-y divide-gray-200 dark:divide-[#383939]">
+                            <tbody className="bg-white dark:bg-[#202024] divide-y divide-gray-200 dark:divide-[#383939]">
                                 {filteredProfessors.map((professor: IProfessor) => (
                                     <tr key={professor._id} className="hover:bg-gray-50 dark:hover:bg-[#ffffff0d]">
                                         <td className="px-6 py-4 whitespace-nowrap">
@@ -245,6 +247,14 @@ const ProfessorsPage = () => {
                     </div>
                 </div>
             </main>
+            
+            {isModalOpen && facultyId && (
+                <AddProfessorModal
+                    facultyId={facultyId}
+                    subjects={subjects}
+                    onClose={() => setIsModalOpen(false)}
+                />
+            )}
         </div>
     );
 };

@@ -47,7 +47,7 @@ const TopRatedProfessors: React.FC = () => {
             key={index}
             className={`fas fa-star ${
               index < Math.round(rating)
-                ? 'text-indigo-500 dark:text-[#646464]'
+                ? 'text-indigo-500 dark:text-[#83838B]'
                 : 'text-gray-300'
             }`}
           />
@@ -70,7 +70,7 @@ const TopRatedProfessors: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {professors.map((professor: Professor) => (
-            <div key={professor._id} className="bg-white dark:bg-[#181818] rounded-lg shadow-sm border border-gray-200 dark:border-[#383939] p-6">
+            <div key={professor._id} className="bg-white dark:bg-[#202024] rounded-lg shadow-sm border border-gray-200 dark:border-[#202024] p-6">
               <div className="flex items-center justify-between gap-1 mb-4">
                 <div>
                   <h3 className="font-bold text-lg text-gray-900 dark:text-white">{professor.name}</h3>

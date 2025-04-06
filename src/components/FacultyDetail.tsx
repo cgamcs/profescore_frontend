@@ -70,10 +70,10 @@ const FacultyDetails = () => {
             <div className="flex">
                 {[...Array(5)].map((_, index) => {
                     if (index < fullStars) {
-                        return <i key={index} className="fas fa-star text-indigo-500 dark:text-[#646464] text-sm" />;
+                        return <i key={index} className="fas fa-star text-indigo-500 dark:text-[#83838B] text-sm" />;
                     }
                     if (index === fullStars && hasHalfStar) {
-                        return <i key={index} className="fas fa-star-half-alt text-indigo-500 dark:text-[#646464] text-sm" />;
+                        return <i key={index} className="fas fa-star-half-alt text-indigo-500 dark:text-[#83838B] text-sm" />;
                     }
                     return <i key={index} className="far fa-star text-gray-300 text-sm" />;
                 })}
@@ -92,7 +92,7 @@ const FacultyDetails = () => {
                 <input
                     type="text"
                     placeholder="Buscar por nombre de materia o profesor..."
-                    className="w-full border dark:text-white border-gray-200 dark:border-[#383939] px-4 py-3 rounded-xl shadow-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+                    className="w-full border dark:text-white border-gray-200 dark:border-[#2B2B2D] px-4 py-3 rounded-xl shadow-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -105,7 +105,7 @@ const FacultyDetails = () => {
             {!isSearchingProfessor && (
                 <section className="mb-12">
                     <h2 className="dark:text-white text-xl font-semibold mb-4">Tabla de Materias</h2>
-                    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-[#383939] shadow-sm">
+                    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm">
                         <table className="min-w-full divide-y divide-gray-200 dark:divide-[#383939]">
                             <thead className="bg-gray-50 dark:bg-indigo-600">
                                 <tr>
@@ -113,7 +113,7 @@ const FacultyDetails = () => {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Créditos</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white dark:bg-[#181818] divide-y divide-gray-200 dark:divide-[#383939]">
+                            <tbody className="bg-white dark:bg-[#202024] divide-y divide-gray-200 dark:divide-[#383939]">
                                 {displayedSubjects.map((subject: ISubject) => (
                                     <tr key={subject._id} className="hover:bg-gray-50 dark:hover:bg-[#ffffff0d]">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600 dark:text-white">
@@ -134,7 +134,7 @@ const FacultyDetails = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {displayedProfessors.map((professor: IProfessor) => (
                         <Link key={professor._id} to={`/facultad/${facultyId}/maestro/${professor._id}`} className="block">
-                            <div className="bg-white dark:bg-[#181818] rounded-lg border border-gray-200 dark:border-[#383939] shadow-sm p-6 hover:shadow-md transition-shadow">
+                            <div className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 hover:shadow-md transition-shadow">
                                 <h3 className="font-medium dark:text-white text-lg mb-1">{professor.name}</h3>
                                 <div className="flex items-center">
                                     <div className="flex items-center">

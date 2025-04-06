@@ -27,7 +27,7 @@ const FacultyList: React.FC = () => {
             <Link
               key={faculty._id}
               to={`/facultad/${faculty._id}`}
-              className="bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#383939] rounded-lg p-4 text-center hover:bg-indigo-600 hover:text-white dark:hover:border-indigo-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              className="bg-white dark:bg-[#202024] border border-gray-200 dark:border-[#202024] rounded-lg p-4 text-center hover:bg-indigo-600 hover:text-white dark:hover:border-indigo-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
               <h3 className="dark:text-white font-bold text-lg mb-1">{faculty.abbreviation}</h3>
               <p className="dark:text-white text-xs opacity-80 line-clamp-2">{faculty.name}</p>

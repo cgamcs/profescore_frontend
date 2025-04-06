@@ -104,9 +104,9 @@ const ProfessorDetail = () => {
         return (
             <div className="flex">
                 {[...Array(fullStars)].map((_, i) => (
-                    <FaStar key={i} className="text-indigo-500 dark:text-[#646464]" />
+                    <FaStar key={i} className="text-indigo-500 dark:text-[#83838B]" />
                 ))}
-                {hasHalfStar && <FaStarHalfAlt className="text-indigo-500 dark:text-[#646464]" />}
+                {hasHalfStar && <FaStarHalfAlt className="text-indigo-500 dark:text-[#83838B]" />}
                 {[...Array(5 - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => (
                     <FaRegStar key={i + fullStars} className="text-gray-300" />
                 ))}
@@ -197,7 +197,7 @@ const ProfessorDetail = () => {
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="md:col-span-1">
-                        <div className="bg-indigo-600 dark:bg-[#181818] text-white p-6 rounded-lg shadow-md mb-6">
+                        <div className="bg-indigo-600 dark:bg-[#202024] text-white p-6 rounded-lg shadow-md mb-6">
                             <div className="text-3xl font-bold mb-2">
                                 {professor.ratingStats.averageGeneral.toFixed(1)}
                             </div>
@@ -209,7 +209,7 @@ const ProfessorDetail = () => {
                             </div>
                         </div>
 
-                        <div className="bg-white dark:bg-[#181818] rounded-lg border border-gray-200 dark:border-[#383939] shadow-sm p-6 mb-6">
+                        <div className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 mb-6">
                             <div className="mb-1 dark:text-white font-medium">Explicación</div>
                             <div className="w-full bg-gray-200 dark:bg-[#383939] rounded-full h-1.5 mb-4">
                                 <div
@@ -243,7 +243,7 @@ const ProfessorDetail = () => {
                             </div>
                         </div>
 
-                        <div className="bg-white dark:bg-[#181818] rounded-lg border border-gray-200 dark:border-[#383939] shadow-sm p-6">
+                        <div className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6">
                             <h2 className="dark:text-white font-semibold text-lg mb-4">Información del Profesor</h2>
                             <div className="space-y-4">
                                 <div>
@@ -274,7 +274,7 @@ const ProfessorDetail = () => {
                         <h2 className="dark:text-white font-semibold text-lg mb-4">Reseñas de Estudiantes</h2>
                         <div className="space-y-4">
                             {ratings.map((rating: RatingType) => (
-                                <div key={rating._id} className="bg-white dark:bg-[#181818] rounded-lg border border-gray-200 dark:border-[#383939] shadow-sm p-4">
+                                <div key={rating._id} className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-4">
                                     <div className="flex justify-between items-start mb-2">
                                         <div>
                                             {renderCommentStars(rating.general)}
@@ -328,14 +328,14 @@ const ProfessorDetail = () => {
                 <div
                     onClick={(e) => e.stopPropagation()}
                     className={`
-                        inset-0 bg-white dark:bg-[#181818] rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden transition-all relative
+                        inset-0 bg-white dark:bg-[#202024] rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden transition-all relative
                         ${showReportModal ? "scale-100 opacity-100" : "scale-125 opacity-0"}
                     `}
                 >
                     {/* Close button */}
                     <button
                         onClick={closeReportModal}
-                        className="absolute top-2 right-2 p-1 rounded-lg text-white hover:text-[#181818] hover:cursor-pointer z-10"
+                        className="absolute top-2 right-2 p-1 rounded-lg text-white hover:text-[#202024] hover:cursor-pointer z-10"
                     >
                         <X size={20} />
                     </button>
@@ -349,14 +349,14 @@ const ProfessorDetail = () => {
                     <div className="p-4">
                         <div className="mb-4">
                             <h4 className="text-sm font-medium text-gray-500 dark:text-white mb-2">Comentario reportado:</h4>
-                            <div className="bg-gray-50 dark:bg-[#383939] p-3 rounded-md border border-gray-200 dark:border-[#383939]">
+                            <div className="bg-gray-50 dark:bg-[#383939] p-3 rounded-md border border-gray-200 dark:border-[#202024]">
                                 <p className="text-gray-700 dark:text-white text-sm">{selectedComment?.comment}</p>
                             </div>
                         </div>
                         <form id="report-form" onSubmit={handleReport}>
                             <div className="mb-4">
                                 <label htmlFor="report-reason" className="block text-sm font-medium text-gray-700 dark:text-white mb-2">Motivo del reporte</label>
-                                <select id="report-reason" className="w-full dark:bg-[#383939] dark:text-white border border-gray-300 dark:border-[#383939] rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <select id="report-reason" className="w-full dark:bg-[#383939] dark:text-white border border-gray-300 dark:border-[#202024] rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                                     <option value="" disabled>Selecciona un motivo</option>
                                     <option value="offensive">Contenido ofensivo o inapropiado</option>
                                     <option value="false">Información falsa o engañosa</option>
@@ -369,7 +369,7 @@ const ProfessorDetail = () => {
                                 <label htmlFor="report-details" className="block text-sm font-medium text-gray-700 dark:text-white mb-2">Detalles adicionales (opcional)</label>
                                 <textarea
                                     id="report-details"
-                                    className="w-full dark:bg-[#383939] dark:text-white border border-gray-300 dark:border-[#383939] rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="w-full dark:bg-[#383939] dark:text-white border border-gray-300 dark:border-[#202024] rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                     placeholder="Proporciona más información sobre por qué estás reportando este comentario..."
                                 ></textarea>
                             </div>
@@ -394,7 +394,7 @@ const ProfessorDetail = () => {
                                 </div>
                             </div>
                             <div className="flex justify-end space-x-3">
-                                <button type="button" className="px-4 py-2 border border-gray-300 dark:border-[#383939] bg-white dark:bg-[#383939] rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-[#ffffff0d]" onClick={closeReportModal}>
+                                <button type="button" className="px-4 py-2 border border-gray-300 dark:border-[#202024] bg-white dark:bg-[#383939] rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-[#ffffff0d]" onClick={closeReportModal}>
                                     Cancelar
                                 </button>
                                 <button type="submit" className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 hover:cursor-pointer">

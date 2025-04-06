@@ -137,7 +137,7 @@ const ProfessorAdd = () => {
                 <div className="max-w-2xl mx-auto">
                     <h1 className="dark:text-white text-2xl font-bold mb-6">Agregar Nuevo Maestro</h1>
 
-                    <div className="bg-white dark:bg-[#181818] rounded-lg border border-gray-200 dark:border-[#383939] shadow-sm p-6">
+                    <div className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6">
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="space-y-2">
                                 <label className="block text-sm font-medium text-gray-700 dark:text-white">Nombre completo</label>
@@ -146,7 +146,7 @@ const ProfessorAdd = () => {
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     placeholder="Ej. Juan Pérez Rodríguez"
-                                    className="w-full px-3 py-2 dark:text-white dark:bg-[#383939] border border-gray-300 dark:border-[#383939] rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="w-full px-3 py-2 dark:text-white dark:bg-[#383939] border border-gray-300 dark:border-[#202024] rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 />
                                 {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
                             </div>
@@ -157,7 +157,7 @@ const ProfessorAdd = () => {
                                     required
                                     value={formData.subject}
                                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                                    className="w-full px-3 py-2 dark:text-white dark:bg-[#383939] border border-gray-300 dark:border-[#383939] rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="w-full px-3 py-2 dark:text-white dark:bg-[#383939] border border-gray-300 dark:border-[#202024] rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 >
                                     <option value="">Selecciona una materia</option>
                                     {subjects.map((subj: Subject) => (
@@ -179,7 +179,7 @@ const ProfessorAdd = () => {
                             <div className="pt-4 flex justify-end space-x-4">
                                 <Link
                                     to={`/facultad/${facultyId}/maestros`}
-                                    className="px-4 py-2 border border-gray-300 dark:border-[#383939] bg-white dark:bg-[#383939] rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-[#ffffff0d]"
+                                    className="px-4 py-2 border border-gray-300 dark:border-[#202024] bg-white dark:bg-[#383939] rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-[#ffffff0d]"
                                 >
                                     Cancelar
                                 </Link>

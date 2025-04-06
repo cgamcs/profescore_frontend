@@ -37,10 +37,10 @@ const SubjectDetail = () => {
       <div className="flex">
         {[...Array(5)].map((_, index) => {
           if (index < fullStars) {
-            return <i key={index} className="fas fa-star text-indigo-500 dark:text-[#646464] text-sm" />;
+            return <i key={index} className="fas fa-star text-indigo-500 dark:text-[#83838B] text-sm" />;
           }
           if (index === fullStars && hasHalfStar) {
-            return <i key={index} className="fas fa-star-half-alt text-indigo-500 dark:text-[#646464] text-sm" />;
+            return <i key={index} className="fas fa-star-half-alt text-indigo-500 dark:text-[#83838B] text-sm" />;
           }
           return <i key={index} className="far fa-star text-gray-300 text-sm" />;
         })}
@@ -60,7 +60,7 @@ const SubjectDetail = () => {
         </div>
 
         {/* Subject Info */}
-        <div className="bg-white dark:bg-[#181818] rounded-lg border border-gray-200 dark:border-[#383939] shadow-sm p-6 mb-8">
+        <div className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
               <h3 className="text-sm font-medium text-gray-500 dark:text-[#979797]">Departamento</h3>
@@ -88,7 +88,7 @@ const SubjectDetail = () => {
             <Link
               key={professor._id}
               to={`/facultad/${facultyId}/maestro/${professor._id}`}
-              className="block bg-white dark:bg-[#181818] rounded-lg border border-gray-200 dark:border-[#383939] shadow-sm p-4 hover:shadow-md transition-shadow"
+              className="block bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-4 hover:shadow-md transition-shadow"
             >
               <div className="flex justify-between items-center gap-1">
                 <h3 className="font-medium text-lg dark:text-white">{professor.name}</h3>

@@ -70,7 +70,7 @@ const SubjectsPage = () => {
         <input
           type="text"
           placeholder="Buscar por nombre del maestro o materia..."
-          className="w-full border dark:text-white border-gray-200 dark:border-[#383939] px-4 py-3 rounded-xl shadow-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+          className="w-full border dark:text-white border-gray-200 dark:border-[#2B2B2D] px-4 py-3 rounded-xl shadow-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -80,7 +80,7 @@ const SubjectsPage = () => {
       </div>
 
       {/* Lista de materias y profesores */}
-      <div className="bg-white dark:bg-[#181818] rounded-lg border border-gray-200 dark:border-[#383939] shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm overflow-hidden">
         <ul className="divide-y divide-gray-200 dark:divide-[#383939]">
           {/* Mostrar materias filtradas */}
           {filteredSubjects.map((subject: ISubject) => (

@@ -41,7 +41,7 @@ const Header = () => {
     }, [theme]);
 
     return (
-        <header className="bg-white dark:bg-[#0A0A0A] border-b border-gray-200 dark:border-[#383939]">
+        <header className="bg-white dark:bg-[#0A0A0A] border-b border-gray-200 dark:border-[#202024]">
             <div className="container mx-auto px-4 py-3 flex items-center justify-between">
                 <Link
                     to={facultyId ? `/` : "/"}
@@ -107,7 +107,7 @@ const Header = () => {
 
             {/* Menú móvil */}
             {showMobileMenu && (
-                <div className="md:hidden bg-white dark:bg-[#0A0A0A] border-t border-gray-200 dark:border-[#383939] py-2">
+                <div className="md:hidden bg-white dark:bg-[#0A0A0A] border-t border-gray-200 dark:border-[#202024] py-2">
                     <nav className="container mx-auto px-4 flex flex-col space-y-3">
                         <NavLink
                             end
