@@ -272,6 +272,13 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
                     </div>
                 </form>
             </div>
+
+            {/* Notificación de éxito */}
+            {showSuccessMessage && (
+                <div className="fixed top-15 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification">
+                    Maestro guardado
+                </div>
+            )}
         </div>
     );
 };
