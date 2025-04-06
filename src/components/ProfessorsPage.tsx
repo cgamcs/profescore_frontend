@@ -99,6 +99,20 @@ const ProfessorsPage = () => {
         });
     }, [professors, subjects, searchQuery]);
 
+    // Memoizar el filtrado de materias
+    const filteredSubjects = useMemo(() => {
+        if (!searchQuery) return [];
+
+        const query = normalizeText(searchQuery);
+        return subjects.filter((subject: ISubject) => {
+            const nameMatches = normalizeText(subject.name).includes(query);
+            const hasProfessor = professors.some((professor: IProfessor) =>
+                professor.subjects.includes(subject._id)
+            );
+            return nameMatches && !hasProfessor;
+        });
+    }, [subjects, professors, searchQuery]);
+
     // Memoizar el renderizado de estrellas
     const renderStars = (rating: number) => {
         const fullStars = Math.floor(rating);
@@ -203,10 +217,35 @@ const ProfessorsPage = () => {
                                         </td>
                                     </tr>
                                 ))}
+                                {filteredSubjects.map((subject: ISubject) => (
+                                    <tr key={subject._id} className="hover:bg-gray-50 dark:hover:bg-[#ffffff0d]">
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className="text-gray-500 dark:text-gray-400 font-medium">
+                                                Sin maestro
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-gray-500">
+                                            <div className="flex flex-wrap gap-1">
+                                                <span
+                                                    key={subject._id}
+                                                    className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 dark:bg-indigo-400/70 text-indigo-800 dark:text-white"
+                                                >
+                                                    {subject.name}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                <span className="bg-gray-100 dark:bg-[#646464] text-gray-800 dark:text-white font-bold rounded px-2 py-1 text-sm mr-2">
+                                                    N/A
+                                                </span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>
-
                 </div>
             </main>
         </div>

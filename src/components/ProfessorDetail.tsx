@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { FaRegStar, FaStar, FaStarHalfAlt, FaHeart, FaRegHeart } from 'react-icons/fa';
+import { X } from 'react-feather'; // Import X icon for the close button
 import ReCAPTCHA from 'react-google-recaptcha';
 import api from '../api';
-import { ProfessorDetailLoader } from './SkeletonLoader'; // Importa el SkeletonLoader
+import { ProfessorDetailLoader } from './SkeletonLoader';
 
 interface RatingType {
     _id: string;
@@ -315,75 +316,95 @@ const ProfessorDetail = () => {
                 </div>
             </main>
 
-            {showReportModal && (
-                <div className="fixed inset-0 backdrop-brightness-50 backdrop-opacity-60 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-[#181818] rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
-                        <div className="bg-indigo-600 px-4 py-3 flex justify-between items-center">
-                            <h3 className="text-lg font-medium text-white">Reportar comentario</h3>
-                            <button className="text-white hover:text-gray-200 focus:outline-none hover:cursor-pointer" onClick={closeReportModal}>
-                                <i className="fas fa-times"></i>
-                            </button>
-                        </div>
-                        <div className="p-4">
-                            <div className="mb-4">
-                                <h4 className="text-sm font-medium text-gray-500 dark:text-white mb-2">Comentario reportado:</h4>
-                                <div className="bg-gray-50 dark:bg-[#383939] p-3 rounded-md border border-gray-200 dark:border-[#383939]">
-                                    <p className="text-gray-700 dark:text-white text-sm">{selectedComment?.comment}</p>
-                                </div>
+            {/* Animated Report Modal */}
+            <div
+                onClick={closeReportModal}
+                className={`
+                    fixed inset-0 flex justify-center items-center transition-colors z-50
+                    ${showReportModal ? "visible backdrop-brightness-50 backdrop-opacity-60" : "invisible"}
+                `}
+            >
+                {/* Modal Content */}
+                <div
+                    onClick={(e) => e.stopPropagation()}
+                    className={`
+                        inset-0 bg-white dark:bg-[#181818] rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden transition-all relative
+                        ${showReportModal ? "scale-100 opacity-100" : "scale-125 opacity-0"}
+                    `}
+                >
+                    {/* Close button */}
+                    <button
+                        onClick={closeReportModal}
+                        className="absolute top-2 right-2 p-1 rounded-lg text-white hover:text-[#181818] hover:cursor-pointer z-10"
+                    >
+                        <X size={20} />
+                    </button>
+                    
+                    {/* Header */}
+                    <div className="bg-indigo-600 px-4 py-3">
+                        <h3 className="text-lg font-medium text-white">Reportar comentario</h3>
+                    </div>
+                    
+                    {/* Body */}
+                    <div className="p-4">
+                        <div className="mb-4">
+                            <h4 className="text-sm font-medium text-gray-500 dark:text-white mb-2">Comentario reportado:</h4>
+                            <div className="bg-gray-50 dark:bg-[#383939] p-3 rounded-md border border-gray-200 dark:border-[#383939]">
+                                <p className="text-gray-700 dark:text-white text-sm">{selectedComment?.comment}</p>
                             </div>
-                            <form id="report-form" onSubmit={handleReport}>
-                                <div className="mb-4">
-                                    <label htmlFor="report-reason" className="block text-sm font-medium text-gray-700 dark:text-white  mb-2">Motivo del reporte</label>
-                                    <select id="report-reason" className="w-full dark:bg-[#383939] dark:text-white border border-gray-300 dark:border-[#383939] rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                                        <option value="" disabled>Selecciona un motivo</option>
-                                        <option value="offensive">Contenido ofensivo o inapropiado</option>
-                                        <option value="false">Información falsa o engañosa</option>
-                                        <option value="personal">Contiene información personal</option>
-                                        <option value="spam">Spam o publicidad</option>
-                                        <option value="other">Otro motivo</option>
-                                    </select>
-                                </div>
-                                <div className="mb-4">
-                                    <label htmlFor="report-details" className="block text-sm font-medium text-gray-700 dark:text-white  mb-2">Detalles adicionales (opcional)</label>
-                                    <textarea
-                                        id="report-details"
-                                        className="w-full dark:bg-[#383939] dark:text-white border border-gray-300 dark:border-[#383939] rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                        placeholder="Proporciona más información sobre por qué estás reportando este comentario..."
-                                    ></textarea>
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">Verificación CAPTCHA</label>
-                                    <ReCAPTCHA
-                                        sitekey={SITE_KEY}
-                                        onChange={handleCaptchaChange}
-                                    />
-                                    {captchaError && <p className="text-red-600 text-sm mt-1">{captchaError}</p>}
-                                </div>
-                                <div className="bg-gray-50 dark:bg-[#363639] p-3 rounded-md border border-gray-200 dark:border-[#363639] mb-4">
-                                    <div className="flex items-start">
-                                        <div className="flex-shrink-0">
-                                            <i className="fas fa-info-circle text-indigo-500 mt-0.5"></i>
-                                        </div>
-                                        <div className="ml-3">
-                                            <p className="text-sm text-gray-600 dark:text-white">
-                                                Tu reporte será revisado por nuestro equipo de moderación. Los reportes ayudan a mantener nuestra comunidad segura y respetuosa.
-                                            </p>
-                                        </div>
+                        </div>
+                        <form id="report-form" onSubmit={handleReport}>
+                            <div className="mb-4">
+                                <label htmlFor="report-reason" className="block text-sm font-medium text-gray-700 dark:text-white mb-2">Motivo del reporte</label>
+                                <select id="report-reason" className="w-full dark:bg-[#383939] dark:text-white border border-gray-300 dark:border-[#383939] rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="" disabled>Selecciona un motivo</option>
+                                    <option value="offensive">Contenido ofensivo o inapropiado</option>
+                                    <option value="false">Información falsa o engañosa</option>
+                                    <option value="personal">Contiene información personal</option>
+                                    <option value="spam">Spam o publicidad</option>
+                                    <option value="other">Otro motivo</option>
+                                </select>
+                            </div>
+                            <div className="mb-4">
+                                <label htmlFor="report-details" className="block text-sm font-medium text-gray-700 dark:text-white mb-2">Detalles adicionales (opcional)</label>
+                                <textarea
+                                    id="report-details"
+                                    className="w-full dark:bg-[#383939] dark:text-white border border-gray-300 dark:border-[#383939] rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                    placeholder="Proporciona más información sobre por qué estás reportando este comentario..."
+                                ></textarea>
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">Verificación CAPTCHA</label>
+                                <ReCAPTCHA
+                                    sitekey={SITE_KEY}
+                                    onChange={handleCaptchaChange}
+                                />
+                                {captchaError && <p className="text-red-600 text-sm mt-1">{captchaError}</p>}
+                            </div>
+                            <div className="bg-gray-50 dark:bg-[#363639] p-3 rounded-md border border-gray-200 dark:border-[#363639] mb-4">
+                                <div className="flex items-start">
+                                    <div className="flex-shrink-0">
+                                        <i className="fas fa-info-circle text-indigo-500 mt-0.5"></i>
+                                    </div>
+                                    <div className="ml-3">
+                                        <p className="text-sm text-gray-600 dark:text-white">
+                                            Tu reporte será revisado por nuestro equipo de moderación. Los reportes ayudan a mantener nuestra comunidad segura y respetuosa.
+                                        </p>
                                     </div>
                                 </div>
-                                <div className="flex justify-end space-x-3">
-                                    <button type="button" className="px-4 py-2 border border-gray-300 dark:border-[#383939] bg-white dark:bg-[#383939] rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-[#ffffff0d]" onClick={closeReportModal}>
-                                        Cancelar
-                                    </button>
-                                    <button type="submit" className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 hover:cursor-pointer">
-                                        Enviar reporte
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+                            </div>
+                            <div className="flex justify-end space-x-3">
+                                <button type="button" className="px-4 py-2 border border-gray-300 dark:border-[#383939] bg-white dark:bg-[#383939] rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-[#ffffff0d]" onClick={closeReportModal}>
+                                    Cancelar
+                                </button>
+                                <button type="submit" className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 hover:cursor-pointer">
+                                    Enviar reporte
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-            )}
+            </div>
 
             {reportSent && (
                 <div className="fixed top-15 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification">
