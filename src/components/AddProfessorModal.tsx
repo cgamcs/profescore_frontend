@@ -48,8 +48,8 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
     const { mutate, isPending } = useMutation({
         mutationFn: (newProfessor: ProfessorFormData & { captcha: string }) => {
             console.log("Datos a enviar:", newProfessor);
-            console.log("URL de la API:", `/faculties/${facultyId}/professors`);
-            return api.post(`/faculties/${facultyId}/professors`, newProfessor);
+            console.log("URL de la API:", `/api/faculties/${facultyId}/professors`);
+            return api.post(`/api/faculties/${facultyId}/professors`, newProfessor);
         },
         onSuccess: () => {
             // Invalidamos la query
