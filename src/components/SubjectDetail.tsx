@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, Link } from 'react-router-dom';
 import { SubjectDetailLoader } from './SkeletonLoader';
@@ -48,13 +48,32 @@ const SubjectDetail = () => {
     );
   };
 
+  // En ambos componentes, añadir este useEffect
+useEffect(() => {
+  document.title = "ProfeScore - Materias";
+  
+  const mainElement = document.getElementById('main-content');
+  if (mainElement) {
+    mainElement.style.viewTransitionName = 'main-content';
+    mainElement.style.contain = 'layout';
+  }
+
+  return () => {
+    const mainElement = document.getElementById('main-content');
+    if (mainElement) {
+      mainElement.style.viewTransitionName = '';
+      mainElement.style.contain = '';
+    }
+  };
+}, []);
+
   if (isLoading) return <SubjectDetailLoader />;
   if (error) return <div className="text-red-500 text-center py-4">{error}</div>;
   if (!subjectData) return <div className="text-center py-4">No se encontró la materia</div>;
 
   return (
     <>
-      <main className="container mx-auto px-4 py-6">
+      <main id="main-content" data-view-transition className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl dark:text-white font-bold">{subjectData.name}</h1>
         </div>

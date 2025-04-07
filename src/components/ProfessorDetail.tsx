@@ -215,6 +215,25 @@ const ProfessorDetail = () => {
         }
     };
 
+    // En ambos componentes, añadir este useEffect
+    useEffect(() => {
+        document.title = "ProfeScore - Maestros";
+
+        const mainElement = document.getElementById('main-content');
+        if (mainElement) {
+            mainElement.style.viewTransitionName = 'main-content';
+            mainElement.style.contain = 'layout';
+        }
+
+        return () => {
+            const mainElement = document.getElementById('main-content');
+            if (mainElement) {
+                mainElement.style.viewTransitionName = '';
+                mainElement.style.contain = '';
+            }
+        };
+    }, []);
+
     // Manejador de tecla ESC para cerrar el modal
     useEffect(() => {
         const handleEscKey = (event: KeyboardEvent) => {
@@ -236,8 +255,8 @@ const ProfessorDetail = () => {
     if (!professor) return <div className='text-center text-red-500 py-4'>Profesor no encontrado</div>;
 
     return (
-        <div className="bg-white dark:bg-[#0A0A0A] min-h-screen">
-            <main className="container mx-auto px-4 py-6">
+        <>
+            <main id="main-content" data-view-transition className="container mx-auto px-4 py-6">
                 {showSuccessMessage && (
                     <div className="fixed top-15 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification z-10">
                         {addSuccess ? 'Profesor agregado correctamente' : 'Calificación enviada correctamente'}
@@ -353,7 +372,7 @@ const ProfessorDetail = () => {
 
                                         <div className="border-l border-gray-200 dark:border-[#979797] pl-5">
                                             <div className="flex items-center gap-2">
-                                                <a href="#" className="text-sm text-gray-500 dark:text-[#979797] hover:cursor-pointer" onClick={(e) => {e.preventDefault(); openReportModal(rating);}}>Reportar</a>
+                                                <a href="#" className="text-sm text-gray-500 dark:text-[#979797] hover:cursor-pointer" onClick={(e) => { e.preventDefault(); openReportModal(rating); }}>Reportar</a>
                                             </div>
                                         </div>
                                     </div>
@@ -362,26 +381,26 @@ const ProfessorDetail = () => {
                         </div>
                     </div>
                 </div>
+
+                <ReportModal
+                    showReportModal={showReportModal}
+                    isClosing={isClosing}
+                    selectedComment={selectedComment}
+                    captchaValue={captchaValue}
+                    captchaError={captchaError}
+                    closeReportModal={closeReportModal}
+                    handleReport={handleReport}
+                    handleCaptchaChange={handleCaptchaChange}
+                    SITE_KEY={SITE_KEY}
+                />
+
+                {reportSent && (
+                    <div className="fixed top-15 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification z-10 animate-fadeIn">
+                        Reporte enviado exitosamente
+                    </div>
+                )}
             </main>
-
-            <ReportModal
-                showReportModal={showReportModal}
-                isClosing={isClosing}
-                selectedComment={selectedComment}
-                captchaValue={captchaValue}
-                captchaError={captchaError}
-                closeReportModal={closeReportModal}
-                handleReport={handleReport}
-                handleCaptchaChange={handleCaptchaChange}
-                SITE_KEY={SITE_KEY}
-            />
-
-            {reportSent && (
-                <div className="fixed top-15 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification z-10 animate-fadeIn">
-                    Reporte enviado exitosamente
-                </div>
-            )}
-        </div>
+        </>
     );
 };
 

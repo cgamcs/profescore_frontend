@@ -61,7 +61,7 @@ const TopRatedProfessors: React.FC = () => {
   if (professors.length === 0) return <div className="text-center py-10">No hay profesores disponibles</div>;
 
   return (
-    <section className="py-12 bg-gray-50 dark:bg-[#131313]">
+    <section id="main-content" data-view-transition className="py-12 bg-gray-50 dark:bg-[#131313]">
       <div className="container mx-auto px-4">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Maestros Mejor Calificados</h2>

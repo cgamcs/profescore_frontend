@@ -35,32 +35,61 @@ const themeKeys = {
 
 type ThemeKey = keyof typeof themeKeys;
 
+// Function to check if browser supports View Transitions API
+const supportsViewTransitions = () => {
+  return !!document.startViewTransition;
+};
+
 const App: React.FC = () => {
   const [theme] = useState<ThemeKey>(localStorage.getItem('theme') as ThemeKey || 'system');
 
-    useEffect(() => {
-        const root = document.documentElement;
-        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  // Add a class to the body if the browser supports View Transitions
+  if (supportsViewTransitions()) {
+    document.body.classList.add('view-transitions-enabled');
+  }
 
-        const applyThem = () => {
-            root.classList.toggle(
-                'dark',
-                theme === themeKeys.dark ||
-                (theme === themeKeys.system && mediaQuery.matches)
-            )
+  // En ambos componentes, añadir este useEffect
+  useEffect(() => {
+    document.title = "ProfeScore - Facultades";
 
-            localStorage.setItem("theme", theme)
-        };
+    const mainElement = document.getElementById('main-content');
+    if (mainElement) {
+      mainElement.style.viewTransitionName = 'main-content';
+      mainElement.style.contain = 'layout';
+    }
 
-        applyThem();
+    return () => {
+      const mainElement = document.getElementById('main-content');
+      if (mainElement) {
+        mainElement.style.viewTransitionName = '';
+        mainElement.style.contain = '';
+      }
+    };
+  }, []);
 
-        mediaQuery.addEventListener("change", applyThem)
+  useEffect(() => {
+    const root = document.documentElement;
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
-        return () => {
-            mediaQuery.removeEventListener("change", applyThem)
-        };
-    }, [theme]);
-    
+    const applyThem = () => {
+      root.classList.toggle(
+        'dark',
+        theme === themeKeys.dark ||
+        (theme === themeKeys.system && mediaQuery.matches)
+      )
+
+      localStorage.setItem("theme", theme)
+    };
+
+    applyThem();
+
+    mediaQuery.addEventListener("change", applyThem)
+
+    return () => {
+      mediaQuery.removeEventListener("change", applyThem)
+    };
+  }, [theme]);
+
   return (
     <Routes>
       {/* Ruta de login para admin */}
@@ -82,7 +111,7 @@ const App: React.FC = () => {
 
       {/* Ruta principal sin header */}
       <Route path="/" element={
-        <div className="min-h-screen bg-white dark:bg-[#0A0A0A]">
+        <div id="main-content" data-view-transition className="min-h-screen bg-white dark:bg-[#0A0A0A]">
           {/* Logo y título */}
           <div className="pt-10 pb-6 text-center">
             <h1 className="text-3xl font-bold text-indigo-600 dark:text-indigo-500">ProfeScore</h1>

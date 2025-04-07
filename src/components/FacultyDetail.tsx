@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { FacultyDetailLoader } from './SkeletonLoader';
 import api from '../api';
+import useViewTransition from './useViewTransition';
 
 interface ISubject {
     _id: string;
@@ -29,6 +30,11 @@ interface IProfessor {
 const FacultyDetails = () => {
     const { facultyId } = useParams();
     const [searchQuery, setSearchQuery] = useState('');
+    const { handleLinkClick } = useViewTransition();
+    const subjectsContainerRef = useRef<HTMLTableElement>(null);
+    const professorsContainerRef = useRef<HTMLDivElement>(null);
+    const [subjectsHeight, setSubjectsHeight] = useState<number | null>(null);
+    const [professorsHeight, setProfessorsHeight] = useState<number | null>(null);
 
     const { data: subjects = [], isLoading: subjectsLoading } = useQuery({
         queryKey: ['subjects', facultyId],
@@ -39,6 +45,47 @@ const FacultyDetails = () => {
         queryKey: ['professors', facultyId],
         queryFn: () => api.get(`/faculties/${facultyId}/professors`).then(res => res.data),
     });
+
+    useEffect(() => {
+        document.title = "ProfeScore - Facultad";
+
+        const prepareTransition = () => {
+          const root = document.documentElement;
+          root.style.viewTransitionName = 'root';
+          root.style.animation = 'none'; // Resetear animaciones
+
+          const mainElement = document.getElementById('main-content');
+          if (mainElement) {
+            mainElement.style.viewTransitionName = 'main-content';
+            mainElement.style.contain = 'layout';
+          }
+        };
+
+        prepareTransition();
+
+        return () => {
+          const root = document.documentElement;
+          root.style.viewTransitionName = '';
+
+          const mainElement = document.getElementById('main-content');
+          if (mainElement) {
+            mainElement.style.viewTransitionName = '';
+            mainElement.style.contain = '';
+          }
+        };
+      }, []);
+
+    // Almacenar las alturas una vez que los datos se han cargado
+    useEffect(() => {
+        if (!subjectsLoading && !professorsLoading) {
+            if (subjectsContainerRef.current) {
+                setSubjectsHeight(subjectsContainerRef.current.offsetHeight);
+            }
+            if (professorsContainerRef.current) {
+                setProfessorsHeight(professorsContainerRef.current.offsetHeight);
+            }
+        }
+    }, [subjectsLoading, professorsLoading, subjects, professors]);
 
     const isLoading = subjectsLoading || professorsLoading;
 
@@ -84,14 +131,14 @@ const FacultyDetails = () => {
     if (isLoading) return <FacultyDetailLoader />;
 
     return (
-        <main className="container mx-auto px-4 py-6">
+        <main id="root-main" data-view-transition className="container mx-auto px-4 py-6">
             <h1 className="text-2xl font-bold text-black dark:text-white text-center mb-6">Tu Guía Académica</h1>
 
             {/* Search Bar */}
             <div className="relative max-w-2xl mx-auto mb-8">
                 <input
                     type="text"
-                    placeholder="Buscar por nombre de materia o profesor..."
+                    placeholder="Buscar por nombre del maestro o materia..."
                     className="w-full border dark:text-white border-gray-200 dark:border-[#2B2B2D] px-4 py-3 rounded-xl shadow-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -105,8 +152,16 @@ const FacultyDetails = () => {
             {!isSearchingProfessor && (
                 <section className="mb-12">
                     <h2 className="dark:text-white text-xl font-semibold mb-4">Tabla de Materias</h2>
-                    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm">
-                        <table className="min-w-full divide-y divide-gray-200 dark:divide-[#383939]">
+                    <div
+                        className="overflow-x-auto rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm transition-all"
+                        style={{
+                            minHeight: subjectsHeight ? `${subjectsHeight}px` : '200px'
+                        }}
+                    >
+                        <table
+                            ref={subjectsContainerRef}
+                            className="min-w-full divide-y divide-gray-200 dark:divide-[#383939]"
+                        >
                             <thead className="bg-gray-50 dark:bg-indigo-600">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Materia</th>
@@ -117,7 +172,12 @@ const FacultyDetails = () => {
                                 {displayedSubjects.map((subject: ISubject) => (
                                     <tr key={subject._id} className="hover:bg-gray-50 dark:hover:bg-[#ffffff0d]">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600 dark:text-white">
-                                            <Link to={`materia/${subject._id}`}>{subject.name}</Link>
+                                            <a
+                                                href={`/facultad/${facultyId}/materia/${subject._id}`}
+                                                onClick={(e) => handleLinkClick(`/facultad/${facultyId}/materia/${subject._id}`, e)}
+                                            >
+                                                {subject.name}
+                                            </a>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{subject.credits}</td>
                                     </tr>
@@ -131,9 +191,20 @@ const FacultyDetails = () => {
             {/* Sección de Profesores Destacados */}
             <section>
                 <h2 className="text-xl dark:text-white font-semibold mb-4">Maestros Mejor Calificados</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div
+                    ref={professorsContainerRef}
+                    className="grid grid-cols-1 md:grid-cols-3 gap-6 transition-all"
+                    style={{
+                        minHeight: professorsHeight ? `${professorsHeight}px` : '150px'
+                    }}
+                >
                     {displayedProfessors.map((professor: IProfessor) => (
-                        <Link key={professor._id} to={`/facultad/${facultyId}/maestro/${professor._id}`} className="block">
+                        <a
+                            key={professor._id}
+                            href={`/facultad/${facultyId}/maestro/${professor._id}`}
+                            onClick={(e) => handleLinkClick(`/facultad/${facultyId}/maestro/${professor._id}`, e)}
+                            className="block"
+                        >
                             <div className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 hover:shadow-md transition-shadow">
                                 <h3 className="font-medium dark:text-white text-lg mb-1">{professor.name}</h3>
                                 <div className="flex items-center">
@@ -145,7 +216,7 @@ const FacultyDetails = () => {
                                     </div>
                                 </div>
                             </div>
-                        </Link>
+                        </a>
                     ))}
                 </div>
             </section>

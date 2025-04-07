@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { SubjectPageLoader } from './SkeletonLoader';
-import AddSubjectModal from './AddSubjectModal'; // Importa el modal
+import AddSubjectModal from './AddSubjectModal';
 import api from '../api';
+import useViewTransition from './useViewTransition';
 
 interface ISubject {
   _id: string;
@@ -32,8 +33,11 @@ interface IProfessor {
 const SubjectsPage = () => {
   const { facultyId } = useParams();
   const [searchQuery, setSearchQuery] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false); // Estado para el modal
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false); // Estado para la notificación
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const { handleLinkClick } = useViewTransition();
+  const subjectsContainerRef = useRef<HTMLDivElement>(null);
+  const [containerHeight, setContainerHeight] = useState<number | null>(null);
 
   const { data: subjects = [], isLoading: subjectsLoading } = useQuery({
     queryKey: ['subjects', facultyId],
@@ -44,6 +48,32 @@ const SubjectsPage = () => {
     queryKey: ['professors', facultyId],
     queryFn: () => api.get(`/faculties/${facultyId}/professors`).then(res => res.data),
   });
+
+// En ambos componentes, añadir este useEffect
+useEffect(() => {
+  document.title = "ProfeScore - Materias";
+  
+  const mainElement = document.getElementById('main-content');
+  if (mainElement) {
+    mainElement.style.viewTransitionName = 'main-content';
+    mainElement.style.contain = 'layout';
+  }
+
+  return () => {
+    const mainElement = document.getElementById('main-content');
+    if (mainElement) {
+      mainElement.style.viewTransitionName = '';
+      mainElement.style.contain = '';
+    }
+  };
+}, []);
+
+  // Capturar la altura del contenedor una vez que los datos se han cargado
+  useEffect(() => {
+    if (!subjectsLoading && !professorsLoading && subjectsContainerRef.current) {
+      setContainerHeight(subjectsContainerRef.current.offsetHeight);
+    }
+  }, [subjectsLoading, professorsLoading, subjects, professors]);
 
   const isLoading = subjectsLoading || professorsLoading;
 
@@ -63,7 +93,7 @@ const SubjectsPage = () => {
   if (isLoading) return <SubjectPageLoader />;
 
   return (
-    <main className="container mx-auto px-4 py-6">
+    <main id="main-content" data-view-transition className="container mx-auto px-4 py-6">
       {showSuccessMessage && (
         <div className="fixed top-15 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification">
           Materia guardada correctamente
@@ -94,13 +124,23 @@ const SubjectsPage = () => {
         </svg>
       </div>
 
-      {/* Lista de materias y profesores */}
-      <div className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm overflow-hidden">
+      {/* Lista de materias y profesores con altura fija durante transiciones */}
+      <div 
+        ref={subjectsContainerRef}
+        className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm overflow-hidden transition-all"
+        style={{ 
+          minHeight: containerHeight ? `${containerHeight}px` : '300px'
+        }}
+      >
         <ul className="divide-y divide-gray-200 dark:divide-[#383939]">
           {/* Mostrar materias filtradas */}
           {filteredSubjects.map((subject: ISubject) => (
             <li key={subject._id}>
-              <Link to={`/facultad/${facultyId}/materia/${subject._id}`} className="block hover:bg-gray-50 dark:hover:bg-[#ffffff0d] p-4">
+              <a 
+                href={`/facultad/${facultyId}/materia/${subject._id}`}
+                onClick={(e) => handleLinkClick(`/facultad/${facultyId}/materia/${subject._id}`, e)} 
+                className="block hover:bg-gray-50 dark:hover:bg-[#ffffff0d] p-4"
+              >
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="text-lg font-medium text-indigo-600 dark:text-indigo-400">{subject.name}</h3>
@@ -109,14 +149,18 @@ const SubjectsPage = () => {
                     {subject.professors.length} profesor{subject.professors.length !== 1 && 'es'}
                   </div>
                 </div>
-              </Link>
+              </a>
             </li>
           ))}
 
           {/* Mostrar profesores filtrados si la búsqueda coincide con ellos */}
           {filteredProfessors.map((professor: IProfessor) => (
             <li key={professor._id}>
-              <Link to={`/facultad/${facultyId}/profesor/${professor._id}`} className="block hover:bg-gray-50 dark:hover:bg-[#ffffff0d] p-4">
+              <a 
+                href={`/facultad/${facultyId}/profesor/${professor._id}`}
+                onClick={(e) => handleLinkClick(`/facultad/${facultyId}/profesor/${professor._id}`, e)} 
+                className="block hover:bg-gray-50 dark:hover:bg-[#ffffff0d] p-4"
+              >
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="text-lg font-medium text-indigo-600 dark:text-indigo-400">{professor.name}</h3>
@@ -125,9 +169,16 @@ const SubjectsPage = () => {
                     {professor.ratingStats.totalRatings} reseña{professor.ratingStats.totalRatings !== 1 && 's'}
                   </div>
                 </div>
-              </Link>
+              </a>
             </li>
           ))}
+
+          {/* Mostrar mensaje si no hay resultados */}
+          {filteredSubjects.length === 0 && filteredProfessors.length === 0 && (
+            <li className="p-4 text-center text-gray-500 dark:text-[#979797]">
+              No se encontraron resultados para "{searchQuery}"
+            </li>
+          )}
         </ul>
       </div>
 
@@ -136,7 +187,10 @@ const SubjectsPage = () => {
           facultyId={facultyId}
           subjects={subjects}
           onClose={() => setIsModalOpen(false)}
-          onSuccess={() => setShowSuccessMessage(true)} // Pasamos la función de callback
+          onSuccess={() => {
+            setShowSuccessMessage(true);
+            setTimeout(() => setShowSuccessMessage(false), 3000);
+          }}
         />
       )}
     </main>

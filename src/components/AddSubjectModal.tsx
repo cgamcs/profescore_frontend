@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import ReCAPTCHA from 'react-google-recaptcha';
 import api from '../api';
+import Portal from './Portal';
 
 interface Subject {
     _id: string;
@@ -194,104 +195,106 @@ const AddSubjectModal: React.FC<AddSubjectModalProps> = ({ facultyId, onClose, o
     }
 
     return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center"
-            aria-modal="true"
-            role="dialog"
-        >
-            {/* Overlay con transición sincronizada */}
+        <Portal>
             <div
-                className={`absolute inset-0 bg-black transition-opacity duration-300 ease-in-out ${isVisible && !isClosing ? 'opacity-60' : 'opacity-0'
-                    }`}
-                onClick={handleClose}
-            />
+                className="fixed inset-0 z-50 flex items-center justify-center"
+                aria-modal="true"
+                role="dialog"
+            >
+                {/* Overlay con transición sincronizada */}
+                <div
+                    className={`absolute inset-0 bg-black transition-opacity duration-300 ease-in-out ${isVisible && !isClosing ? 'opacity-60' : 'opacity-0'
+                        }`}
+                    onClick={handleClose}
+                />
 
-            {/* Contenido del modal con transición sincronizada */}
-            <div
-                className={`relative bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 w-full max-w-md transition-all duration-300 ease-in-out ${isVisible && !isClosing
+                {/* Contenido del modal con transición sincronizada */}
+                <div
+                    className={`relative bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 w-full max-w-md transition-all duration-300 ease-in-out ${isVisible && !isClosing
                         ? 'opacity-100 transform translate-y-0 scale-100'
                         : 'opacity-0 transform -translate-y-4 scale-95'
-                    }`}
-            >
-                <h2 className="text-xl font-bold mb-4 dark:text-white">Agregar Nueva Materia</h2>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="space-y-2">
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-white">
-                            Nombre de la Materia
-                        </label>
-                        <input
-                            id="name"
-                            name="name"
-                            type="text"
-                            className={`w-full dark:text-white px-3 py-2 dark:bg-[#383939] border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${errors.name ? 'border-red-500' : 'border-gray-300 dark:border-[#202024]'}`}
-                            placeholder="Ej. Cálculo Diferencial"
-                            value={formData.name}
-                            onChange={handleChange}
-                        />
-                        {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-                    </div>
+                        }`}
+                >
+                    <h2 className="text-xl font-bold mb-4 dark:text-white">Agregar Nueva Materia</h2>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="space-y-2">
+                            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-white">
+                                Nombre de la Materia
+                            </label>
+                            <input
+                                id="name"
+                                name="name"
+                                type="text"
+                                className={`w-full dark:text-white px-3 py-2 dark:bg-[#383939] border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${errors.name ? 'border-red-500' : 'border-gray-300 dark:border-[#202024]'}`}
+                                placeholder="Ej. Cálculo Diferencial"
+                                value={formData.name}
+                                onChange={handleChange}
+                            />
+                            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                        </div>
 
-                    <div className="space-y-2">
-                        <label htmlFor="credits" className="block text-sm font-medium text-gray-700 dark:text-white">
-                            Créditos
-                        </label>
-                        <input
-                            id="credits"
-                            name="credits"
-                            type="number"
-                            min="1"
-                            max="22"
-                            className={`w-full dark:text-white px-3 py-2 dark:bg-[#383939] border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${errors.credits ? 'border-red-500' : 'border-gray-300 dark:border-[#202024]'}`}
-                            placeholder="Ej. 5"
-                            value={formData.credits}
-                            onChange={handleChange}
-                        />
-                        {errors.credits && <p className="text-red-500 text-sm mt-1">{errors.credits}</p>}
-                    </div>
+                        <div className="space-y-2">
+                            <label htmlFor="credits" className="block text-sm font-medium text-gray-700 dark:text-white">
+                                Créditos
+                            </label>
+                            <input
+                                id="credits"
+                                name="credits"
+                                type="number"
+                                min="1"
+                                max="22"
+                                className={`w-full dark:text-white px-3 py-2 dark:bg-[#383939] border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${errors.credits ? 'border-red-500' : 'border-gray-300 dark:border-[#202024]'}`}
+                                placeholder="Ej. 5"
+                                value={formData.credits}
+                                onChange={handleChange}
+                            />
+                            {errors.credits && <p className="text-red-500 text-sm mt-1">{errors.credits}</p>}
+                        </div>
 
-                    <div className="space-y-2">
-                        <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-white">
-                            Descripción (opcional)
-                        </label>
-                        <textarea
-                            id="description"
-                            name="description"
-                            className={`w-full dark:text-white px-3 py-2 dark:bg-[#383939] border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${errors.description ? 'border-red-500' : 'border-gray-300 dark:border-[#202024]'}`}
-                            placeholder="Describe brevemente el contenido de la materia..."
-                            value={formData.description}
-                            onChange={handleChange}
-                        ></textarea>
-                        {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
-                    </div>
+                        <div className="space-y-2">
+                            <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-white">
+                                Descripción (opcional)
+                            </label>
+                            <textarea
+                                id="description"
+                                name="description"
+                                className={`w-full dark:text-white px-3 py-2 dark:bg-[#383939] border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${errors.description ? 'border-red-500' : 'border-gray-300 dark:border-[#202024]'}`}
+                                placeholder="Describe brevemente el contenido de la materia..."
+                                value={formData.description}
+                                onChange={handleChange}
+                            ></textarea>
+                            {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
+                        </div>
 
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-white">Verificación CAPTCHA</label>
-                        <ReCAPTCHA
-                            sitekey={SITE_KEY}
-                            onChange={handleCaptchaChange}
-                        />
-                        {errors.captcha && <p className="text-red-500 text-sm mt-1">{errors.captcha}</p>}
-                    </div>
+                        <div className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-white">Verificación CAPTCHA</label>
+                            <ReCAPTCHA
+                                sitekey={SITE_KEY}
+                                onChange={handleCaptchaChange}
+                            />
+                            {errors.captcha && <p className="text-red-500 text-sm mt-1">{errors.captcha}</p>}
+                        </div>
 
-                    <div className="pt-4 flex justify-end space-x-4">
-                        <button
-                            type="button"
-                            onClick={handleClose}
-                            className="px-4 py-2 border border-gray-300 dark:border-[#202024] bg-white dark:bg-[#383939] rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-[#ffffff0d] disabled:opacity-50"
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={isSaving}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md hover:cursor-pointer text-sm font-medium disabled:opacity-50"
-                        >
-                            {isSaving ? 'Guardando...' : 'Guardar Materia'}
-                        </button>
-                    </div>
-                </form>
+                        <div className="pt-4 flex justify-end space-x-4">
+                            <button
+                                type="button"
+                                onClick={handleClose}
+                                className="px-4 py-2 border border-gray-300 dark:border-[#202024] bg-white dark:bg-[#383939] rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-[#ffffff0d] disabled:opacity-50"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={isSaving}
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md hover:cursor-pointer text-sm font-medium disabled:opacity-50"
+                            >
+                                {isSaving ? 'Guardando...' : 'Guardar Materia'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
+        </Portal>
     );
 };
 

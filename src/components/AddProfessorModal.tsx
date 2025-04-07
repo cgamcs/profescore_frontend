@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import ReCAPTCHA from 'react-google-recaptcha';
 import api from '../api';
+import Portal from './Portal';
 
 interface Subject {
     _id: string;
@@ -185,84 +186,86 @@ const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjec
     }, []);
 
     return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center"
-            aria-modal="true"
-            role="dialog"
-        >
-            {/* Overlay con transición sincronizada */}
+        <Portal>
             <div
-                className={`absolute inset-0 bg-black transition-opacity duration-300 ease-in-out 
-                            ${isVisible && !isClosing ? 'opacity-60' : 'opacity-0'}`}
-                onClick={handleClose}
-            />
+                className="fixed inset-0 z-[100] flex items-center justify-center"
+                aria-modal="true"
+                role="dialog"
+            >
+                {/* Overlay con transición sincronizada */}
+                <div
+                    className={`fixed inset-0 bg-black transition-opacity duration-300 ease-in-out z-[101] ${isVisible && !isClosing ? 'opacity-60' : 'opacity-0'
+                        }`}
+                    onClick={handleClose}
+                />
 
-            {/* Contenido del modal con transición sincronizada */}
-            <div
-                className={`relative bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 w-full max-w-md transition-all duration-300 ease-in-out ${isVisible && !isClosing
+                {/* Contenido del modal con transición sincronizada */}
+                <div
+                    className={`relative bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 w-full max-w-md transition-all duration-300 ease-in-out z-[102] ${isVisible && !isClosing
                         ? 'opacity-100 transform translate-y-0 scale-100'
                         : 'opacity-0 transform -translate-y-4 scale-95'
-                    }`}
-            >
-                <h2 className="text-xl font-bold mb-4 dark:text-white">Agregar Nuevo Maestro</h2>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-white">Nombre completo</label>
-                        <input
-                            required
-                            value={formData.name}
-                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            placeholder="Ej. Juan Pérez Rodríguez"
-                            className="w-full px-3 py-2 dark:text-white dark:bg-[#383939] border border-gray-300 dark:border-[#202024] rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        />
-                        {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
-                    </div>
+                        }`}
+                >
+                    <h2 className="text-xl font-bold mb-4 dark:text-white">Agregar Nuevo Maestro</h2>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-white">Nombre completo</label>
+                            <input
+                                required
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                placeholder="Ej. Juan Pérez Rodríguez"
+                                className="w-full px-3 py-2 dark:text-white dark:bg-[#383939] border border-gray-300 dark:border-[#202024] rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            />
+                            {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
+                        </div>
 
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-white">Materia que imparte</label>
-                        <select
-                            required
-                            value={formData.subject}
-                            onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                            className="w-full px-3 py-2 dark:text-white dark:bg-[#383939] border border-gray-300 dark:border-[#202024] rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        >
-                            <option value="">Selecciona una materia</option>
-                            {subjects.map((subj: Subject) => (
-                                <option key={subj._id} value={subj._id}>{subj.name}</option>
-                            ))}
-                        </select>
-                        {errors.subject && <p className="text-red-600 text-sm mt-1">{errors.subject}</p>}
-                    </div>
+                        <div className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-white">Materia que imparte</label>
+                            <select
+                                required
+                                value={formData.subject}
+                                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                                className="w-full px-3 py-2 dark:text-white dark:bg-[#383939] border border-gray-300 dark:border-[#202024] rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            >
+                                <option value="">Selecciona una materia</option>
+                                {subjects.map((subj: Subject) => (
+                                    <option key={subj._id} value={subj._id}>{subj.name}</option>
+                                ))}
+                            </select>
+                            {errors.subject && <p className="text-red-600 text-sm mt-1">{errors.subject}</p>}
+                        </div>
 
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-white">Verificación CAPTCHA</label>
-                        <ReCAPTCHA
-                            sitekey={SITE_KEY}
-                            onChange={handleCaptchaChange}
-                        />
-                        {errors.captcha && <p className="text-red-600 text-sm mt-1">{errors.captcha}</p>}
-                    </div>
+                        <div className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-white">Verificación CAPTCHA</label>
+                            <ReCAPTCHA
+                                sitekey={SITE_KEY}
+                                onChange={handleCaptchaChange}
+                            />
+                            {errors.captcha && <p className="text-red-600 text-sm mt-1">{errors.captcha}</p>}
+                        </div>
 
-                    <div className="pt-4 flex justify-end space-x-4">
-                        <button
-                            type="button"
-                            onClick={triggerClose}
-                            disabled={isPending}
-                            className="px-4 py-2 border border-gray-300 dark:border-[#202024] bg-white dark:bg-[#383939] rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-[#ffffff0d] disabled:opacity-50"
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={isPending}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md hover:cursor-pointer text-sm font-medium disabled:opacity-50"
-                        >
-                            {isPending ? 'Guardando...' : 'Guardar Maestro'}
-                        </button>
-                    </div>
-                </form>
+                        <div className="pt-4 flex justify-end space-x-4">
+                            <button
+                                type="button"
+                                onClick={triggerClose}
+                                disabled={isPending}
+                                className="px-4 py-2 border border-gray-300 dark:border-[#202024] bg-white dark:bg-[#383939] rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-[#ffffff0d] disabled:opacity-50"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={isPending}
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md hover:cursor-pointer text-sm font-medium disabled:opacity-50"
+                            >
+                                {isPending ? 'Guardando...' : 'Guardar Maestro'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
+        </Portal>
     );
 };
 

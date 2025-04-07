@@ -3,8 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { FacultyListLoader } from './SkeletonLoader';
 import api from '../api';
+import useViewTransition from './useViewTransition';
 
 const FacultyList: React.FC = () => {
+  const { handleLinkClick } = useViewTransition();
   const { data: faculties = [], isLoading, error } = useQuery({
     queryKey: ['faculties'],
     queryFn: () => api.get('/faculties').then(res => res.data.faculties),
@@ -15,7 +17,7 @@ const FacultyList: React.FC = () => {
   if (error) return <div className="text-center text-red-500 py-10">Error al cargar las facultades</div>;
 
   return (
-    <section className="pb-12 bg-white dark:bg-[#0A0A0A]">
+    <section id="main-content" data-view-transition className="pb-12 bg-white dark:bg-[#0A0A0A]">
       <div className="container mx-auto px-4">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Lista de Facultades</h2>
@@ -27,6 +29,7 @@ const FacultyList: React.FC = () => {
             <Link
               key={faculty._id}
               to={`/facultad/${faculty._id}`}
+              onClick={(e) => handleLinkClick(`/facultad/${faculty._id}`, e)}
               className="bg-white dark:bg-[#202024] border border-gray-200 dark:border-[#202024] rounded-lg p-4 text-center hover:bg-indigo-600 hover:text-white dark:hover:border-indigo-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
               <h3 className="dark:text-white font-bold text-lg mb-1">{faculty.abbreviation}</h3>

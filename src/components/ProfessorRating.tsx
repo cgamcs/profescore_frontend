@@ -147,6 +147,25 @@ const ProfessorRating = () => {
     }
   };
 
+      // En ambos componentes, añadir este useEffect
+      useEffect(() => {
+        document.title = `ProfeScore - Califcación`;
+
+        const mainElement = document.getElementById('main-content');
+        if (mainElement) {
+            mainElement.style.viewTransitionName = 'main-content';
+            mainElement.style.contain = 'layout';
+        }
+
+        return () => {
+            const mainElement = document.getElementById('main-content');
+            if (mainElement) {
+                mainElement.style.viewTransitionName = '';
+                mainElement.style.contain = '';
+            }
+        };
+    }, []);
+
   const renderRatingButtons = (field: keyof RatingForm) => {
     return [1, 2, 3, 4, 5].map(value => (
       <div key={`${field}-${value}`} className="flex flex-col items-center">
@@ -165,8 +184,8 @@ const ProfessorRating = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-[#0A0A0A] min-h-screen">
-      <main className="container mx-auto px-4 py-6">
+    <>
+      <main id="main-content" data-view-transition className="container mx-auto px-4 py-6">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-2xl dark:text-white font-bold mb-6">Calificar a {professor?.name}</h1>
 
@@ -265,7 +284,7 @@ const ProfessorRating = () => {
                 name="comment"
                 placeholder="Comparte tu experiencia con este profesor..."
                 rows={5}
-                className="w-full px-3 py-2 dark:text-white border-2 border-gray-300 dark:border-[#202024] rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 dark:text-white dark:bg-[#383939] border-2 border-gray-300 dark:border-[#202024] rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 value={formData.comment}
                 onChange={handleCommentChange}
               ></textarea>
@@ -300,7 +319,7 @@ const ProfessorRating = () => {
           </form>
         </div>
       </main>
-    </div>
+    </>
   );
 };
 

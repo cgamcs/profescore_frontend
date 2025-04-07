@@ -3,7 +3,7 @@ import Header from './Header';
 
 const LayoutWithHeader = () => {
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0A0A0A] scrollbar-none">
+    <div id="main-content" data-view-transition className="min-h-screen bg-white dark:bg-[#0A0A0A] scrollbar-none">
       <Header />
       <main>
         <Outlet />
