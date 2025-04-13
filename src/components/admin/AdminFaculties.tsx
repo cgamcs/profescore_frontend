@@ -30,10 +30,6 @@ interface Faculty {
   departments: string[];
 }
 
-interface Department {
-  _id: string;
-}
-
 const AdminFaculties: React.FC = () => {
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
