@@ -1,5 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Pencil, Trash2, Plus } from "lucide-react";
+import { useToast } from "../../hooks/use-toast";
+import { Button } from "../ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "../ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from "../ui/dialog";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import axios from 'axios';
 
 interface Faculty {
   _id: string;
@@ -8,31 +30,41 @@ interface Faculty {
   departments: string[];
 }
 
+interface Department {
+  _id: string;
+}
+
 const AdminFaculties: React.FC = () => {
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedFaculty, setSelectedFaculty] = useState<Faculty | null>(null);
-  const [confirmationInput, setConfirmationInput] = useState('');
-  const [error, setError] = useState('');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [currentFaculty, setCurrentFaculty] = useState<{ 
+    _id?: string; 
+    name: string; 
+    abbreviation: string; 
+    departments: string[] 
+  }>({ 
+    name: "", 
+    abbreviation: "", 
+    departments: [] 
+  });
+  const [facultyToDelete, setFacultyToDelete] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Fetch faculties from API
+  const { toast } = useToast();
+
   const fetchFaculties = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/faculty`, {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/faculty`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
-
-      if (!response.ok) throw new Error('Error al obtener facultades');
-
-      const data = await response.json();
-      setFaculties(data);
+      setFaculties(response.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      console.error('Error fetching faculties:', err);
     }
   };
 
@@ -51,176 +83,224 @@ const AdminFaculties: React.FC = () => {
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   };
 
-  // Handle search
   const filteredFaculties = faculties.filter(faculty =>
     normalizeString(faculty.name).includes(normalizeString(searchTerm)) ||
     normalizeString(faculty.abbreviation).includes(normalizeString(searchTerm))
   );
 
-  // Handle deletion
-  const handleDelete = async () => {
-    if (!selectedFaculty) return;
+  const handleAddFaculty = () => {
+    setCurrentFaculty({ name: "", abbreviation: "", departments: [] });
+    setIsDialogOpen(true);
+  };
 
-    // Check if confirmation input matches exactly
-    if (normalizeString(confirmationInput.trim()) !== normalizeString(selectedFaculty.name.trim())) {
-      setError('El nombre ingresado no coincide');
+  const handleEditFaculty = (faculty: Faculty) => {
+    setCurrentFaculty({ 
+      _id: faculty._id, 
+      name: faculty.name, 
+      abbreviation: faculty.abbreviation, 
+      departments: faculty.departments 
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleDeleteFaculty = (id: string) => {
+    setFacultyToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleSaveFaculty = async () => {
+    if (!currentFaculty.name.trim() || !currentFaculty.abbreviation.trim()) {
+      toast({
+        title: "Error",
+        description: "El nombre y la abreviatura son obligatorios",
+        variant: "destructive",
+      });
       return;
     }
 
     try {
-      // Send delete request to backend
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/faculty/${selectedFaculty._id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const token = localStorage.getItem('token');
+      const dataToSend = {
+        name: currentFaculty.name,
+        abbreviation: currentFaculty.abbreviation,
+        departments: currentFaculty.departments.map(id => ({ _id: id }))
+      };
 
-      if (!response.ok) throw new Error('Error al eliminar facultad');
+      if (currentFaculty._id) {
+        await axios.put(
+          `${import.meta.env.VITE_API_URL}/admin/faculty/${currentFaculty._id}`,
+          dataToSend,
+          { headers: { 'Authorization': `Bearer ${token}` } }
+        );
+        toast({
+          title: "Facultad actualizada",
+          description: `Facultad "${currentFaculty.name}" actualizada correctamente.`,
+        });
+      } else {
+        await axios.post(
+          `${import.meta.env.VITE_API_URL}/admin/faculty`,
+          dataToSend,
+          { headers: { 'Authorization': `Bearer ${token}` } }
+        );
+        toast({
+          title: "Facultad creada",
+          description: `Facultad "${currentFaculty.name}" creada correctamente.`,
+        });
+      }
 
-      // Remove faculty from local state
-      setFaculties(prev => prev.filter(f => f._id !== selectedFaculty._id));
-
-      // Reset modal state
-      setShowDeleteModal(false);
-      setConfirmationInput('');
-      setSelectedFaculty(null);
+      fetchFaculties();
+      setIsDialogOpen(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al eliminar');
+      console.error('Error saving faculty:', err);
+      toast({
+        title: "Error",
+        description: "Ocurrió un error al guardar la facultad",
+        variant: "destructive",
+      });
     }
   };
 
-  if (error) return <div className="text-red-500 text-center py-8">{error}</div>;
+  const handleConfirmDelete = async () => {
+    if (facultyToDelete) {
+      try {
+        const token = localStorage.getItem('token');
+        await axios.delete(`${import.meta.env.VITE_API_URL}/admin/faculty/${facultyToDelete}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        setFaculties(faculties.filter(f => f._id !== facultyToDelete));
+        setIsDeleteDialogOpen(false);
+        toast({
+          title: "Facultad eliminada",
+          description: "Facultad eliminada correctamente.",
+        });
+      } catch (err) {
+        console.error('Error deleting faculty:', err);
+        toast({
+          title: "Error",
+          description: "Ocurrió un error al eliminar la facultad",
+          variant: "destructive",
+        });
+      }
+    }
+  };
 
   return (
     <div className="bg-white min-h-screen">
-      {/* Contenido principal */}
       <main className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Administrar Facultades</h1>
-          <Link
-            to="/admin/facultades/agregar"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white text-center px-4 py-2 rounded-md text-sm font-medium flex gap-2 items-center"
-          >
-            <div className="hidden md:block">
-              <i className="fa-solid fa-plus"></i>
-            </div>
-            Agregar Facultad
-          </Link>
+          <h1 className="text-3xl font-bold">Facultades</h1>
+          <Button className='bg-black text-white' onClick={handleAddFaculty}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nueva Facultad
+          </Button>
         </div>
 
-        {/* Barra de búsqueda */}
         <div className="relative w-full max-w-md mb-6">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Buscar por nombre o abreviatura..."
-              className="w-full border border-gray-200 px-4 py-3 rounded-xl shadow-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            `
-          </div>
+          <input
+            type="text"
+            placeholder="Buscar por nombre o abreviatura..."
+            className="w-full border border-gray-200 px-4 py-3 rounded-xl shadow-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
 
-        {/* Tabla de facultades */}
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Abreviatura</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredFaculties.map(faculty => (
-                  <tr key={faculty._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap font-medium">{faculty.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{faculty.abbreviation}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <div className="flex space-x-2">
-                        <Link
-                          to={`/admin/facultades/${faculty._id}`}
-                          className="text-indigo-600 hover:text-indigo-900"
-                        >
-                          <i className="fa-solid fa-pen-to-square"></i>
-                        </Link>
-                        <button
-                          onClick={() => {
-                            setSelectedFaculty(faculty);
-                            setShowDeleteModal(true);
-                          }}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          <i className="fa-solid fa-trash"></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {filteredFaculties.length === 0 && (
-            <div className="text-center py-4">
-              <span className="loader"></span>
-            </div>
-          )}
+        <div className="border border-gray-200 rounded-md">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nombre</TableHead>
+                <TableHead>Abreviatura</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredFaculties.map(faculty => (
+                <TableRow key={faculty._id}>
+                  <TableCell>{faculty.name}</TableCell>
+                  <TableCell>{faculty.abbreviation}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleEditFaculty(faculty)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="text-red-500 hover:bg-red-100"
+                        onClick={() => handleDeleteFaculty(faculty._id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       </main>
 
-      {/* Secure Delete Modal */}
-      {showDeleteModal && selectedFaculty && (
-        <div className="fixed inset-0 backdrop-brightness-50 backdrop-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Eliminar Facultad</h3>
-            <p className="text-sm text-gray-500 mb-4">
-              Estás a punto de eliminar la facultad <strong>"{selectedFaculty.name}"</strong>.
-              Esta acción eliminará TODA la información relacionada, incluyendo:
-              <ul className="list-disc list-inside text-sm text-gray-600 mt-2">
-                <li>Departamentos</li>
-                <li>Materias</li>
-                <li>Profesores</li>
-                <li>Calificaciones de profesores</li>
-              </ul>
-            </p>
-            <p className="text-sm text-gray-500 mb-4">
-              Para confirmar, escribe el nombre exacto de la facultad:
-            </p>
-            <input
-              type="text"
-              placeholder={`Escribe "${selectedFaculty.name}"`}
-              value={confirmationInput}
-              onChange={(e) => setConfirmationInput(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 mb-4 text-sm"
-            />
-            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setConfirmationInput('');
-                  setError('');
-                }}
-                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleDelete}
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
-                disabled={normalizeString(confirmationInput.trim()) !== normalizeString(selectedFaculty.name.trim())}
-              >
-                Eliminar Permanentemente
-              </button>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {currentFaculty._id ? "Editar Facultad" : "Nueva Facultad"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Nombre</Label>
+              <Input
+                value={currentFaculty.name}
+                className='border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-white focus:border-indigo-500'
+                onChange={(e) => setCurrentFaculty({...currentFaculty, name: e.target.value})}
+                placeholder="Ej. Facultad de Ingeniería"
+              />
+            </div>
+            <div>
+              <Label>Abreviatura</Label>
+              <Input
+                value={currentFaculty.abbreviation}
+                className='border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-white focus:border-indigo-500'
+                onChange={(e) => setCurrentFaculty({...currentFaculty, abbreviation: e.target.value})}
+                placeholder="Ej. FI"
+              />
             </div>
           </div>
-        </div>
-      )}
+          <DialogFooter>
+            <Button variant="cancel" onClick={() => setIsDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button variant="save" onClick={handleSaveFaculty}>
+              {currentFaculty._id ? "Guardar cambios" : "Crear facultad"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>¿Eliminar facultad?</DialogTitle>
+            <DialogDescription>
+              Esta acción no se puede deshacer. ¿Confirmas que deseas eliminar esta facultad?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="cancel" onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmDelete}>
+              Eliminar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Users, BookOpen, Building2, MessageSquare } from "lucide-react";
 import axios from 'axios';
 
 // Interfaces for our data types
@@ -104,17 +105,18 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <main className="container mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold mb-6">Panel de Administración</h1>
+      <h1 className="text-2xl font-bold">Panel de Administración</h1>
+      <p className="text-gray-500 mb-6">Resumen del sistema de calificación de maestros</p>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Link to="/admin/facultades" className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 hover:shadow-md transition-shadow">
+        <Link to="/admin/profesores" className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Facultades</p>
-              <p className="text-2xl font-bold mt-1">{stats.facultiesCount}</p>
+              <p className="text-sm text-gray-500">Profesores</p>
+              <p className="text-2xl font-bold mt-1">{stats.professorsCount}</p>
             </div>
-            <div className="text-3xl">🏛️</div>
+            <div className="bg-blue-100 text-blue-600 text-3xl p-2 rounded-full"><Users /></div>
           </div>
         </Link>
 
@@ -124,27 +126,27 @@ const AdminDashboard: React.FC = () => {
               <p className="text-sm text-gray-500">Materias</p>
               <p className="text-2xl font-bold mt-1">{stats.subjectsCount}</p>
             </div>
-            <div className="text-3xl">📚</div>
+            <div className="bg-purple-100 text-purple-600 text-3xl p-2 rounded-full"><BookOpen /></div>
           </div>
         </Link>
 
-        <Link to="/admin/profesores" className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 hover:shadow-md transition-shadow">
+        <Link to="/admin/facultades" className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Profesores</p>
-              <p className="text-2xl font-bold mt-1">{stats.professorsCount}</p>
+              <p className="text-sm text-gray-500">Facultades</p>
+              <p className="text-2xl font-bold mt-1">{stats.facultiesCount}</p>
             </div>
-            <div className="text-3xl">👨‍🏫</div>
+            <div className="bg-amber-100 text-amber-600 text-3xl p-2 rounded-full"><Building2 /></div>
           </div>
         </Link>
 
         <Link to="/admin/resenas" className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Reseñas</p>
+              <p className="text-sm text-gray-500">Comentarios</p>
               <p className="text-2xl font-bold mt-1">{stats.ratingsCount}</p>
             </div>
-            <div className="text-3xl">⭐</div>
+            <div className="bg-emerald-100 text-emerald-600 text-3xl p-2 rounded-full"><MessageSquare /></div>
           </div>
         </Link>
       </div>
