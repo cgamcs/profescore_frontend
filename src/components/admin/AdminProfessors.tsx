@@ -1,343 +1,635 @@
-import React, { useEffect, useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
+import { useToast } from "../../hooks/use-toast";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from "../../components/ui/table";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle 
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from "../../components/ui/dialog";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
 import { Label } from "../../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { useToast } from "../../hooks/use-toast";
 import { Badge } from "../../components/ui/badge";
-import { Plus, Search, MoreHorizontal, Star, Eye, Trash } from "lucide-react";
+import { Plus, MoreHorizontal, Star, Trash2, Edit, ChevronLeft, ChevronRight, Eye, Users } from "lucide-react";
+import { Avatar, AvatarFallback } from "../../components/ui/avatar";
+import SubjectSelector from '../ui/subjectselector';
+
+const API_URL = import.meta.env.VITE_API_URL;
+const ITEMS_PER_PAGE = 10;
 
 interface IFaculty {
-  _id: string;
-  name: string;
+    _id: string;
+    name: string;
+    abbreviation?: string;
 }
 
 interface IProfessor {
-  _id: string;
-  name: string;
-  faculty: string;
-  facultyId: string;
-  subjects: string[];
-  ratingStats: {
-    averageGeneral: number;
-    totalRatings: number;
-  };
+    _id: string;
+    name: string;
+    faculty: string;
+    facultyAbbreviation?: string;
+    facultyId: string;
+    subjects: string[];
+    ratingStats: {
+        averageGeneral: number;
+        averageExplanation: number;
+        averageAccessibility: number;
+        averageDifficulty: number;
+        averageAttendance: number;
+        totalRatings: number;
+    };
 }
 
-const AdminProfessors: React.FC = () => {
-  const [professors, setProfessors] = useState<IProfessor[]>([]);
-  const [faculties, setFaculties] = useState<IFaculty[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [professorToDelete, setProfessorToDelete] = useState<IProfessor | null>(null);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedFaculty, setSelectedFaculty] = useState('');
-  const [confirmName, setConfirmName] = useState('');
-  const navigate = useNavigate();
-  const { toast } = useToast();
+interface ISubject {
+    _id: string;
+    name: string;
+    facultyId: string;
+}
 
-  useEffect(() => {
-    const fetchProfessors = async () => {
-      try {
-        const [professorsRes, facultiesRes] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_API_URL}/admin/professors`, {
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-          }),
-          axios.get(`${import.meta.env.VITE_API_URL}/admin/faculty`, {
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-          })
-        ]);
+const normalizeString = (str = '') =>
+    str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-        const faculties = facultiesRes.data;
-        const professorsWithFacultyId = professorsRes.data.map((professor: any) => {
-          const faculty = faculties.find((f: IFaculty) => f.name === professor.faculty);
-          return {
-            ...professor,
-            faculty: professor.faculty,
-            facultyId: faculty?._id || ''
-          };
+const AdminProfessors = () => {
+    const { toast } = useToast();
+    const [professors, setProfessors] = useState<IProfessor[]>([]);
+    const [faculties, setFaculties] = useState<IFaculty[]>([]);
+    const [allSubjects, setAllSubjects] = useState<ISubject[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [openDialog, setOpenDialog] = useState(false);
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+    const [openViewDialog, setOpenViewDialog] = useState(false);
+    const [professorToDelete, setProfessorToDelete] = useState<IProfessor | null>(null);
+    const [currentProfessor, setCurrentProfessor] = useState<IProfessor | null>(null);
+    const [viewingProfessor, setViewingProfessor] = useState<IProfessor | null>(null);
+    const [confirmName, setConfirmName] = useState('');
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [isInitialDataLoaded, setIsInitialDataLoaded] = useState(false);
+    const [isLoadingAction, setIsLoadingAction] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+
+    // Filtrado y paginación
+    const filteredProfessors = useMemo(() => {
+        if (!searchTerm.trim()) return professors;
+        const normalizedSearch = normalizeString(searchTerm);
+        return professors.filter(professor =>
+            normalizeString(professor.name).includes(normalizedSearch) ||
+            normalizeString(professor.facultyAbbreviation).includes(normalizedSearch) ||
+            professor.subjects.some(subject => normalizeString(subject).includes(normalizedSearch))
+        );
+    }, [professors, searchTerm]);
+
+    const paginatedProfessors = useMemo(() => {
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        return filteredProfessors.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+    }, [filteredProfessors, currentPage]);
+
+    const totalPages = useMemo(() =>
+        Math.max(1, Math.ceil(filteredProfessors.length / ITEMS_PER_PAGE)),
+        [filteredProfessors.length]
+    );
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm]);
+
+    // Carga inicial de datos
+    useEffect(() => {
+        const fetchInitialData = async () => {
+            try {
+                const [professorsRes, facultiesRes] = await Promise.all([
+                    axios.get(`${API_URL}/admin/professors`, {
+                        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                    }),
+                    axios.get(`${API_URL}/admin/faculty`, {
+                        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                    })
+                ]);
+
+                const professorsWithFacultyId = professorsRes.data.map((professor: any) => {
+                    const faculty = facultiesRes.data.find((f: IFaculty) => f.name === professor.faculty);
+                    return {
+                        ...professor,
+                        facultyId: faculty?._id || '',
+                        facultyAbbreviation: faculty?.abbreviation || '' // Incluir la abreviatura
+                    };
+                });
+
+                setProfessors(professorsWithFacultyId);
+                setFaculties(facultiesRes.data);
+                setIsInitialDataLoaded(true);
+            } catch (error) {
+                toast({
+                    title: 'Error',
+                    description: 'Error cargando datos iniciales',
+                    variant: 'destructive'
+                });
+            }
+        };
+
+        fetchInitialData();
+    }, []);
+
+    // Carga de todas las materias para todas las facultades
+    useEffect(() => {
+        const fetchAllSubjects = async () => {
+            if (!isInitialDataLoaded || faculties.length === 0) return;
+
+            try {
+                const subjectsPromises = faculties.map(faculty =>
+                    axios.get(`${API_URL}/admin/faculty/${faculty._id}/subjects`, {
+                        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                    })
+                );
+
+                const responses = await Promise.all(subjectsPromises);
+                const allSubjectsData = responses.flatMap((res, index) =>
+                    res.data.map((subject: any) => ({
+                        ...subject,
+                        facultyId: faculties[index]._id
+                    }))
+                );
+
+                setAllSubjects(allSubjectsData);
+            } catch (error) {
+                toast({
+                    title: 'Error',
+                    description: 'Error cargando materias',
+                    variant: 'destructive'
+                });
+            }
+        };
+
+        fetchAllSubjects();
+    }, [isInitialDataLoaded, faculties]);
+
+    // Handlers
+    const handleOpenAddDialog = () => {
+        setCurrentProfessor({
+            _id: '',
+            name: '',
+            faculty: '',
+            facultyId: '',
+            subjects: [],
+            ratingStats: {
+                averageGeneral: 0,
+                averageExplanation: 0,
+                averageAccessibility: 0,
+                averageDifficulty: 0,
+                averageAttendance: 0,
+                totalRatings: 0
+            }
         });
-        setProfessors(professorsWithFacultyId);
-        setFaculties(faculties);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
+        setErrors({});
+        setOpenDialog(true);
     };
 
-    fetchProfessors();
-  }, []);
+    const handleEditProfessor = (professor: IProfessor) => {
+        setCurrentProfessor({
+            ...professor,
+            subjects: professor.subjects.map(subjectName => {
+                const subject = allSubjects.find(s => s.name === subjectName);
+                return subject ? subject._id : '';
+            }),
+            facultyAbbreviation: professor.facultyAbbreviation // Incluir la abreviatura
+        });
+        setOpenDialog(true);
+    };
 
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
-  };
+    const handleViewProfessor = (professor: IProfessor) => {
+        setViewingProfessor(professor);
+        setOpenViewDialog(true);
+    };
 
-  const normalizeString = (str: string) => {
-    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  };
+    const handleSaveProfessor = async () => {
+        if (!currentProfessor) return;
 
-  const filteredProfessors = professors.filter(professor =>
-    normalizeString(professor.name).includes(normalizeString(searchTerm)) ||
-    normalizeString(professor.faculty).includes(normalizeString(searchTerm)) ||
-    professor.subjects.some(subject => normalizeString(subject).includes(normalizeString(searchTerm)))
-  );
+        const newErrors: { [key: string]: string } = {};
+        if (!currentProfessor.name.trim()) newErrors.name = 'Nombre requerido';
+        if (!currentProfessor.facultyId) newErrors.faculty = 'Facultad requerida';
+        if (currentProfessor.subjects.length === 0) newErrors.subjects = 'Selecciona al menos una materia';
 
-  const handleDelete = async (professor: IProfessor) => {
-    if (confirmName === professor.name) {
-      const faculty = faculties.find(f => f._id === professor.facultyId);
-      if (faculty) {
-        try {
-          await axios.delete(`${import.meta.env.VITE_API_URL}/admin/faculty/${professor.facultyId}/professor/${professor._id}`, {
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-          });
-          setProfessors(professors.filter(p => p._id !== professor._id));
-          setProfessorToDelete(null);
-          setConfirmName('');
-          toast({
-            title: "Profesor eliminado",
-            description: `El profesor "${professor.name}" ha sido eliminado correctamente.`,
-          });
-        } catch (error) {
-          console.error('Error deleting professor:', error);
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
         }
-      } else {
-        alert('No se encontró la facultad asociada al profesor.');
-      }
-    } else {
-      alert('El nombre ingresado no coincide con el nombre del profesor.');
-    }
-  };
 
-  const handleFacultySelect = (facultyId: string) => {
-    setSelectedFaculty(facultyId);
-  };
+        try {
+            setIsLoadingAction(true);
 
-  const handleAddProfessor = () => {
-    if (selectedFaculty) {
-      navigate(`/admin/facultad/${selectedFaculty}/maestro/multiple`);
-      setShowAddModal(false);
-    }
-  };
+            // Find the faculty name and abbreviation from the facultyId
+            const faculty = faculties.find(f => f._id === currentProfessor.facultyId);
+            if (!faculty) {
+                throw new Error('Facultad no encontrada');
+            }
 
-  const getRatingColor = (rating: number) => {
-    if (rating >= 4.5) return "text-green-500";
-    if (rating >= 4.0) return "text-emerald-500";
-    if (rating >= 3.5) return "text-amber-500";
-    if (rating >= 3.0) return "text-orange-500";
-    return "text-red-500";
-  };
+            const payload = {
+                name: currentProfessor.name,
+                facultyId: currentProfessor.facultyId,
+                subjects: currentProfessor.subjects // Aquí se envían los IDs de las materias
+            };
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Administrar Profesores</h1>
-        <p className="text-muted-foreground">Gestiona los profesores de la universidad</p>
-      </div>
+            const endpoint = currentProfessor._id ?
+                `${API_URL}/admin/faculty/${currentProfessor.facultyId}/professor/${currentProfessor._id}` :
+                `${API_URL}/admin/faculty/${currentProfessor.facultyId}/professor/multiple`;
 
-      <Card>
-        <CardHeader className="flex-row justify-between items-center space-y-0 gap-4">
-          <div>
-            <CardTitle>Lista de Profesores</CardTitle>
-            <CardDescription>Todos los profesores disponibles en el sistema</CardDescription>
-          </div>
-          <Button onClick={() => setShowAddModal(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Nuevo Profesor
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <div className="flex mb-4">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Buscar profesores..."
-                className="pl-8"
-                value={searchTerm}
-                onChange={handleSearch}
-              />
-            </div>
-          </div>
+            const response = await axios[currentProfessor._id ? 'put' : 'post'](endpoint, payload, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
 
-          <div className="border rounded-md">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Profesor</TableHead>
-                  <TableHead>Facultad</TableHead>
-                  <TableHead>Materias</TableHead>
-                  <TableHead>Calificación</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredProfessors.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
-                      No se encontraron profesores
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredProfessors.map((professor) => (
-                    <TableRow key={professor._id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="font-medium">{professor.name}</div>
+            // Ensure faculty name and abbreviation are included in the updated professor data
+            const updatedProfessor = {
+                ...response.data,
+                faculty: faculty.name,
+                facultyAbbreviation: faculty.abbreviation, // Incluir la abreviatura
+                subjects: Array.isArray(response.data.subjects) ? response.data.subjects.map((subjectId: string) => {
+                    const subject = allSubjects.find(s => s._id === subjectId);
+                    return subject ? subject.name : '';
+                }) : []
+            };
+
+            setProfessors(prev => {
+                if (currentProfessor._id) {
+                    return prev.map(p => p._id === currentProfessor._id ? updatedProfessor : p);
+                } else {
+                    return [...prev, updatedProfessor];
+                }
+            });
+
+            toast({
+                title: 'Éxito',
+                description: `Profesor ${currentProfessor._id ? 'actualizado' : 'creado'} correctamente`
+            });
+
+            setOpenDialog(false);
+        } catch (error) {
+            toast({
+                title: 'Error',
+                description: `Error ${currentProfessor._id ? 'actualizando' : 'creando'} profesor`,
+                variant: 'destructive'
+            });
+            console.log(error)
+        } finally {
+            setIsLoadingAction(false);
+        }
+    };
+
+    const getInitials = (name: string) =>
+        name.split(' ').map(word => word[0]).join('').toUpperCase();
+
+    const getRatingColor = (rating: number) => {
+        if (rating >= 4.5) return "text-green-500";
+        if (rating >= 4.0) return "text-emerald-500";
+        if (rating >= 3.5) return "text-amber-500";
+        if (rating >= 3.0) return "text-orange-500";
+        return "text-red-500";
+    };
+
+    const handleFacultyChange = (value: string) => {
+        if (!currentProfessor) return;
+
+        const faculty = faculties.find(f => f._id === value);
+        setCurrentProfessor({
+            ...currentProfessor,
+            facultyId: value,
+            faculty: faculty?.name || '',
+            subjects: [] // Reset subjects when faculty changes
+        });
+    };
+
+    return (
+        <div className="bg-white min-h-screen">
+            <main className="container mx-auto px-4 py-6">
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-3xl font-bold">Profesores</h1>
+                    <Button
+                        className="bg-black text-white hover:cursor-pointer"
+                        onClick={handleOpenAddDialog}
+                    >
+                        <Plus className="w-4 h-4 mr-2" /> Nuevo Profesor
+                    </Button>
+                </div>
+
+                <div className="relative w-full max-w-md mb-6">
+                    <Input
+                        type="text"
+                        placeholder="Buscar por nombre o facultad..."
+                        className="w-full border border-gray-200 px-4 py-3 rounded-xl shadow-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none ring-0"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+
+                <div className="border border-gray-300 rounded-lg overflow-hidden">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Profesor</TableHead>
+                                <TableHead>Facultad</TableHead>
+                                <TableHead>Materias</TableHead>
+                                <TableHead>Calificación</TableHead>
+                                <TableHead className="text-right">Acciones</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {paginatedProfessors.map((professor) => (
+                                <TableRow key={professor._id}>
+                                    <TableCell>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
+                                                <Users className="h-5 w-5 text-blue-600" />
+                                            </div>
+                                            <span className="font-medium">{professor.name}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>{professor.facultyAbbreviation}</TableCell> {/* Mostrar la abreviatura */}
+                                    <TableCell>
+                                        <div className="flex flex-wrap gap-1">
+                                            {professor.subjects.slice(0, 3).map((subject, index) => (
+                                                <Badge key={index} variant="outline">{subject}</Badge>
+                                            ))}
+                                            {professor.subjects.length > 3 && (
+                                                <Badge variant="outline">+{professor.subjects.length - 3}</Badge>
+                                            )}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center gap-1">
+                                            <Star className={`h-4 w-4 ${getRatingColor(professor.ratingStats.averageGeneral)}`} />
+                                            <span className={getRatingColor(professor.ratingStats.averageGeneral)}>
+                                                {professor.ratingStats.averageGeneral.toFixed(1)}
+                                            </span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon">
+                                                    <MoreHorizontal className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="bg-white">
+                                                <DropdownMenuItem className="cursor-pointer hover:bg-gray-100" onClick={() => handleViewProfessor(professor)}>
+                                                    <Eye className="mr-2 h-4 w-4" /> Ver Detalles
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem className="cursor-pointer hover:bg-gray-100" onClick={() => handleEditProfessor(professor)}>
+                                                    <Edit className="mr-2 h-4 w-4" /> Editar
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    className="text-red-500 cursor-pointer hover:bg-gray-100"
+                                                    onClick={() => {
+                                                        setProfessorToDelete(professor);
+                                                        setOpenDeleteDialog(true);
+                                                    }}
+                                                >
+                                                    <Trash2 className="mr-2 h-4 w-4" /> Eliminar
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+
+                {/* Paginación */}
+                <div className="flex justify-center items-center gap-4 mt-4">
+                    <Button
+                        variant="outline"
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                    >
+                        <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span>Página {currentPage} de {totalPages}</span>
+                    <Button
+                        variant="outline"
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                    >
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
+                </div>
+
+                {/* Modal Editar/Crear */}
+                <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+                    <DialogContent className="w-full">
+                        <DialogHeader>
+                            <DialogTitle>
+                                {currentProfessor ? "Editar Profesor" : "Nuevo Profesor"}
+                            </DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label>Nombre Completo</Label>
+                                <Input
+                                    value={currentProfessor?.name || ''}
+                                    onChange={(e) => setCurrentProfessor(prev =>
+                                        prev ? { ...prev, name: e.target.value } : null
+                                    )}
+                                />
+                                {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="faculty">Facultad</Label>
+                                <Select
+                                    value={currentProfessor?.facultyId || ''}
+                                    onValueChange={handleFacultyChange}
+                                >
+                                    <SelectTrigger id="faculty">
+                                        <SelectValue placeholder="Selecciona una facultad" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-white">
+                                        {faculties.map((faculty) => (
+                                            <SelectItem
+                                                key={faculty._id}
+                                                value={faculty._id}
+                                                className="hover:bg-gray-100"
+                                            >
+                                                {faculty.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {errors.faculty && <p className="text-red-500 text-sm">{errors.faculty}</p>}
+                            </div>
+
+                            <div className="space-y-2">
+                                <SubjectSelector
+                                    allSubjects={allSubjects}
+                                    selectedSubjects={currentProfessor?.subjects || []}
+                                    facultyId={currentProfessor?.facultyId || ''}
+                                    onChange={(newSubjects) => setCurrentProfessor(prev =>
+                                        prev ? { ...prev, subjects: newSubjects } : null
+                                    )}
+                                    error={errors.subjects}
+                                />
+                            </div>
                         </div>
-                      </TableCell>
-                      <TableCell>{professor.faculty}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {professor.subjects.map((subject: string, index: number) => (
-                            <Badge key={index} variant="outline" className="bg-slate-100">
-                              {subject}
-                            </Badge>
-                          ))}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Star className={`h-4 w-4 ${getRatingColor(professor.ratingStats.averageGeneral)}`} fill="currentColor" />
-                          <span className={`font-medium ${getRatingColor(professor.ratingStats.averageGeneral)}`}>
-                            {professor.ratingStats.averageGeneral.toFixed(1)}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
+                        <DialogFooter>
+                            <Button variant="cancel" onClick={() => setOpenDialog(false)}>
+                                Cancelar
                             </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem asChild>
-                              <Link to={`/admin/facultad/${professor.facultyId}/maestro/${professor._id}`}>
-                                <Eye className="mr-2 h-4 w-4" />
-                                Ver detalles
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <Link to={`/admin/facultad/${professor.facultyId}/maestro/${professor._id}/editar`}>
-                                <svg className="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                                Editar
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive" onClick={() => setProfessorToDelete(professor)}>
-                              <Trash className="mr-2 h-4 w-4" />
-                              Eliminar
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                            <Button variant="save" onClick={handleSaveProfessor} disabled={isLoadingAction}>
+                                {isLoadingAction ? 'Guardando...' : 'Guardar'}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
 
-      {professorToDelete && (
-        <Dialog open={!!professorToDelete}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Eliminar Profesor</DialogTitle>
-              <DialogDescription>
-                ¿Estás seguro de que deseas eliminar al profesor "{professorToDelete.name}"? Esta acción no se puede deshacer.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-2">
-              <div className="space-y-2">
-                <Label htmlFor="confirm-name">Escribe el nombre del profesor para confirmar:</Label>
-                <Input
-                  id="confirm-name"
-                  value={confirmName}
-                  onChange={(e) => setConfirmName(e.target.value)}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setProfessorToDelete(null)}>
-                Cancelar
-              </Button>
-              <Button variant="destructive" onClick={() => handleDelete(professorToDelete)}>
-                Eliminar
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+                {/* Modal Ver Detalles */}
+                <Dialog open={openViewDialog} onOpenChange={setOpenViewDialog}>
+                    <DialogContent className="max-w-md">
+                        <DialogHeader>
+                            <DialogTitle>Detalles del Profesor</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                            <div className="flex flex-col items-center">
+                                <Avatar className="h-24 w-24 bg-gray-300">
+                                    <AvatarFallback className="text-2xl">
+                                        {getInitials(viewingProfessor?.name || '')}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <h2 className="text-2xl font-bold mt-4">{viewingProfessor?.name}</h2>
+                                <p className="text-muted-foreground">{viewingProfessor?.faculty}</p>
+                            </div>
 
-      {showAddModal && (
-        <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Agregar Profesor</DialogTitle>
-              <DialogDescription>
-                Selecciona la facultad para agregar un nuevo profesor.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-2">
-              <div className="space-y-2">
-                <Label htmlFor="faculty-select">Selecciona la facultad:</Label>
-                <Select value={selectedFaculty} onValueChange={handleFacultySelect}>
-                  <SelectTrigger id="faculty-select">
-                    <SelectValue placeholder="Selecciona una facultad" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {faculties.map(faculty => (
-                      <SelectItem key={faculty._id} value={faculty._id}>
-                        {faculty.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowAddModal(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={handleAddProfessor}>
-                Continuar
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
-    </div>
-  );
+                            <div className="space-y-4">
+                                <h3 className="font-semibold">Calificaciones</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <p className="text-sm text-muted-foreground">General</p>
+                                        <div className="flex items-center">
+                                            <Star className={`h-4 w-4 mr-2 ${getRatingColor(viewingProfessor?.ratingStats.averageGeneral || 0)
+                                                }`} />
+                                            <span className="font-medium">
+                                                {(viewingProfessor?.ratingStats.averageGeneral || 0).toFixed(1)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-sm text-muted-foreground">Accesibilidad</p>
+                                        <div className="flex items-center">
+                                            <Star className={`h-4 w-4 mr-2 ${getRatingColor(viewingProfessor?.ratingStats.averageAccessibility || 0)
+                                                }`} />
+                                            <span className="font-medium">
+                                                {(viewingProfessor?.ratingStats.averageAccessibility || 0).toFixed(1)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-sm text-muted-foreground">Asistencia</p>
+                                        <div className="flex items-center">
+                                            <Star className={`h-4 w-4 mr-2 ${getRatingColor(viewingProfessor?.ratingStats.averageAttendance || 0)
+                                                }`} />
+                                            <span className="font-medium">
+                                                {(viewingProfessor?.ratingStats.averageAttendance || 0).toFixed(1)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-sm text-muted-foreground">Explicación</p>
+                                        <div className="flex items-center">
+                                            <Star className={`h-4 w-4 mr-2 ${getRatingColor(viewingProfessor?.ratingStats.averageExplanation || 0)
+                                                }`} />
+                                            <span className="font-medium">
+                                                {(viewingProfessor?.ratingStats.averageExplanation || 0).toFixed(1)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-sm text-muted-foreground">Dificultad</p>
+                                        <div className="flex items-center">
+                                            <Star className={`h-4 w-4 mr-2 ${getRatingColor(viewingProfessor?.ratingStats.averageDifficulty || 0)
+                                                }`} />
+                                            <span className="font-medium">
+                                                {(viewingProfessor?.ratingStats.averageDifficulty || 0).toFixed(1)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 className="font-semibold mb-2">Materias Impartidas</h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {viewingProfessor?.subjects.map((subject, index) => (
+                                        <Badge key={index} variant="outline">{subject}</Badge>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Modal Eliminar */}
+                <Dialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Confirmar Eliminación</DialogTitle>
+                            <DialogDescription>
+                                ¿Estás seguro de eliminar al profesor "{professorToDelete?.name}"?
+                                Esta acción no se puede deshacer.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <Input
+                            placeholder="Escribe el nombre del profesor para confirmar"
+                            value={confirmName}
+                            onChange={(e) => setConfirmName(e.target.value)}
+                        />
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setOpenDeleteDialog(false)}>
+                                Cancelar
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                onClick={async () => {
+                                    if (professorToDelete && confirmName === professorToDelete.name) {
+                                        try {
+                                            await axios.delete(
+                                                `${API_URL}/admin/faculty/${professorToDelete.facultyId}/professor/${professorToDelete._id}`,
+                                                { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+                                            );
+                                            setProfessors(prev => prev.filter(p => p._id !== professorToDelete._id));
+                                            setOpenDeleteDialog(false);
+                                        } catch (error) {
+                                            toast({
+                                                title: 'Error',
+                                                description: 'Error eliminando profesor',
+                                                variant: 'destructive'
+                                            });
+                                        }
+                                    }
+                                }}
+                                disabled={confirmName !== professorToDelete?.name}
+                            >
+                                Eliminar
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            </main>
+        </div>
+    );
 };
 
 export default AdminProfessors;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, Plus, Building2 } from "lucide-react";
 import { useToast } from "../../hooks/use-toast";
 import { Button } from "../ui/button";
 import {
@@ -213,7 +213,12 @@ const AdminFaculties: React.FC = () => {
             <TableBody>
               {filteredFaculties.map(faculty => (
                 <TableRow key={faculty._id}>
-                  <TableCell>{faculty.name}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="bg-amber-100 text-amber-600 text-3xl p-2 rounded-full"><Building2 /></div>
+                      <span className="font-medium">{faculty.name}</span>
+                    </div>
+                  </TableCell>
                   <TableCell>{faculty.abbreviation}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
