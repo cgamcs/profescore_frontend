@@ -1,293 +1,343 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "../../components/ui/table";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle 
+} from "../../components/ui/dialog";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "../../components/ui/dropdown-menu";
+import { Label } from "../../components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import { useToast } from "../../hooks/use-toast";
+import { Badge } from "../../components/ui/badge";
+import { Plus, Search, MoreHorizontal, Star, Eye, Trash } from "lucide-react";
 
 interface IFaculty {
-    _id: string;
-    name: string;
+  _id: string;
+  name: string;
 }
 
 interface IProfessor {
-    _id: string;
-    name: string;
-    faculty: string;
-    facultyId: string;
-    subjects: string[];
-    ratingStats: {
-        averageGeneral: number;
-        totalRatings: number;
-    };
+  _id: string;
+  name: string;
+  faculty: string;
+  facultyId: string;
+  subjects: string[];
+  ratingStats: {
+    averageGeneral: number;
+    totalRatings: number;
+  };
 }
 
 const AdminProfessors: React.FC = () => {
-    const [professors, setProfessors] = useState<IProfessor[]>([]);
-    const [faculties, setFaculties] = useState<IFaculty[]>([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [professorToDelete, setProfessorToDelete] = useState<IProfessor | null>(null);
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [selectedFaculty, setSelectedFaculty] = useState('');
-    const [confirmName, setConfirmName] = useState('');
-    const navigate = useNavigate();
+  const [professors, setProfessors] = useState<IProfessor[]>([]);
+  const [faculties, setFaculties] = useState<IFaculty[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [professorToDelete, setProfessorToDelete] = useState<IProfessor | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedFaculty, setSelectedFaculty] = useState('');
+  const [confirmName, setConfirmName] = useState('');
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-    useEffect(() => {
-        const fetchProfessors = async () => {
-            try {
-                const [professorsRes, facultiesRes] = await Promise.all([
-                    axios.get(`${import.meta.env.VITE_API_URL}/admin/professors`, {
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        }
-                    }),
-                    axios.get(`${import.meta.env.VITE_API_URL}/admin/faculty`, {
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        }
-                    })
-                ]);
-                
-                const faculties = facultiesRes.data;
-                const professorsWithFacultyId = professorsRes.data.map((professor: any) => {
-                    const faculty = faculties.find((f: IFaculty) => f.name === professor.faculty);
-                    return {
-                        ...professor,
-                        faculty: professor.faculty,
-                        facultyId: faculty?._id || ''
-                    };
-                });
-                setProfessors(professorsWithFacultyId);
-                setFaculties(faculties);
-            } catch (error) {
-                console.error('Error fetching data:', error);
+  useEffect(() => {
+    const fetchProfessors = async () => {
+      try {
+        const [professorsRes, facultiesRes] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_API_URL}/admin/professors`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
-        };
-
-        fetchProfessors();
-    }, []);
-
-    const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchTerm(event.target.value);
-    };
-
-    const normalizeString = (str: string) => {
-        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    };
-
-    const filteredProfessors = professors.filter(professor =>
-        normalizeString(professor.name).includes(normalizeString(searchTerm)) ||
-        normalizeString(professor.faculty).includes(normalizeString(searchTerm)) ||
-        professor.subjects.some(subject => normalizeString(subject).includes(normalizeString(searchTerm)))
-    );
-
-    const handleDelete = async (professor: IProfessor) => {
-        if (confirmName === professor.name) {
-            const faculty = faculties.find(f => f._id === professor.facultyId);
-            if (faculty) {
-                try {
-                    await axios.delete(`${import.meta.env.VITE_API_URL}/admin/faculty/${professor.facultyId}/professor/${professor._id}`, {
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        }
-                    });
-                    setProfessors(professors.filter(p => p._id !== professor._id));
-                    setProfessorToDelete(null);
-                    setConfirmName('');
-                } catch (error) {
-                    console.error('Error deleting professor:', error);
-                }
-            } else {
-                alert('No se encontró la facultad asociada al profesor.');
+          }),
+          axios.get(`${import.meta.env.VITE_API_URL}/admin/faculty`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
-        } else {
-            alert('El nombre ingresado no coincide con el nombre del profesor.');
+          })
+        ]);
+
+        const faculties = facultiesRes.data;
+        const professorsWithFacultyId = professorsRes.data.map((professor: any) => {
+          const faculty = faculties.find((f: IFaculty) => f.name === professor.faculty);
+          return {
+            ...professor,
+            faculty: professor.faculty,
+            facultyId: faculty?._id || ''
+          };
+        });
+        setProfessors(professorsWithFacultyId);
+        setFaculties(faculties);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchProfessors();
+  }, []);
+
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const normalizeString = (str: string) => {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  };
+
+  const filteredProfessors = professors.filter(professor =>
+    normalizeString(professor.name).includes(normalizeString(searchTerm)) ||
+    normalizeString(professor.faculty).includes(normalizeString(searchTerm)) ||
+    professor.subjects.some(subject => normalizeString(subject).includes(normalizeString(searchTerm)))
+  );
+
+  const handleDelete = async (professor: IProfessor) => {
+    if (confirmName === professor.name) {
+      const faculty = faculties.find(f => f._id === professor.facultyId);
+      if (faculty) {
+        try {
+          await axios.delete(`${import.meta.env.VITE_API_URL}/admin/faculty/${professor.facultyId}/professor/${professor._id}`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+          setProfessors(professors.filter(p => p._id !== professor._id));
+          setProfessorToDelete(null);
+          setConfirmName('');
+          toast({
+            title: "Profesor eliminado",
+            description: `El profesor "${professor.name}" ha sido eliminado correctamente.`,
+          });
+        } catch (error) {
+          console.error('Error deleting professor:', error);
         }
-    };
+      } else {
+        alert('No se encontró la facultad asociada al profesor.');
+      }
+    } else {
+      alert('El nombre ingresado no coincide con el nombre del profesor.');
+    }
+  };
 
-    const handleFacultySelect = (facultyId: string) => {
-        setSelectedFaculty(facultyId);
-    };
+  const handleFacultySelect = (facultyId: string) => {
+    setSelectedFaculty(facultyId);
+  };
 
-    const handleAddProfessor = () => {
-        if (selectedFaculty) {
-            navigate(`/admin/facultad/${selectedFaculty}/maestro/multiple`);
-            setShowAddModal(false);
-        }
-    };
+  const handleAddProfessor = () => {
+    if (selectedFaculty) {
+      navigate(`/admin/facultad/${selectedFaculty}/maestro/multiple`);
+      setShowAddModal(false);
+    }
+  };
 
-    const renderStars = (rating: number) => {
-        const fullStars = Math.floor(rating);
-        const hasHalfStar = rating % 1 >= 0.5;
+  const getRatingColor = (rating: number) => {
+    if (rating >= 4.5) return "text-green-500";
+    if (rating >= 4.0) return "text-emerald-500";
+    if (rating >= 3.5) return "text-amber-500";
+    if (rating >= 3.0) return "text-orange-500";
+    return "text-red-500";
+  };
 
-        return (
-            <div className="flex">
-                {[...Array(5)].map((_, index) => {
-                    if (index < fullStars) {
-                        return <i key={index} className="fas fa-star text-indigo-500 text-sm" />;
-                    }
-                    if (index === fullStars && hasHalfStar) {
-                        return <i key={index} className="fas fa-star-half-alt text-indigo-500 text-sm" />;
-                    }
-                    return <i key={index} className="far fa-star text-gray-300 text-sm" />;
-                })}
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Administrar Profesores</h1>
+        <p className="text-muted-foreground">Gestiona los profesores de la universidad</p>
+      </div>
+
+      <Card>
+        <CardHeader className="flex-row justify-between items-center space-y-0 gap-4">
+          <div>
+            <CardTitle>Lista de Profesores</CardTitle>
+            <CardDescription>Todos los profesores disponibles en el sistema</CardDescription>
+          </div>
+          <Button onClick={() => setShowAddModal(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nuevo Profesor
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="flex mb-4">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Buscar profesores..."
+                className="pl-8"
+                value={searchTerm}
+                onChange={handleSearch}
+              />
             </div>
-        );
-    };
-    
-    return (
-        <div className="bg-white min-h-screen">
-            <main className="container mx-auto px-4 py-6">
-                <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-bold">Administrar Profesores</h1>
-                    <button
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center"
-                        onClick={() => setShowAddModal(true)}
-                    >
-                        <i className="fas fa-plus mr-2"></i> Agregar Profesor
-                    </button>
-                </div>
-                <div className="relative w-full max-w-md mb-6">
-                    <div className="relative">
-                        <input
-                            type="text"
-                            id="search-input"
-                            placeholder="Buscar por nombre o facultad..."
-                            className="w-full border border-gray-200 px-4 py-3 rounded-xl shadow-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
-                            value={searchTerm}
-                            onChange={handleSearch}
-                        />
-                        <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
-                </div>
-                <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Facultad</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Materias</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Calificación</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {filteredProfessors.map(professor => (
-                                    <tr key={professor._id} className="hover:bg-gray-50">
-                                        <td className="px-6 py-4 whitespace-nowrap font-medium">{professor.name}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{professor.faculty}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-500">
-                                            <div className="flex flex-wrap gap-1">
-                                                {professor.subjects.map((subject, index) => (
-                                                    <span key={index} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
-                                                        {subject}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center">
-                                                <span className="bg-indigo-100 text-indigo-800 font-bold rounded px-2 py-1 text-sm mr-2">
-                                                    {professor.ratingStats.averageGeneral.toFixed(1)}
-                                                </span>
-                                                {renderStars(professor.ratingStats.averageGeneral)}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <div className="flex space-x-2">
-                                                <Link to={`/admin/facultad/${professor.facultyId}/maestro/${professor._id}`} className="text-indigo-600 hover:text-indigo-900">
-                                                    <i className="fas fa-edit h-5 w-5"></i>
-                                                </Link>
-                                                <button className="text-red-600 hover:text-red-900" onClick={() => setProfessorToDelete(professor)}>
-                                                    <i className="fas fa-trash h-5 w-5"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                    {filteredProfessors.length === 0 && (
-                        <div className="text-center py-4">
-                            <span className="loader"></span>
+          </div>
+
+          <div className="border rounded-md">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Profesor</TableHead>
+                  <TableHead>Facultad</TableHead>
+                  <TableHead>Materias</TableHead>
+                  <TableHead>Calificación</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredProfessors.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
+                      No se encontraron profesores
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredProfessors.map((professor) => (
+                    <TableRow key={professor._id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="font-medium">{professor.name}</div>
                         </div>
-                    )}
-                </div>
-            </main>
-            {professorToDelete && (
-                <div className="fixed inset-0 backdrop-brightness-50 backdrop-opacity-60 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
-                        <h3 className="text-lg font-medium text-gray-900 mb-4">Eliminar Profesor</h3>
-                        <p className="text-sm text-gray-500 mb-6">
-                            ¿Estás seguro de que deseas eliminar al profesor "{professorToDelete.name}"? Esta acción no se puede deshacer.
-                        </p>
-                        <div className="mb-4">
-                            <label htmlFor="confirm-name" className="block text-sm font-medium text-gray-700">Escribe el nombre del profesor para confirmar:</label>
-                            <input
-                                type="text"
-                                id="confirm-name"
-                                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                value={confirmName}
-                                onChange={(e) => setConfirmName(e.target.value)}
-                            />
+                      </TableCell>
+                      <TableCell>{professor.faculty}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {professor.subjects.map((subject: string, index: number) => (
+                            <Badge key={index} variant="outline" className="bg-slate-100">
+                              {subject}
+                            </Badge>
+                          ))}
                         </div>
-                        <div className="flex justify-end space-x-4">
-                            <button
-                                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-                                onClick={() => setProfessorToDelete(null)}
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700"
-                                onClick={() => handleDelete(professorToDelete)}
-                            >
-                                Eliminar
-                            </button>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Star className={`h-4 w-4 ${getRatingColor(professor.ratingStats.averageGeneral)}`} fill="currentColor" />
+                          <span className={`font-medium ${getRatingColor(professor.ratingStats.averageGeneral)}`}>
+                            {professor.ratingStats.averageGeneral.toFixed(1)}
+                          </span>
                         </div>
-                    </div>
-                </div>
-            )}
-            {showAddModal && (
-                <div className="fixed inset-0 backdrop-brightness-50 backdrop-opacity-60 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
-                        <h3 className="text-lg font-medium text-gray-900 mb-4">Agregar Profesor</h3>
-                        <div className="mb-4">
-                            <label htmlFor="faculty-select" className="block text-sm font-medium text-gray-700">Selecciona la facultad:</label>
-                            <select
-                                id="faculty-select"
-                                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                onChange={(e) => handleFacultySelect(e.target.value)}
-                                value={selectedFaculty || ''}
-                            >
-                                <option value="" disabled>Selecciona una facultad</option>
-                                {faculties.map(faculty => (
-                                    <option key={faculty._id} value={faculty._id}>
-                                        {faculty.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="flex justify-end space-x-4">
-                            <button
-                                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-                                onClick={() => setShowAddModal(false)}
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
-                                onClick={handleAddProfessor}
-                            >
-                                Continuar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem asChild>
+                              <Link to={`/admin/facultad/${professor.facultyId}/maestro/${professor._id}`}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                Ver detalles
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link to={`/admin/facultad/${professor.facultyId}/maestro/${professor._id}/editar`}>
+                                <svg className="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                Editar
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive" onClick={() => setProfessorToDelete(professor)}>
+                              <Trash className="mr-2 h-4 w-4" />
+                              Eliminar
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {professorToDelete && (
+        <Dialog open={!!professorToDelete}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Eliminar Profesor</DialogTitle>
+              <DialogDescription>
+                ¿Estás seguro de que deseas eliminar al profesor "{professorToDelete.name}"? Esta acción no se puede deshacer.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <Label htmlFor="confirm-name">Escribe el nombre del profesor para confirmar:</Label>
+                <Input
+                  id="confirm-name"
+                  value={confirmName}
+                  onChange={(e) => setConfirmName(e.target.value)}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setProfessorToDelete(null)}>
+                Cancelar
+              </Button>
+              <Button variant="destructive" onClick={() => handleDelete(professorToDelete)}>
+                Eliminar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {showAddModal && (
+        <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Agregar Profesor</DialogTitle>
+              <DialogDescription>
+                Selecciona la facultad para agregar un nuevo profesor.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <Label htmlFor="faculty-select">Selecciona la facultad:</Label>
+                <Select value={selectedFaculty} onValueChange={handleFacultySelect}>
+                  <SelectTrigger id="faculty-select">
+                    <SelectValue placeholder="Selecciona una facultad" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {faculties.map(faculty => (
+                      <SelectItem key={faculty._id} value={faculty._id}>
+                        {faculty.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddModal(false)}>
+                Cancelar
+              </Button>
+              <Button onClick={handleAddProfessor}>
+                Continuar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
+  );
 };
 
 export default AdminProfessors;
