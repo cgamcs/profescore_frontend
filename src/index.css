@@ -3,12 +3,10 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 .toast-in {
-  background-color: #fff;
   animation: toast-in .2s linear forwards;
 }
 
 .toast-out {
-  background-color: #fff;
   animation: toast-out .1s linear;
 }
 
