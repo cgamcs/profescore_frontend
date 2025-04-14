@@ -1,10 +1,10 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, Link, useLocation, useSearchParams } from 'react-router-dom';
-import { ProfessorPageLoader } from './SkeletonLoader';
-import AddProfessorModal from './AddProfessorModal'; // Importa el modal
+import { ProfessorPageLoader } from '../layouts/SkeletonLoader';
+import AddProfessorModal from '../components/AddProfessorModal'; // Importa el modal
 import api from '../api';
-import useViewTransition from './useViewTransition';
+import useViewTransition from '../layouts/useViewTransition';
 
 interface IProfessor {
     _id: string;

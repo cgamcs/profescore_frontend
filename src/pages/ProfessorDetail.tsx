@@ -3,8 +3,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { FaRegStar, FaStar, FaStarHalfAlt, FaHeart, FaRegHeart } from 'react-icons/fa';
 import api from '../api';
-import { ProfessorDetailLoader } from './SkeletonLoader';
-import ReportModal from './ReportModal';
+import { ProfessorDetailLoader } from '../layouts/SkeletonLoader';
+import ReportModal from '../components/ReportModal';
 
 interface RatingType {
     _id: string;

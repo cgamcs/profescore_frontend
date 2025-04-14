@@ -55,7 +55,7 @@ interface ISubject {
 const normalizeString = (str = '') => 
   str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-const AdminSubjects = () => {
+const Subjects = () => {
   const { toast } = useToast();
   
   // Main data states
@@ -262,15 +262,15 @@ const AdminSubjects = () => {
         <TableRow key={`skeleton-${index}`}>
           <TableCell>
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-gray-200 animate-pulse"></div>
-              <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+              <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-[#d4d3d3] animate-pulse"></div>
+              <div className="h-4 bg-gray-200 dark:bg-[#d4d3d3] rounded w-32 animate-pulse"></div>
             </div>
           </TableCell>
-          <TableCell><div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div></TableCell>
-          <TableCell><div className="h-4 bg-gray-200 rounded w-8 animate-pulse"></div></TableCell>
-          <TableCell><div className="h-4 bg-gray-200 rounded w-12 animate-pulse"></div></TableCell>
+          <TableCell><div className="h-4 bg-gray-200 dark:bg-[#d4d3d3] rounded w-16 animate-pulse"></div></TableCell>
+          <TableCell><div className="h-4 bg-gray-200 dark:bg-[#d4d3d3] rounded w-8 animate-pulse"></div></TableCell>
+          <TableCell><div className="h-4 bg-gray-200 dark:bg-[#d4d3d3] rounded w-12 animate-pulse"></div></TableCell>
           <TableCell className="text-right">
-            <div className="h-8 bg-gray-200 rounded w-8 ml-auto animate-pulse"></div>
+            <div className="h-8 bg-gray-200 dark:bg-[#d4d3d3] rounded w-8 ml-auto animate-pulse"></div>
           </TableCell>
         </TableRow>
       ))}
@@ -278,12 +278,12 @@ const AdminSubjects = () => {
   );
   
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-white dark:bg-[#0A0A0A] min-h-screen">
       <main className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Materias</h1>
+          <h1 className="text-3xl dark:text-white font-bold">Materias</h1>
           <Button 
-            className="bg-black text-white hover:cursor-pointer" 
+            className="bg-black dark:bg-indigo-600 text-white hover:cursor-pointer" 
             onClick={() => handleDialogOpen()}
             disabled={!isInitialDataLoaded}
           >
@@ -297,14 +297,14 @@ const AdminSubjects = () => {
             <Input
               type="text"
               placeholder="Buscar por nombre o facultad..."
-              className="w-full border border-gray-200 px-4 py-3 rounded-xl shadow-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none ring-0"
+              className="w-full border border-gray-200 dark:border-[#2B2B2D] px-4 py-3 rounded-xl shadow-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         )}
 
-        <div className="border border-gray-300 rounded-lg overflow-hidden">
+        <div className="border border-gray-300 dark:border-[#383939] rounded-lg overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
@@ -344,16 +344,16 @@ const AdminSubjects = () => {
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-white">
+                        <DropdownMenuContent align="end">
                           <DropdownMenuItem
-                            className="cursor-pointer hover:bg-gray-100"
+                            className="dark:text-white"
                             onClick={() => handleDialogOpen(subject)}
                           >
                             <Edit className="mr-2 h-4 w-4" />
                             Editar
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            className="text-red-500 cursor-pointer hover:bg-gray-100"
+                            className="text-red-500"
                             onClick={() => {
                               setCurrentSubject(subject);
                               setOpenDeleteDialog(true);
@@ -387,9 +387,9 @@ const AdminSubjects = () => {
               disabled={currentPage === 1}
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4 dark:text-white" />
             </Button>
-            <span className="text-sm">
+            <span className="text-sm dark:text-white">
               Página {currentPage} de {totalPages}
             </span>
             <Button
@@ -398,7 +398,7 @@ const AdminSubjects = () => {
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4 dark:text-white" />
             </Button>
           </div>
         )}
@@ -418,17 +418,17 @@ const AdminSubjects = () => {
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Nombre de la Materia <span className="text-red-500">*</span></Label>
+                <Label className="text-white">Nombre de la Materia <span className="text-red-500">*</span></Label>
                 <Input
                   value={currentSubject?.name || ''}
                   onChange={(e) => setCurrentSubject(prev => ({ ...prev, name: e.target.value }))}
-                  className={errors.name ? 'border-red-500' : ''}
+                  className={errors.name ? 'border-red-500' : 'dark:bg-[#383939] border border-gray-300 dark:border-[#202024] dark:text-white'}
                 />
                 {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
               </div>
 
               <div className="space-y-2">
-                <Label>Créditos <span className="text-red-500">*</span></Label>
+                <Label className="text-white">Créditos <span className="text-red-500">*</span></Label>
                 <Input
                   type="number"
                   value={currentSubject?.credits || ''}
@@ -436,13 +436,13 @@ const AdminSubjects = () => {
                     ...prev,
                     credits: Number(e.target.value)
                   }))}
-                  className={errors.credits ? 'border-red-500' : ''}
+                  className={errors.credits ? 'border-red-500' : 'dark:bg-[#383939] border border-gray-300 dark:border-[#202024] dark:text-white'}
                 />
                 {errors.credits && <p className="text-red-500 text-sm">{errors.credits}</p>}
               </div>
 
               <div className="space-y-2">
-                <Label>Facultad <span className="text-red-500">*</span></Label>
+                <Label className="text-white">Facultad <span className="text-red-500">*</span></Label>
                 <Select
                   value={currentSubject?.faculty?._id || ''}
                   onValueChange={(value) => {
@@ -453,10 +453,9 @@ const AdminSubjects = () => {
                   <SelectTrigger className={errors.faculty ? 'border-red-500' : ''}>
                     <SelectValue placeholder="Seleccionar facultad" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white">
+                  <SelectContent>
                     {faculties.map(faculty => (
                       <SelectItem
-                        className="hover:bg-gray-100"
                         key={faculty._id}
                         value={faculty._id}
                       >
@@ -469,18 +468,18 @@ const AdminSubjects = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Descripción</Label>
+                <Label className="text-white">Descripción</Label>
                 <Input
                   value={currentSubject?.description || ''}
                   onChange={(e) => setCurrentSubject(prev => ({ ...prev, description: e.target.value }))}
-                  className={errors.description ? 'border-red-500' : ''}
+                  className={errors.description ? 'border-red-500' : 'dark:bg-[#383939] border border-gray-300 dark:border-[#202024] dark:text-white'}
                 />
                 {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
               </div>
             </div>
             <DialogFooter>
               <Button 
-                variant="outline" 
+                variant="cancel" 
                 onClick={() => setOpenDialog(false)}
                 disabled={isLoadingAction}
               >
@@ -514,7 +513,7 @@ const AdminSubjects = () => {
             />
             <DialogFooter>
               <Button 
-                variant="outline" 
+                variant="cancel" 
                 onClick={() => {
                   setOpenDeleteDialog(false);
                   setConfirmationInput('');
@@ -538,4 +537,4 @@ const AdminSubjects = () => {
   );
 };
 
-export default AdminSubjects;
+export default Subjects;

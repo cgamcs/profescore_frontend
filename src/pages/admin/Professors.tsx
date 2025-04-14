@@ -30,7 +30,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Badge } from "../../components/ui/badge";
 import { Plus, MoreHorizontal, Star, Trash2, Edit, ChevronLeft, ChevronRight, Eye, Users } from "lucide-react";
 import { Avatar, AvatarFallback } from "../../components/ui/avatar";
-import SubjectSelector from '../ui/subjectselector';
+import SubjectSelector from '../../components/ui/subjectselector';
 
 const API_URL = import.meta.env.VITE_API_URL;
 const ITEMS_PER_PAGE = 10;
@@ -67,7 +67,7 @@ interface ISubject {
 const normalizeString = (str = '') =>
     str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-const AdminProfessors = () => {
+const Professors = () => {
     const { toast } = useToast();
     const [professors, setProfessors] = useState<IProfessor[]>([]);
     const [faculties, setFaculties] = useState<IFaculty[]>([]);
@@ -314,30 +314,55 @@ const AdminProfessors = () => {
         });
     };
 
+    // Skeleton loader for initial data loading
+    const SkeletonLoader = () => (
+        <>
+            {[...Array(5)].map((_, index) => (
+                <TableRow key={`skeleton-${index}`}>
+                    <TableCell>
+                        <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-[#d4d3d3] animate-pulse"></div>
+                            <div className="h-4 bg-gray-200 dark:bg-[#d4d3d3] rounded w-32 animate-pulse"></div>
+                        </div>
+                    </TableCell>
+                    <TableCell><div className="h-4 bg-gray-200 dark:bg-[#d4d3d3] rounded w-16 animate-pulse"></div></TableCell>
+                    <TableCell><div className="h-4 bg-gray-200 dark:bg-[#d4d3d3] rounded w-8 animate-pulse"></div></TableCell>
+                    <TableCell><div className="h-4 bg-gray-200 dark:bg-[#d4d3d3] rounded w-12 animate-pulse"></div></TableCell>
+                    <TableCell className="text-right">
+                        <div className="h-8 bg-gray-200 dark:bg-[#d4d3d3] rounded w-8 ml-auto animate-pulse"></div>
+                    </TableCell>
+                </TableRow>
+            ))}
+        </>
+    );
+
     return (
-        <div className="bg-white min-h-screen">
+        <div className="bg-white dark:bg-[#0A0A0A] min-h-screen">
             <main className="container mx-auto px-4 py-6">
                 <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-3xl font-bold">Profesores</h1>
+                    <h1 className="text-3xl dark:text-white font-bold">Profesores</h1>
                     <Button
-                        className="bg-black text-white hover:cursor-pointer"
+                        className="bg-black dark:bg-indigo-600 text-white hover:cursor-pointer"
                         onClick={handleOpenAddDialog}
+                        disabled={!isInitialDataLoaded}
                     >
                         <Plus className="w-4 h-4 mr-2" /> Nuevo Profesor
                     </Button>
                 </div>
 
-                <div className="relative w-full max-w-md mb-6">
-                    <Input
-                        type="text"
-                        placeholder="Buscar por nombre o facultad..."
-                        className="w-full border border-gray-200 px-4 py-3 rounded-xl shadow-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none ring-0"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
+                {isInitialDataLoaded && (
+                    <div className="relative w-full max-w-md mb-6">
+                        <Input
+                            type="text"
+                            placeholder="Buscar por nombre o facultad..."
+                            className="w-full border border-gray-200 dark:border-[#2B2B2D] px-4 py-3 rounded-xl shadow-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                )}
 
-                <div className="border border-gray-300 rounded-lg overflow-hidden">
+                <div className="border border-gray-300 dark:border-[#383939] rounded-lg overflow-hidden">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -349,63 +374,73 @@ const AdminProfessors = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {paginatedProfessors.map((professor) => (
-                                <TableRow key={professor._id}>
-                                    <TableCell>
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
-                                                <Users className="h-5 w-5 text-blue-600" />
+                            {!isInitialDataLoaded ? (
+                                <SkeletonLoader />
+                            ) : paginatedProfessors.length > 0 ? (
+                                paginatedProfessors.map((professor) => (
+                                    <TableRow key={professor._id}>
+                                        <TableCell>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
+                                                    <Users className="h-5 w-5 text-blue-600" />
+                                                </div>
+                                                <span className="font-medium">{professor.name}</span>
                                             </div>
-                                            <span className="font-medium">{professor.name}</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>{professor.facultyAbbreviation}</TableCell> {/* Mostrar la abreviatura */}
-                                    <TableCell>
-                                        <div className="flex flex-wrap gap-1">
-                                            {professor.subjects.slice(0, 3).map((subject, index) => (
-                                                <Badge key={index} variant="outline">{subject}</Badge>
-                                            ))}
-                                            {professor.subjects.length > 3 && (
-                                                <Badge variant="outline">+{professor.subjects.length - 3}</Badge>
-                                            )}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-1">
-                                            <Star className={`h-4 w-4 ${getRatingColor(professor.ratingStats.averageGeneral)}`} />
-                                            <span className={getRatingColor(professor.ratingStats.averageGeneral)}>
-                                                {professor.ratingStats.averageGeneral.toFixed(1)}
-                                            </span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon">
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="bg-white">
-                                                <DropdownMenuItem className="cursor-pointer hover:bg-gray-100" onClick={() => handleViewProfessor(professor)}>
-                                                    <Eye className="mr-2 h-4 w-4" /> Ver Detalles
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem className="cursor-pointer hover:bg-gray-100" onClick={() => handleEditProfessor(professor)}>
-                                                    <Edit className="mr-2 h-4 w-4" /> Editar
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem
-                                                    className="text-red-500 cursor-pointer hover:bg-gray-100"
-                                                    onClick={() => {
-                                                        setProfessorToDelete(professor);
-                                                        setOpenDeleteDialog(true);
-                                                    }}
-                                                >
-                                                    <Trash2 className="mr-2 h-4 w-4" /> Eliminar
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                                        </TableCell>
+                                        <TableCell>{professor.facultyAbbreviation}</TableCell> {/* Mostrar la abreviatura */}
+                                        <TableCell>
+                                            <div className="flex flex-wrap gap-1">
+                                                {professor.subjects.slice(0, 3).map((subject, index) => (
+                                                    <Badge key={index} variant="outline">{subject}</Badge>
+                                                ))}
+                                                {professor.subjects.length > 3 && (
+                                                    <Badge variant="outline">+{professor.subjects.length - 3}</Badge>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center gap-1">
+                                                <Star className={`h-4 w-4 ${getRatingColor(professor.ratingStats.averageGeneral)}`} />
+                                                <span className={getRatingColor(professor.ratingStats.averageGeneral)}>
+                                                    {professor.ratingStats.averageGeneral.toFixed(1)}
+                                                </span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon">
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem className="dark:text-white" onClick={() => handleViewProfessor(professor)}>
+                                                        <Eye className="mr-2 h-4 w-4" /> Ver Detalles
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem className="dark:text-white" onClick={() => handleEditProfessor(professor)}>
+                                                        <Edit className="mr-2 h-4 w-4" /> Editar
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem
+                                                        className="text-red-500"
+                                                        onClick={() => {
+                                                            setProfessorToDelete(professor);
+                                                            setOpenDeleteDialog(true);
+                                                        }}
+                                                    >
+                                                        <Trash2 className="mr-2 h-4 w-4" /> Eliminar
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="text-center h-24">
+                                        No se encontraron profesores
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            )}
                         </TableBody>
                     </Table>
                 </div>
@@ -417,15 +452,15 @@ const AdminProfessors = () => {
                         onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                         disabled={currentPage === 1}
                     >
-                        <ChevronLeft className="h-4 w-4" />
+                        <ChevronLeft className="h-4 w-4 dark:text-white" />
                     </Button>
-                    <span>Página {currentPage} de {totalPages}</span>
+                    <span className="dark:text-white">Página {currentPage} de {totalPages}</span>
                     <Button
                         variant="outline"
                         onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                         disabled={currentPage === totalPages}
                     >
-                        <ChevronRight className="h-4 w-4" />
+                        <ChevronRight className="h-4 w-4 dark:text-white" />
                     </Button>
                 </div>
 
@@ -445,6 +480,7 @@ const AdminProfessors = () => {
                                     onChange={(e) => setCurrentProfessor(prev =>
                                         prev ? { ...prev, name: e.target.value } : null
                                     )}
+                                    className={errors.name ? 'border-red-500' : 'dark:bg-[#383939] border border-gray-300 dark:border-[#202024] dark:text-white'}
                                 />
                                 {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
                             </div>
@@ -632,4 +668,4 @@ const AdminProfessors = () => {
     );
 };
 
-export default AdminProfessors;
+export default Professors;

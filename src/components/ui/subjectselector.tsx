@@ -60,7 +60,7 @@ const SubjectSelector = ({
                     placeholder="Buscar materia..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="mb-2"
+                    className="mb-2 dark:bg-[#383939] border border-gray-300 dark:border-[#202024] dark:text-white"
                 />
                 {searchTerm && (
                     <button
@@ -76,7 +76,7 @@ const SubjectSelector = ({
             {/* Selected subjects */}
             {selectedSubjects.length > 0 && (
                 <div className="mb-2">
-                    <Label className="text-sm text-gray-500">Seleccionadas ({selectedSubjects.length})</Label>
+                    <Label className="text-sm text-gray-500 dark:text-gray-300">Seleccionadas ({selectedSubjects.length})</Label>
                     <div className="flex flex-wrap gap-2 mt-1">
                         {selectedSubjects.map(subjectId => {
                             const subjectName = allSubjects.find(s => s._id === subjectId)?.name || '';
@@ -84,7 +84,7 @@ const SubjectSelector = ({
                                 <Badge
                                     key={subjectId}
                                     variant="default"
-                                    className="px-2 py-1 flex items-center gap-1"
+                                    className="px-2 py-1 dark:bg-[#383939] flex items-center gap-1"
                                 >
                                     {subjectName}
                                     <button
@@ -102,7 +102,7 @@ const SubjectSelector = ({
             )}
 
             {/* Available subjects */}
-            <ScrollArea className="border border-gray-300 rounded-md h-64 p-2">
+            <ScrollArea className="border border-gray-300 dark:border-[#2B2B2D] rounded-md h-64 p-2">
                 {availableSubjects.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
                         {availableSubjects.map(subject => {

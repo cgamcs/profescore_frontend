@@ -9,10 +9,10 @@ const AdminHeader = () => {
     return (
         <>
             {/* Header */}
-            <header className="bg-white border-b border-gray-200">
+            <header className="bg-white dark:bg-[#0A0A0A] border-b border-gray-200 dark:border-[#202024]">
                 <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-                    <Link to="/admin" className="text-xl font-bold text-black">
-                        ProfeScore <span className="text-indigo-600 text-sm ml-2">Admin</span>
+                    <Link to="/admin" className="text-xl font-bold text-black dark:text-white">
+                        ProfeScore <span className="text-indigo-600 dark:text-indigo-400 text-sm ml-2">Admin</span>
                     </Link>
 
                     {/* Menú móvil */}
@@ -26,30 +26,30 @@ const AdminHeader = () => {
                         <NavLink 
                             to="/admin/facultades"
                             className={({ isActive }) =>
-                                `text-sm ${isActive ? 'text-indigo-600 font-medium' : 'text-gray-600'}`
+                                `text-sm ${isActive ? 'text-indigo-600 dark:text-indigo-500 font-medium' : 'text-gray-600 dark:text-gray-200'}`
                             }
                         >Facultades</NavLink>
                         <NavLink 
                             to="/admin/materias" 
                             className={({ isActive }) =>
-                                `text-sm ${isActive ? 'text-indigo-600 font-medium' : 'text-gray-600'}`
+                                `text-sm ${isActive ? 'text-indigo-600 dark:text-indigo-500 font-medium' : 'text-gray-600 dark:text-gray-200'}`
                             }
                         >Materias</NavLink>
                         <NavLink 
                             to="/admin/maestros" 
                             className={({ isActive }) =>
-                                `text-sm ${isActive ? 'text-indigo-600 font-medium' : 'text-gray-600'}`
+                                `text-sm ${isActive ? 'text-indigo-600 dark:text-indigo-500 font-medium' : 'text-gray-600 dark:text-gray-200'}`
                             }
                         >Maestros</NavLink>
                         <NavLink 
                             to="/admin/reportes" 
                             className={({ isActive }) =>
-                                `text-sm ${isActive ? 'text-indigo-600 font-medium' : 'text-gray-600'}`
+                                `text-sm ${isActive ? 'text-indigo-600 dark:text-indigo-500 font-medium' : 'text-gray-600 dark:text-gray-200'}`
                             }
                         >Reportes</NavLink>
                         <NavLink 
                             to="/" 
-                            className="text-sm text-gray-600"
+                            className="text-sm text-gray-600 dark:text-gray-200"
                         >Volver al sitio</NavLink>
                     </nav>
 
@@ -68,12 +68,32 @@ const AdminHeader = () => {
 
                 {/* Menú móvil */}
                 {showMobileMenu && (
-                    <div className="md:hidden bg-white border-t border-gray-200 py-2">
+                    <div className="md:hidden bg-white dark:bg-[#0A0A0A] border-t border-gray-200 dark:border-[#202024] py-2">
                         <nav className="container mx-auto px-4 flex flex-col space-y-3">
-                            <NavLink to="/admin/facultades" className="text-sm text-indigo-600 font-medium">Facultades</NavLink>
-                            <NavLink to="/admin/materias" className="text-sm text-gray-600">Materias</NavLink>
-                            <NavLink to="/admin/maestros" className="text-sm text-gray-600">Maestros</NavLink>
-                            <NavLink to="/admin/reportes" className="text-sm text-gray-600">Reportes</NavLink>
+                            <NavLink
+                                to="/admin/facultades"
+                                className={({ isActive }) => 
+                                    `text-sm ${isActive ? 'text-indigo-600 dark:text-indigo-500 font-medium' : 'text-gray-600 dark:text-gray-200'}`
+                                }
+                            >Facultades</NavLink>
+                            <NavLink
+                                to="/admin/materias"
+                                className={({ isActive }) =>
+                                    `text-sm ${isActive ? 'text-indigo-600 dark:text-indigo-500 font-medium' : 'text-gray-600 dark:text-gray-200'}`
+                                }
+                            >Materias</NavLink>
+                            <NavLink
+                                to="/admin/maestros"
+                                className={({ isActive }) =>
+                                    `text-sm ${isActive ? 'text-indigo-600 dark:text-indigo-500 font-medium' : 'text-gray-600 dark:text-gray-200'}`
+                                }
+                            >Maestros</NavLink>
+                            <NavLink
+                                to="/admin/reportes"
+                                className={({ isActive }) =>
+                                    `text-sm ${isActive ? 'text-indigo-600 dark:text-indigo-500 font-medium' : 'text-gray-600 dark:text-gray-200'}`
+                                }
+                            >Reportes</NavLink>
                             <NavLink to="/" className="text-sm text-gray-600">Volver al sitio</NavLink>
                             <button
                                 onClick={() => {

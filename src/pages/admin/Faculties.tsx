@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Pencil, Trash2, Plus, Building2 } from "lucide-react";
 import { useToast } from "../../hooks/use-toast";
-import { Button } from "../ui/button";
+import { Button } from "../../components/ui/button";
 import {
   Table,
   TableBody,
@@ -10,7 +10,7 @@ import {
   TableHead,
   TableHeader,
   TableRow
-} from "../ui/table";
+} from "../../components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -18,10 +18,18 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from "../ui/dialog";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
+} from "../../components/ui/dialog";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
 import axios from 'axios';
+
+const themeKeys = {
+  system: "system",
+  light: "light",
+  dark: "dark"
+} as const;
+
+type ThemeKey = keyof typeof themeKeys;
 
 interface Faculty {
   _id: string;
@@ -30,7 +38,8 @@ interface Faculty {
   departments: string[];
 }
 
-const AdminFaculties: React.FC = () => {
+const Faculties: React.FC = () => {
+  const [theme] = useState<ThemeKey>(localStorage.getItem('theme') as ThemeKey || 'system');
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -63,6 +72,35 @@ const AdminFaculties: React.FC = () => {
       console.error('Error fetching faculties:', err);
     }
   };
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const applyTheme = () => {
+        root.classList.toggle(
+            'dark',
+            theme === themeKeys.dark ||
+            (theme === themeKeys.system && mediaQuery.matches)
+        )
+
+        localStorage.setItem("theme", theme)
+    };
+
+    applyTheme();
+
+    mediaQuery.addEventListener("change", applyTheme)
+
+    // Set view transition name for header
+    const headerElement = document.getElementById('site-header');
+    if (headerElement) {
+        headerElement.style.viewTransitionName = 'site-header';
+    }
+
+    return () => {
+        mediaQuery.removeEventListener("change", applyTheme)
+    };
+}, [theme]);
 
   useEffect(() => {
     fetchFaculties();
@@ -181,11 +219,11 @@ const AdminFaculties: React.FC = () => {
   };
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-white dark:bg-[#0A0A0A] min-h-screen">
       <main className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Facultades</h1>
-          <Button className='bg-black text-white hover:cursor-pointer' onClick={handleAddFaculty}>
+          <h1 className="text-3xl dark:text-white font-bold">Facultades</h1>
+          <Button className='bg-black dark:bg-indigo-600 text-white hover:cursor-pointer' onClick={handleAddFaculty}>
             <Plus className="w-4 h-4 mr-2" />
             Nueva Facultad
           </Button>
@@ -195,13 +233,13 @@ const AdminFaculties: React.FC = () => {
           <Input
             type="text"
             placeholder="Buscar por nombre o abreviatura..."
-            className="w-full border border-gray-200 px-4 py-3 rounded-xl shadow-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none ring-0"
+            className="w-full border border-gray-200 dark:border-[#2B2B2D] px-4 py-3 rounded-xl shadow-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
-        <div className="border border-gray-200 rounded-lg">
+        <div className="border border-gray-200 dark:border-[#383939] rounded-lg">
           <Table>
             <TableHeader>
               <TableRow>
@@ -255,19 +293,19 @@ const AdminFaculties: React.FC = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Nombre</Label>
+              <Label className="dark:text-white">Nombre</Label>
               <Input
                 value={currentFaculty.name}
-                className='border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-white focus:border-indigo-500'
+                className='dark:bg-[#383939] border border-gray-300 dark:border-[#202024] dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-white focus:border-indigo-500'
                 onChange={(e) => setCurrentFaculty({...currentFaculty, name: e.target.value})}
                 placeholder="Ej. Facultad de Ingeniería"
               />
             </div>
             <div>
-              <Label>Abreviatura</Label>
+              <Label className="dark:text-white">Abreviatura</Label>
               <Input
                 value={currentFaculty.abbreviation}
-                className='border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-white focus:border-indigo-500'
+                className='dark:bg-[#383939] border border-gray-300 dark:border-[#202024] dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-white focus:border-indigo-500'
                 onChange={(e) => setCurrentFaculty({...currentFaculty, abbreviation: e.target.value})}
                 placeholder="Ej. FI"
               />
@@ -306,4 +344,4 @@ const AdminFaculties: React.FC = () => {
   );
 };
 
-export default AdminFaculties;
+export default Faculties;

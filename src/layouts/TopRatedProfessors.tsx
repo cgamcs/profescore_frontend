@@ -65,7 +65,7 @@ const TopRatedProfessors: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Maestros Mejor Calificados</h2>
-          <p className="text-gray-600 dark:text-[#F3F5F7]">Descubre a los maestros con las mejores calificaciones</p>
+          <p className="text-gray-600 dark:text-[#d4d3d3]">Descubre a los maestros con las mejores calificaciones</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">

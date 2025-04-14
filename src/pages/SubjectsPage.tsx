@@ -1,10 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
-import { SubjectPageLoader } from './SkeletonLoader';
-import AddSubjectModal from './AddSubjectModal';
+import { SubjectPageLoader } from '../layouts/SkeletonLoader';
+import AddSubjectModal from '../components/AddSubjectModal';
 import api from '../api';
-import useViewTransition from './useViewTransition';
+import useViewTransition from '../layouts/useViewTransition';
 
 interface ISubject {
   _id: string;

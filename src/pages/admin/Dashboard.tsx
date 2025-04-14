@@ -3,6 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Users, BookOpen, Building2, MessageSquare } from "lucide-react";
 import axios from 'axios';
 
+const themeKeys = {
+  system: "system",
+  light: "light",
+  dark: "dark"
+} as const;
+
+type ThemeKey = keyof typeof themeKeys;
+
 // Interfaces for our data types
 interface DashboardStats {
   facultiesCount: number;
@@ -17,7 +25,9 @@ interface RecentActivity {
   timestamp: string;
 }
 
-const AdminDashboard: React.FC = () => {
+const Dashboard: React.FC = () => {
+  const [theme] = useState<ThemeKey>(localStorage.getItem('theme') as ThemeKey || 'system');
+
   const [stats, setStats] = useState<DashboardStats>({
     facultiesCount: 0,
     subjectsCount: 0,
@@ -29,6 +39,35 @@ const AdminDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const applyTheme = () => {
+        root.classList.toggle(
+            'dark',
+            theme === themeKeys.dark ||
+            (theme === themeKeys.system && mediaQuery.matches)
+        )
+
+        localStorage.setItem("theme", theme)
+    };
+
+    applyTheme();
+
+    mediaQuery.addEventListener("change", applyTheme)
+
+    // Set view transition name for header
+    const headerElement = document.getElementById('site-header');
+    if (headerElement) {
+        headerElement.style.viewTransitionName = 'site-header';
+    }
+
+    return () => {
+        mediaQuery.removeEventListener("change", applyTheme)
+    };
+}, [theme]);
 
   useEffect(() => {
     // Check for token and validate it
@@ -105,46 +144,46 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <main className="container mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold">Panel de Administración</h1>
-      <p className="text-gray-500 mb-6">Resumen del sistema de calificación de maestros</p>
+      <h1 className="dark:text-white text-2xl font-bold">Panel de Administración</h1>
+      <p className="text-gray-500 dark:text-[#d4d3d3] mb-6">Resumen del sistema de calificación de maestros</p>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Link to="/admin/profesores" className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 hover:shadow-md transition-shadow">
+        <Link to="/admin/profesores" className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Profesores</p>
-              <p className="text-2xl font-bold mt-1">{stats.professorsCount}</p>
+              <p className="text-sm text-gray-500 dark:text-[#d4d3d3]">Profesores</p>
+              <p className="text-2xl dark:text-white font-bold mt-1">{stats.professorsCount}</p>
             </div>
             <div className="bg-blue-100 text-blue-600 text-3xl p-2 rounded-full"><Users /></div>
           </div>
         </Link>
 
-        <Link to="/admin/materias" className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 hover:shadow-md transition-shadow">
+        <Link to="/admin/materias" className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Materias</p>
-              <p className="text-2xl font-bold mt-1">{stats.subjectsCount}</p>
+              <p className="text-sm text-gray-500 dark:text-[#d4d3d3]">Materias</p>
+              <p className="text-2xl dark:text-white font-bold mt-1">{stats.subjectsCount}</p>
             </div>
             <div className="bg-purple-100 text-purple-600 text-3xl p-2 rounded-full"><BookOpen /></div>
           </div>
         </Link>
 
-        <Link to="/admin/facultades" className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 hover:shadow-md transition-shadow">
+        <Link to="/admin/facultades" className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Facultades</p>
-              <p className="text-2xl font-bold mt-1">{stats.facultiesCount}</p>
+              <p className="text-sm text-gray-500 dark:text-[#d4d3d3]">Facultades</p>
+              <p className="text-2xl dark:text-white font-bold mt-1">{stats.facultiesCount}</p>
             </div>
             <div className="bg-amber-100 text-amber-600 text-3xl p-2 rounded-full"><Building2 /></div>
           </div>
         </Link>
 
-        <Link to="/admin/resenas" className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 hover:shadow-md transition-shadow">
+        <Link to="/admin/resenas" className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Comentarios</p>
-              <p className="text-2xl font-bold mt-1">{stats.ratingsCount}</p>
+              <p className="text-sm text-gray-500 dark:text-[#d4d3d3]">Comentarios</p>
+              <p className="text-2xl dark:text-white font-bold mt-1">{stats.ratingsCount}</p>
             </div>
             <div className="bg-emerald-100 text-emerald-600 text-3xl p-2 rounded-full"><MessageSquare /></div>
           </div>
@@ -152,25 +191,25 @@ const AdminDashboard: React.FC = () => {
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-[#202024] rounded-lg shadow-sm overflow-hidden">
         <div className="p-4 bg-indigo-600 text-white">
           <h2 className="font-medium">Actividad Reciente</h2>
         </div>
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-gray-200 dark:divide-[#383939]">
           {recentActivities.length === 0 ? (
-            <div className="p-4 text-center text-gray-500">
+            <div className="p-4 text-center text-gray-500 dark:text-white">
               No hay actividades recientes
             </div>
           ) : (
             recentActivities.map((activity, index) => {
               const parsedActivity = parseActivity(activity);
               return (
-                <div key={index} className="p-4 hover:bg-gray-50">
+                <div key={index} className="p-4 hover:bg-gray-50 dark:hover:bg-[#ffffff0d]">
                   <div className="flex justify-between mb-2">
                     <div>
-                      <p className="font-bold">{parsedActivity.title}</p>
+                      <p className="dark:text-white font-bold">{parsedActivity.title}</p>
                       {parsedActivity.entity && (
-                        <p className="text-sm text-gray-700 mb-1">
+                        <p className="text-sm text-gray-700 dark:text-[#d4d3d3] mb-1">
                           {parsedActivity.entity}
                         </p>
                       )}
@@ -189,4 +228,4 @@ const AdminDashboard: React.FC = () => {
   );
 };
 
-export default AdminDashboard;
+export default Dashboard;

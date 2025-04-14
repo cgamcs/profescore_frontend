@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { HiComputerDesktop } from "react-icons/hi2";
 import { IoSunnyOutline } from "react-icons/io5";
 import { FaRegMoon } from "react-icons/fa";
-import useViewTransition from './useViewTransition';
+import useViewTransition from '../layouts/useViewTransition';
 
 const themeKeys = {
     system: "system",

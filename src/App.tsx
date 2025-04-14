@@ -1,31 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Toaster } from './components/ui/toaster';
-import LayoutWithHeader from './components/LayoutWithHeader';
-import FacultyDetails from './components/FacultyDetail';
-import SubjectsPage from './components/SubjectsPage';
-import ProfessorsPage from './components/ProfessorsPage';
-import SubjectDetail from './components/SubjectDetail';
-import ProfessorDetail from './components/ProfessorDetail';
-import ProfessorRating from './components/ProfessorRating';
+import LayoutWithHeader from './layouts/UserWithHeader';
+import FacultyDetails from './pages/FacultyDetail';
+import SubjectsPage from './pages/SubjectsPage';
+import ProfessorsPage from './pages/ProfessorsPage';
+import SubjectDetail from './pages/SubjectDetail';
+import ProfessorDetail from './pages/ProfessorDetail';
+import ProfessorRating from './pages/ProfessorRating';
 import ProfessorAdd from './components/ProfessorAdd';
-import AdminLogin from './components/admin/AdminLogin';
-import AdminWithHeader from './components/admin/AdminWithHeader';
-import AdminDashboard from './components/admin/AdminDashboard';
-import AdminFaculties from './components/admin/AdminFaculties';
+import AdminLogin from './pages/admin/Login';
+import AdminWithHeader from './layouts/AdminWithHeader';
+import AdminDashboard from './pages/admin/Dashboard';
+import AdminFaculties from './pages/admin/Faculties';
 import AddFaculty from './components/admin/AddFaculty';
 import EditFaculty from './components/admin/EditFaculty';
-import AdminSubjects from './components/admin/AdminSubjects';
+import AdminSubjects from './pages/admin/Subjects';
 import AddSubject from './components/admin/AddSubject';
 import EditSubject from './components/admin/EditSubject';
-import AdminProfessors from './components/admin/AdminProfessors';
+import AdminProfessors from './pages/admin/Professors';
 import AddProfessor from './components/admin/AddProfessor';
 import Unauthorized from './components/401/Unauthorized';
-import Faq from './components/Faq';
-import Privacity from './components/Privacity';
+import Faq from './pages/Faq';
+import Privacity from './pages/Privacity';
 import AdminReports from './components/admin/AdminReports';
 import EditProfessor from './components/admin/EditProfessor';
-import HomePage from './components/HomePage'; // Importa el nuevo componente
+import HomePage from './layouts/HomePage'; // Importa el nuevo componente
 
 const themeKeys = {
   system: "system",

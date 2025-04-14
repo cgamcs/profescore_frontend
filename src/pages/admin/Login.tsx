@@ -1,7 +1,16 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const AdminLogin: React.FC = () => {
+const themeKeys = {
+    system: "system",
+    light: "light",
+    dark: "dark"
+} as const;
+
+type ThemeKey = keyof typeof themeKeys;
+
+const Login: React.FC = () => {
+    const [theme] = useState<ThemeKey>(localStorage.getItem('theme') as ThemeKey || 'system');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -9,6 +18,35 @@ const AdminLogin: React.FC = () => {
     const [passwordError, setPasswordError] = useState('');
     const [authError, setAuthError] = useState(''); // Estado para el mensaje de error de autenticación
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const root = document.documentElement;
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+        const applyTheme = () => {
+            root.classList.toggle(
+                'dark',
+                theme === themeKeys.dark ||
+                (theme === themeKeys.system && mediaQuery.matches)
+            )
+
+            localStorage.setItem("theme", theme)
+        };
+
+        applyTheme();
+
+        mediaQuery.addEventListener("change", applyTheme)
+
+        // Set view transition name for header
+        const headerElement = document.getElementById('site-header');
+        if (headerElement) {
+            headerElement.style.viewTransitionName = 'site-header';
+        }
+
+        return () => {
+            mediaQuery.removeEventListener("change", applyTheme)
+        };
+    }, [theme]);
 
     const isValidEmail = (email: string) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -62,12 +100,12 @@ const AdminLogin: React.FC = () => {
     };
 
     return (
-        <div className="bg-white min-h-screen flex flex-col">
+        <div className="bg-white dark:bg-[#0A0A0A] min-h-screen flex flex-col">
             {/* Header */}
-            <header className="border-b border-gray-200 bg-white">
+            <header className="border-b border-gray-200 dark:border-[#202024] bg-white dark:bg-[#0A0A0A]">
                 <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-                    <a href="/" className="text-xl font-bold text-black">ProfeScore</a>
-                    <a href="/" className="text-sm text-gray-600 hover:text-indigo-600">
+                    <a href="/" className="text-xl font-bold text-black dark:text-white">ProfeScore</a>
+                    <a href="/" className="text-sm text-gray-600 dark:text-white hover:text-indigo-600">
                         Volver al inicio
                     </a>
                 </div>
@@ -76,28 +114,28 @@ const AdminLogin: React.FC = () => {
             {/* Main Content */}
             <main className="flex-1 flex items-center justify-center px-4 py-12">
                 <div className="w-full max-w-md">
-                    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8">
+                    <div className="bg-white dark:bg-[#0A0A0A] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-8">
                         <div className="text-center mb-8">
-                            <h1 className="text-2xl font-bold text-gray-900">Iniciar Sesión</h1>
-                            <p className="text-gray-600 mt-2">Esta sección es solo para el administrador</p>
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Iniciar Sesión</h1>
+                            <p className="text-gray-600 dark:text-[#F3F5F7] mt-2">Esta sección es solo para el administrador</p>
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {/* Campo Email */}
                             <div className="space-y-2">
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-white">
                                     Correo electrónico
                                 </label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <i className="fas fa-envelope text-gray-400"></i>
+                                        <i className="fas fa-envelope text-gray-400 dark:text-white"></i>
                                     </div>
                                     <input
                                         id="email"
                                         type="email"
                                         autoComplete="email"
                                         required
-                                        className={`w-full pl-10 px-3 py-2 border rounded-md shadow-sm focus:outline-none ${emailError ? 'border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
+                                        className={`w-full pl-10 px-3 py-2 dark:text-white border rounded-md shadow-sm focus:outline-none ${emailError ? 'border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
                                             }`}
                                         placeholder="usuario@ejemplo.com"
                                         value={email}
@@ -110,23 +148,23 @@ const AdminLogin: React.FC = () => {
                             {/* Campo Contraseña */}
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
-                                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-white">
                                         Contraseña
                                     </label>
-                                    <a href="#" className="text-xs text-indigo-600 hover:text-indigo-500">
+                                    <a href="#" className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-500">
                                         ¿Olvidaste tu contraseña?
                                     </a>
                                 </div>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <i className="fas fa-lock text-gray-400"></i>
+                                        <i className="fas fa-lock text-gray-400 dark:text-white"></i>
                                     </div>
                                     <input
                                         id="password"
                                         type={showPassword ? 'text' : 'password'}
                                         autoComplete="current-password"
                                         required
-                                        className={`w-full pl-10 px-3 py-2 border rounded-md shadow-sm focus:outline-none ${passwordError ? 'border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
+                                        className={`w-full pl-10 px-3 py-2 dark:text-white border rounded-md shadow-sm focus:outline-none ${passwordError ? 'border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
                                             }`}
                                         placeholder="••••••••"
                                         value={password}
@@ -135,7 +173,7 @@ const AdminLogin: React.FC = () => {
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500"
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-white hover:text-gray-500 dark:hover:text-gray-300"
                                     >
                                         <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
                                     </button>
@@ -159,8 +197,8 @@ const AdminLogin: React.FC = () => {
             </main>
 
             {/* Footer */}
-            <footer className="bg-white border-t border-gray-200 py-4">
-                <div className="container mx-auto px-4 text-center text-sm text-gray-500">
+            <footer className="bg-white dark:bg-[#0A0A0A] border-t border-gray-200 dark:border-[#202024] py-4">
+                <div className="container mx-auto px-4 text-center text-sm text-gray-500 dark:text-white">
                     <p>&copy; ProfeScore - {new Date().getFullYear()}</p>
                 </div>
             </footer>
@@ -168,4 +206,4 @@ const AdminLogin: React.FC = () => {
     );
 };
 
-export default AdminLogin;
+export default Login;

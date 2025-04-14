@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, Link } from 'react-router-dom';
-import { SubjectDetailLoader } from './SkeletonLoader';
+import { SubjectDetailLoader } from '../layouts/SkeletonLoader';
 import api from '../api';
 
 interface IProfessor {

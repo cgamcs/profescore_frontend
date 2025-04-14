@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import FacultyList from './FacultyList';
+import FacultyList from '../pages/FacultyList';
 import TopRatedProfessors from './TopRatedProfessors';
 
 const HomePage: React.FC = () => {
@@ -13,7 +13,7 @@ const HomePage: React.FC = () => {
       {/* Logo y título */}
       <div className="pt-10 pb-6 text-center">
         <h1 className="text-3xl font-bold text-indigo-600 dark:text-indigo-500">ProfeScore</h1>
-        <p className="text-gray-600 dark:text-[#F3F5F7] mt-2">Califica y encuentra a los mejores maestros</p>
+        <p className="text-gray-600 dark:text-[#d4d3d3] mt-2">Califica y encuentra a los mejores maestros</p>
       </div>
 
       <FacultyList />

@@ -1,9 +1,9 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { FacultyListLoader } from './SkeletonLoader';
+import { FacultyListLoader } from '../layouts/SkeletonLoader';
 import api from '../api';
-import useViewTransition from './useViewTransition';
+import useViewTransition from '../layouts/useViewTransition';
 
 const FacultyList: React.FC = () => {
   const { handleLinkClick } = useViewTransition();
@@ -21,7 +21,7 @@ const FacultyList: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Lista de Facultades</h2>
-          <p className="text-gray-600 dark:text-[#F3F5F7]">Selecciona tu facultad</p>
+          <p className="text-gray-600 dark:text-[#d4d3d3]">Selecciona tu facultad</p>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
