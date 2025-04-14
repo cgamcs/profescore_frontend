@@ -70,7 +70,7 @@ const Reports = () => {
                 const response = await api.get('/admin/reports');
                 const normalizedReports = response.data.map((report: Report) => ({
                     ...report,
-                    professorId: report.teacherId || {
+                    teacherId: report.teacherId || {
                         _id: 'unknown',
                         name: 'Desconocido',
                         biography: '',
@@ -78,6 +78,8 @@ const Reports = () => {
                     },
                     subject: report.subject || { _id: '', name: 'Sin materia' }
                 }));
+                
+                console.log('Reportes normalizados:', normalizedReports); // Agrega este log para debug
                 setReports(normalizedReports);
                 setLoading(false);
             } catch (error) {
@@ -91,23 +93,8 @@ const Reports = () => {
 
     const handleDeleteReport = async (reportId: string) => {
         try {
-            const reportToDelete = reports.find(r => r._id === reportId);
-            
-            if (!reportToDelete) {
-                throw new Error('Reporte no encontrado');
-            }
-
-            if (!reportToDelete.commentId || !reportToDelete.teacherId?._id) {
-                throw new Error('IDs requeridos no están presentes');
-            }
-
-            await api.delete(`/admin/reports/${reportId}/delete-comment`, {
-                data: {
-                    commentId: reportToDelete.commentId,
-                    professorId: reportToDelete.teacherId._id
-                }
-            });
-
+            await api.delete(`/admin/reports/${reportId}/delete-comment`);
+    
             setReports(reports.map(report => 
                 report._id === reportId ? { ...report, status: 'deleted' } : report
             ));
@@ -129,14 +116,8 @@ const Reports = () => {
 
     const handleRejectReport = async (reportId: string) => {
         try {
-            const reportToReject = reports.find(r => r._id === reportId);
-            
-            if (!reportToReject) {
-                throw new Error('Reporte no encontrado');
-            }
-
             await api.put(`/admin/reports/${reportId}/reject`);
-
+    
             setReports(reports.map(report => 
                 report._id === reportId ? { ...report, status: 'rejected' } : report
             ));
