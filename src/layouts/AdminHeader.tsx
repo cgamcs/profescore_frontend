@@ -36,11 +36,11 @@ const AdminHeader = () => {
                             }
                         >Materias</NavLink>
                         <NavLink 
-                            to="/admin/maestros" 
+                            to="/admin/profesores" 
                             className={({ isActive }) =>
                                 `text-sm ${isActive ? 'text-indigo-600 dark:text-indigo-500 font-medium' : 'text-gray-600 dark:text-gray-200'}`
                             }
-                        >Maestros</NavLink>
+                        >Profesores</NavLink>
                         <NavLink 
                             to="/admin/reportes" 
                             className={({ isActive }) =>
@@ -83,11 +83,11 @@ const AdminHeader = () => {
                                 }
                             >Materias</NavLink>
                             <NavLink
-                                to="/admin/maestros"
+                                to="/admin/profesores"
                                 className={({ isActive }) =>
                                     `text-sm ${isActive ? 'text-indigo-600 dark:text-indigo-500 font-medium' : 'text-gray-600 dark:text-gray-200'}`
                                 }
-                            >Maestros</NavLink>
+                            >Profesores</NavLink>
                             <NavLink
                                 to="/admin/reportes"
                                 className={({ isActive }) =>

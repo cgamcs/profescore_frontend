@@ -128,14 +128,14 @@ const Login: React.FC = () => {
                                 </label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <i className="fas fa-envelope text-gray-400 dark:text-white"></i>
+                                        <i className="fas fa-envelope text-gray-400 dark:text-[#202024]"></i>
                                     </div>
                                     <input
                                         id="email"
                                         type="email"
                                         autoComplete="email"
                                         required
-                                        className={`w-full pl-10 px-3 py-2 dark:text-white border rounded-md shadow-sm focus:outline-none ${emailError ? 'border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
+                                        className={`w-full pl-10 px-3 py-2 dark:text-white dark:bg-[#383939] border border-gray-300 dark:border-[#202024] rounded-md shadow-sm focus:outline-none ${emailError ? 'border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
                                             }`}
                                         placeholder="usuario@ejemplo.com"
                                         value={email}
@@ -157,14 +157,14 @@ const Login: React.FC = () => {
                                 </div>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <i className="fas fa-lock text-gray-400 dark:text-white"></i>
+                                        <i className="fas fa-lock text-gray-400 dark:text-[#202024]"></i>
                                     </div>
                                     <input
                                         id="password"
                                         type={showPassword ? 'text' : 'password'}
                                         autoComplete="current-password"
                                         required
-                                        className={`w-full pl-10 px-3 py-2 dark:text-white border rounded-md shadow-sm focus:outline-none ${passwordError ? 'border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
+                                        className={`w-full pl-10 px-3 py-2 dark:text-white dark:bg-[#383939] border border-gray-300 dark:border-[#202024] rounded-md shadow-sm focus:outline-none ${passwordError ? 'border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
                                             }`}
                                         placeholder="••••••••"
                                         value={password}
@@ -173,7 +173,7 @@ const Login: React.FC = () => {
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-white hover:text-gray-500 dark:hover:text-gray-300"
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-[#202024] hover:text-gray-500 dark:hover:text-gray-300"
                                     >
                                         <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
                                     </button>

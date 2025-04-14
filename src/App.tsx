@@ -23,7 +23,7 @@ import AddProfessor from './components/admin/AddProfessor';
 import Unauthorized from './components/401/Unauthorized';
 import Faq from './pages/Faq';
 import Privacity from './pages/Privacity';
-import AdminReports from './components/admin/AdminReports';
+import AdminReports from './pages/admin/Reports';
 import EditProfessor from './components/admin/EditProfessor';
 import HomePage from './layouts/HomePage'; // Importa el nuevo componente
 
@@ -85,7 +85,7 @@ const App: React.FC = () => {
           <Route path="materias" element={<AdminSubjects />} />
           <Route path="facultad/:facultyId/materia/agregar" element={<AddSubject />} />
           <Route path="facultad/:facultyId/materia/:subjectId" element={<EditSubject />} />
-          <Route path="maestros" element={<AdminProfessors />} />
+          <Route path="profesores" element={<AdminProfessors />} />
           <Route path="facultad/:facultyId/maestro/multiple" element={<AddProfessor />} />
           <Route path="facultad/:facultyId/maestro/:professorId" element={<EditProfessor />} />
           <Route path="reportes" element={<AdminReports />} />
