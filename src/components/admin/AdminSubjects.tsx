@@ -1,276 +1,539 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
+import { useToast } from "../../hooks/use-toast";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../../components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../components/ui/dropdown-menu";
+import { Label } from "../../components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import { Plus, MoreHorizontal, Book, Users, Trash2, Edit, ChevronLeft, ChevronRight } from "lucide-react";
 
+// API base URL
+const API_URL = import.meta.env.VITE_API_URL;
+// Items per page for client-side pagination
+const ITEMS_PER_PAGE = 10;
+
+// Interfaces
 interface IFaculty {
   _id: string;
   name: string;
+  abbreviation: string;
 }
 
 interface ISubject {
   _id: string;
   name: string;
   credits: number;
-  department: string[];
+  description: string;
+  faculty: IFaculty | null;
   professors: string[];
-  faculty: IFaculty | null; // Permitir que faculty sea null
+  studentsCount?: number;
 }
 
-const AdminSubjects: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [materias, setMaterias] = useState<ISubject[]>([]);
+// Utility function to normalize strings for case-insensitive comparison
+const normalizeString = (str = '') => 
+  str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+const AdminSubjects = () => {
+  const { toast } = useToast();
+  
+  // Main data states
+  const [allSubjects, setAllSubjects] = useState<ISubject[]>([]);
   const [faculties, setFaculties] = useState<IFaculty[]>([]);
-  const [materiaIdToDelete, setMateriaIdToDelete] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedFaculty, setSelectedFaculty] = useState<string | null>(null);
+  
+  // UI states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [openDialog, setOpenDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [currentSubject, setCurrentSubject] = useState<Partial<ISubject>>({ faculty: null });
   const [confirmationInput, setConfirmationInput] = useState('');
-  const [confirmationError, setConfirmationError] = useState('');
-  const navigate = useNavigate();
-
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  // Loading states
+  const [isInitialDataLoaded, setIsInitialDataLoaded] = useState(false);
+  const [isLoadingAction, setIsLoadingAction] = useState(false);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  // Memoized filtered subjects - only recalculate when necessary
+  const filteredSubjects = useMemo(() => {
+    if (!searchTerm.trim()) return allSubjects;
+    
+    const normalizedSearch = normalizeString(searchTerm);
+    return allSubjects.filter(subject => 
+      normalizeString(subject.name).includes(normalizedSearch) ||
+      (subject.faculty && normalizeString(subject.faculty.abbreviation).includes(normalizedSearch))
+    );
+  }, [allSubjects, searchTerm]);
+  
+  // Calculate paginated subjects
+  const paginatedSubjects = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredSubjects.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredSubjects, currentPage]);
+  
+  // Total pages
+  const totalPages = useMemo(() => 
+    Math.max(1, Math.ceil(filteredSubjects.length / ITEMS_PER_PAGE)), 
+    [filteredSubjects.length]
+  );
+  
+  // Reset to first page when search term changes
   useEffect(() => {
-    // Obtener todas las materias desde la API
-    const fetchMaterias = async () => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+  
+  // Fetch initial data (subjects and faculties) in parallel
+  useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+    
+    const fetchInitialData = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/subjects`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
+        // Create both requests
+        const subjectsPromise = axios.get(`${API_URL}/admin/subjects`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+          signal: controller.signal
         });
-        setMaterias(response.data);
-      } catch (error) {
-        console.error('Error al obtener las materias:', error);
-      }
-    };
-
-    // Obtener todas las facultades desde la API
-    const fetchFaculties = async () => {
-      try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/faculty`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
+        
+        const facultiesPromise = axios.get(`${API_URL}/admin/faculty`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+          signal: controller.signal
         });
-        setFaculties(response.data);
+        
+        // Execute in parallel
+        const [subjectsRes, facultiesRes] = await Promise.all([
+          subjectsPromise,
+          facultiesPromise
+        ]);
+        
+        if (isMounted) {
+          setAllSubjects(subjectsRes.data);
+          setFaculties(facultiesRes.data);
+          setIsInitialDataLoaded(true);
+        }
       } catch (error) {
-        console.error('Error al obtener las facultades:', error);
-      }
-    };
-
-    fetchMaterias();
-    fetchFaculties();
-  }, []);
-
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
-  };
-
-  const handleDeleteClick = (id: string, _name: string) => {
-    setMateriaIdToDelete(id);
-    setShowModal(true);
-  };
-
-  const handleCancelDelete = () => {
-    setShowModal(false);
-    setMateriaIdToDelete(null);
-    setConfirmationInput('');
-    setConfirmationError('');
-  };
-
-  const handleConfirmDelete = async () => {
-    if (materiaIdToDelete !== null) {
-      const materiaToDelete = materias.find(m => m._id === materiaIdToDelete);
-      if (materiaToDelete && normalizeString(confirmationInput) === normalizeString(materiaToDelete.name)) {
-        try {
-          await axios.delete(`${import.meta.env.VITE_API_URL}/admin/faculty/${materiaToDelete.faculty?._id}/subject/${materiaIdToDelete}`, {
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
+        if (isMounted && !axios.isCancel(error)) {
+          toast({
+            title: 'Error',
+            description: 'No se pudieron cargar los datos',
+            variant: 'destructive'
           });
-          setMaterias(materias.filter(materia => materia._id !== materiaIdToDelete));
-          setShowModal(false);
-          setMateriaIdToDelete(null);
-          setConfirmationInput('');
-          setConfirmationError('');
-        } catch (error) {
-          console.error('Error al eliminar la materia:', error);
+        }
+      }
+    };
+    
+    fetchInitialData();
+    
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, []);
+  
+  // Functions for handling subject operations
+  const handleDialogOpen = useCallback((subject?: ISubject) => {
+    setCurrentSubject(subject || { faculty: null });
+    setErrors({});
+    setOpenDialog(true);
+  }, []);
+  
+  const validateForm = useCallback(() => {
+    const newErrors: Record<string, string> = {};
+    if (!currentSubject.name?.trim()) newErrors.name = 'Nombre obligatorio';
+    if (!currentSubject.credits || currentSubject.credits < 1 || currentSubject.credits > 22) {
+      newErrors.credits = 'Créditos entre 1-22';
+    }
+    if (!currentSubject.faculty?._id) newErrors.faculty = 'Facultad obligatoria';
+    if (currentSubject.description && currentSubject.description.length > 500) {
+      newErrors.description = 'Máximo 500 caracteres';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [currentSubject]);
+  
+  const handleSaveSubject = useCallback(async () => {
+    if (!validateForm()) return;
+    
+    try {
+      setIsLoadingAction(true);
+      const isEdit = !!currentSubject._id;
+      const url = isEdit
+        ? `${API_URL}/admin/faculty/${currentSubject.faculty?._id}/subject/${currentSubject._id}`
+        : `${API_URL}/admin/faculty/${currentSubject.faculty?._id}/subject`;
+        
+      const response = await axios[isEdit ? 'put' : 'post'](
+        url, 
+        currentSubject, 
+        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+      );
+      
+      // Si es una nueva materia, hacer una recarga completa de datos
+      // para asegurar que todos los campos estén correctamente cargados
+      if (!isEdit) {
+        try {
+          const refreshResponse = await axios.get(`${API_URL}/admin/subjects`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          });
+          setAllSubjects(refreshResponse.data);
+        } catch (refreshError) {
+          // Si falla la recarga, al menos añadimos la materia con los datos que tenemos
+          setAllSubjects(prev => [response.data, ...prev]);
         }
       } else {
-        setConfirmationError('El nombre no coincide. Por favor, inténtalo de nuevo.');
+        // Para ediciones, actualizamos solo la materia modificada
+        setAllSubjects(prev => prev.map(s => s._id === currentSubject._id ? response.data : s));
       }
+      
+      toast({
+        title: `Materia ${isEdit ? 'actualizada' : 'creada'}`,
+        description: `La materia "${currentSubject.name}" se ha guardado correctamente`,
+      });
+      
+      setOpenDialog(false);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Error al procesar la solicitud',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoadingAction(false);
     }
-  };
-
-  const handleAddMateriaClick = () => {
-    setShowAddModal(true);
-  };
-
-  const handleFacultySelect = (facultyId: string) => {
-    setSelectedFaculty(facultyId);
-  };
-
-  const handleNextClick = () => {
-    if (selectedFaculty) {
-      navigate(`/admin/facultad/${selectedFaculty}/materia/agregar`);
-      setShowAddModal(false);
+  }, [currentSubject, validateForm]);
+  
+  const handleDeleteSubject = useCallback(async () => {
+    if (!currentSubject._id || !currentSubject.faculty?._id) return;
+    
+    try {
+      setIsLoadingAction(true);
+      await axios.delete(
+        `${API_URL}/admin/faculty/${currentSubject.faculty._id}/subject/${currentSubject._id}`,
+        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+      );
+      
+      setAllSubjects(prev => prev.filter(s => s._id !== currentSubject._id));
+      
+      toast({
+        title: 'Materia eliminada',
+        description: `La materia "${currentSubject.name}" ha sido eliminada`,
+      });
+      
+      setOpenDeleteDialog(false);
+      setConfirmationInput('');
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Error al eliminar la materia',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoadingAction(false);
     }
-  };
-
-  const normalizeString = (str: string) => {
-    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  };
-
-  const filteredMaterias = materias.filter(materia =>
-    normalizeString(materia.name).includes(normalizeString(searchTerm)) ||
-    (materia.faculty && normalizeString(materia.faculty.name).includes(normalizeString(searchTerm)))
+  }, [currentSubject]);
+  
+  // Skeleton loader for initial data loading
+  const SkeletonLoader = () => (
+    <>
+      {[...Array(5)].map((_, index) => (
+        <TableRow key={`skeleton-${index}`}>
+          <TableCell>
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-gray-200 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+            </div>
+          </TableCell>
+          <TableCell><div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div></TableCell>
+          <TableCell><div className="h-4 bg-gray-200 rounded w-8 animate-pulse"></div></TableCell>
+          <TableCell><div className="h-4 bg-gray-200 rounded w-12 animate-pulse"></div></TableCell>
+          <TableCell className="text-right">
+            <div className="h-8 bg-gray-200 rounded w-8 ml-auto animate-pulse"></div>
+          </TableCell>
+        </TableRow>
+      ))}
+    </>
   );
-
+  
   return (
     <div className="bg-white min-h-screen">
       <main className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Administrar Materias</h1>
-          <button
-            onClick={handleAddMateriaClick}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center"
+          <h1 className="text-3xl font-bold">Materias</h1>
+          <Button 
+            className="bg-black text-white hover:cursor-pointer" 
+            onClick={() => handleDialogOpen()}
+            disabled={!isInitialDataLoaded}
           >
-            <i className="fas fa-plus mr-2"></i> Agregar Materia
-          </button>
+            <Plus className="w-4 h-4 mr-2" />
+            Nueva Materia
+          </Button>
         </div>
 
-        <div className="relative w-full max-w-md mb-6">
-          <div className="relative">
-            <input
+        {isInitialDataLoaded && (
+          <div className="relative w-full max-w-md mb-6">
+            <Input
               type="text"
               placeholder="Buscar por nombre o facultad..."
-              className="w-full border border-gray-200 px-4 py-3 rounded-xl shadow-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+              className="w-full border border-gray-200 px-4 py-3 rounded-xl shadow-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none ring-0"
               value={searchTerm}
-              onChange={handleSearch}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
           </div>
-        </div>
+        )}
 
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Facultad</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Créditos</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Profesores</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredMaterias.map(materia => (
-                  <tr key={materia._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap font-medium">{materia.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{materia.faculty?.name || 'Facultad no disponible'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{materia.credits}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{materia.professors.length}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <div className="flex space-x-2">
-                        <Link to={`/admin/facultad/${materia.faculty?._id}/materia/${materia._id}`} className="text-indigo-600 hover:text-indigo-900">
-                          <i className="fas fa-edit h-5 w-5"></i>
-                        </Link>
-                        <button
-                          className="text-red-600 hover:text-red-900 hover:cursor-pointer"
-                          onClick={() => handleDeleteClick(materia._id, materia.name)}
-                        >
-                          <i className="fas fa-trash h-5 w-5"></i>
-                        </button>
+        <div className="border border-gray-300 rounded-lg overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Materia</TableHead>
+                <TableHead>Facultad</TableHead>
+                <TableHead>Créditos</TableHead>
+                <TableHead>Profesores</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {!isInitialDataLoaded ? (
+                <SkeletonLoader />
+              ) : paginatedSubjects.length > 0 ? (
+                paginatedSubjects.map((subject) => (
+                  <TableRow className="hover:bg-gray-100" key={subject._id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-purple-100 flex items-center justify-center">
+                          <Book className="h-5 w-5 text-purple-600" />
+                        </div>
+                        <span className="font-medium">{subject.name}</span>
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {filteredMaterias.length === 0 && (
-            <div className="text-center py-4">
-              <span className="loader"></span>
-            </div>
-          )}
+                    </TableCell>
+                    <TableCell>{subject.faculty?.abbreviation || 'N/A'}</TableCell>
+                    <TableCell>{subject.credits}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <span>{subject.professors?.length || 0}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-white">
+                          <DropdownMenuItem
+                            className="cursor-pointer hover:bg-gray-100"
+                            onClick={() => handleDialogOpen(subject)}
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-red-500 cursor-pointer hover:bg-gray-100"
+                            onClick={() => {
+                              setCurrentSubject(subject);
+                              setOpenDeleteDialog(true);
+                            }}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Eliminar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center h-24">
+                    No se encontraron materias
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </div>
+        
+        {/* Pagination */}
+        {isInitialDataLoaded && totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm">
+              Página {currentPage} de {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+
+        {/* Add/Edit Dialog */}
+        <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                {currentSubject?._id ? "Editar Materia" : "Nueva Materia"}
+              </DialogTitle>
+              <DialogDescription>
+                {currentSubject?._id 
+                  ? "Modifica los detalles de la materia" 
+                  : "Completa los campos requeridos"}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Nombre de la Materia <span className="text-red-500">*</span></Label>
+                <Input
+                  value={currentSubject?.name || ''}
+                  onChange={(e) => setCurrentSubject(prev => ({ ...prev, name: e.target.value }))}
+                  className={errors.name ? 'border-red-500' : ''}
+                />
+                {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Créditos <span className="text-red-500">*</span></Label>
+                <Input
+                  type="number"
+                  value={currentSubject?.credits || ''}
+                  onChange={(e) => setCurrentSubject(prev => ({
+                    ...prev,
+                    credits: Number(e.target.value)
+                  }))}
+                  className={errors.credits ? 'border-red-500' : ''}
+                />
+                {errors.credits && <p className="text-red-500 text-sm">{errors.credits}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Facultad <span className="text-red-500">*</span></Label>
+                <Select
+                  value={currentSubject?.faculty?._id || ''}
+                  onValueChange={(value) => {
+                    const faculty = faculties.find(f => f._id === value);
+                    setCurrentSubject(prev => ({ ...prev, faculty: faculty || null }));
+                  }}
+                >
+                  <SelectTrigger className={errors.faculty ? 'border-red-500' : ''}>
+                    <SelectValue placeholder="Seleccionar facultad" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    {faculties.map(faculty => (
+                      <SelectItem
+                        className="hover:bg-gray-100"
+                        key={faculty._id}
+                        value={faculty._id}
+                      >
+                        {faculty.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.faculty && <p className="text-red-500 text-sm">{errors.faculty}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Descripción</Label>
+                <Input
+                  value={currentSubject?.description || ''}
+                  onChange={(e) => setCurrentSubject(prev => ({ ...prev, description: e.target.value }))}
+                  className={errors.description ? 'border-red-500' : ''}
+                />
+                {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button 
+                variant="outline" 
+                onClick={() => setOpenDialog(false)}
+                disabled={isLoadingAction}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                variant="save"
+                onClick={handleSaveSubject}
+                disabled={isLoadingAction}
+              >
+                {isLoadingAction ? 'Guardando...' : currentSubject?._id ? 'Actualizar' : 'Crear'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Dialog */}
+        <Dialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirmar eliminación</DialogTitle>
+              <DialogDescription>
+                Escribe el nombre de la materia para confirmar:{" "}
+                <strong>{currentSubject?.name}</strong>
+              </DialogDescription>
+            </DialogHeader>
+            <Input
+              value={confirmationInput}
+              onChange={(e) => setConfirmationInput(e.target.value)}
+              placeholder="Nombre de la materia"
+            />
+            <DialogFooter>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setOpenDeleteDialog(false);
+                  setConfirmationInput('');
+                }}
+                disabled={isLoadingAction}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={handleDeleteSubject}
+                disabled={isLoadingAction || confirmationInput !== currentSubject?.name}
+              >
+                {isLoadingAction ? 'Eliminando...' : 'Eliminar'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
-
-      {showModal && (
-        <div className="fixed inset-0 backdrop-brightness-50 backdrop-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Eliminar Materia</h3>
-            <p className="text-sm text-gray-500 mb-6">
-              ¿Estás seguro de que deseas eliminar esta materia? Esta acción no se puede deshacer.
-            </p>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Escribe el nombre de la materia para confirmar:</label>
-              <input
-                type="text"
-                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                value={confirmationInput}
-                onChange={(e) => setConfirmationInput(e.target.value)}
-              />
-              {confirmationError && <p className="text-red-500 text-sm mt-1">{confirmationError}</p>}
-            </div>
-            <div className="flex justify-end space-x-4">
-              <button
-                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-                onClick={handleCancelDelete}
-              >
-                Cancelar
-              </button>
-              <button
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700"
-                onClick={handleConfirmDelete}
-              >
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showAddModal && (
-        <div className="fixed inset-0 backdrop-brightness-50 backdrop-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Agregar Materia</h3>
-            <div className="mb-4">
-              <label htmlFor="faculty-select" className="block text-sm font-medium text-gray-700">Selecciona una facultad:</label>
-              <select
-                id="faculty-select"
-                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                onChange={(e) => handleFacultySelect(e.target.value)}
-                value={selectedFaculty || ''}
-              >
-                <option value="" disabled>Selecciona una facultad</option>
-                {faculties.map(faculty => (
-                  <option key={faculty._id} value={faculty._id}>
-                    {faculty.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex justify-end space-x-4">
-              <button
-                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-                onClick={() => setShowAddModal(false)}
-              >
-                Cancelar
-              </button>
-              <button
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
-                onClick={handleNextClick}
-              >
-                Siguiente
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

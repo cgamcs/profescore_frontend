@@ -185,23 +185,23 @@ const AdminFaculties: React.FC = () => {
       <main className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Facultades</h1>
-          <Button className='bg-black text-white' onClick={handleAddFaculty}>
+          <Button className='bg-black text-white hover:cursor-pointer' onClick={handleAddFaculty}>
             <Plus className="w-4 h-4 mr-2" />
             Nueva Facultad
           </Button>
         </div>
 
         <div className="relative w-full max-w-md mb-6">
-          <input
+          <Input
             type="text"
             placeholder="Buscar por nombre o abreviatura..."
-            className="w-full border border-gray-200 px-4 py-3 rounded-xl shadow-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+            className="w-full border border-gray-200 px-4 py-3 rounded-xl shadow-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none ring-0"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
-        <div className="border border-gray-200 rounded-md">
+        <div className="border border-gray-200 rounded-lg">
           <Table>
             <TableHeader>
               <TableRow>
