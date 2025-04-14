@@ -105,7 +105,7 @@ const Login: React.FC = () => {
             <header className="border-b border-gray-200 dark:border-[#202024] bg-white dark:bg-[#0A0A0A]">
                 <div className="container mx-auto px-4 py-3 flex items-center justify-between">
                     <a href="/" className="text-xl font-bold text-black dark:text-white">ProfeScore</a>
-                    <a href="/" className="text-sm text-gray-600 dark:text-white hover:text-indigo-600">
+                    <a href="/" className="text-sm text-gray-600 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-500">
                         Volver al inicio
                     </a>
                 </div>
@@ -114,7 +114,7 @@ const Login: React.FC = () => {
             {/* Main Content */}
             <main className="flex-1 flex items-center justify-center px-4 py-12">
                 <div className="w-full max-w-md">
-                    <div className="bg-white dark:bg-[#0A0A0A] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-8">
+                    <div className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-8">
                         <div className="text-center mb-8">
                             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Iniciar Sesión</h1>
                             <p className="text-gray-600 dark:text-[#F3F5F7] mt-2">Esta sección es solo para el administrador</p>
