@@ -2,9 +2,35 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* .dark {
-    color-scheme: dark;
-} */
+.toast-in {
+  background-color: #fff;
+  animation: toast-in .2s linear forwards;
+}
+
+.toast-out {
+  background-color: #fff;
+  animation: toast-out .1s linear;
+}
+
+@keyframes toast-in {
+  0% {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-out {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(500px);
+  }
+}
 
 /* Transiciones mejoradas - ajustar en tu archivo CSS global */
 @keyframes fade-in {

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { Toaster } from './components/ui/toaster';
 import LayoutWithHeader from './components/LayoutWithHeader';
 import FacultyDetails from './components/FacultyDetail';
 import SubjectsPage from './components/SubjectsPage';
@@ -71,45 +72,48 @@ const App: React.FC = () => {
   }, [theme]);
 
   return (
-    <Routes>
-      {/* Ruta de login para admin */}
-      <Route path="/admin/login" element={<AdminLogin />} />
+    <>
+      <Routes>
+        {/* Ruta de login para admin */}
+        <Route path="/admin/login" element={<AdminLogin />} />
 
-      <Route path="/admin" element={<AdminWithHeader />}>
-        <Route index element={<AdminDashboard />} />
-        <Route path="facultades" element={<AdminFaculties />} />
-        <Route path="facultades/agregar" element={<AddFaculty />} />
-        <Route path="facultades/:facultyId" element={<EditFaculty />} />
-        <Route path="materias" element={<AdminSubjects />} />
-        <Route path="facultad/:facultyId/materia/agregar" element={<AddSubject />} />
-        <Route path="facultad/:facultyId/materia/:subjectId" element={<EditSubject />} />
-        <Route path="maestros" element={<AdminProfessors />} />
-        <Route path="facultad/:facultyId/maestro/multiple" element={<AddProfessor />} />
-        <Route path="facultad/:facultyId/maestro/:professorId" element={<EditProfessor />} />
-        <Route path="reportes" element={<AdminReports />} />
-      </Route>
+        <Route path="/admin" element={<AdminWithHeader />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="facultades" element={<AdminFaculties />} />
+          <Route path="facultades/agregar" element={<AddFaculty />} />
+          <Route path="facultades/:facultyId" element={<EditFaculty />} />
+          <Route path="materias" element={<AdminSubjects />} />
+          <Route path="facultad/:facultyId/materia/agregar" element={<AddSubject />} />
+          <Route path="facultad/:facultyId/materia/:subjectId" element={<EditSubject />} />
+          <Route path="maestros" element={<AdminProfessors />} />
+          <Route path="facultad/:facultyId/maestro/multiple" element={<AddProfessor />} />
+          <Route path="facultad/:facultyId/maestro/:professorId" element={<EditProfessor />} />
+          <Route path="reportes" element={<AdminReports />} />
+        </Route>
 
-      {/* Ruta principal sin header */}
-      <Route path="/" element={<HomePage />} />
+        {/* Ruta principal sin header */}
+        <Route path="/" element={<HomePage />} />
 
-      {/* Rutas con header */}
-      <Route path="/facultad/:facultyId" element={<LayoutWithHeader />}>
-        <Route index element={<FacultyDetails />} />
-        <Route path="materias" element={<SubjectsPage />} />
-        <Route path="materia/:subjectId" element={<SubjectDetail />} />
-        <Route path="maestros" element={<ProfessorsPage />} />
-        <Route path="maestros/agregar-maestro" element={<ProfessorAdd />} />
-        <Route path="maestro/:professorId" element={<ProfessorDetail />} />
-        <Route path="maestro/:professorId/calificar" element={<ProfessorRating />} />
-      </Route>
+        {/* Rutas con header */}
+        <Route path="/facultad/:facultyId" element={<LayoutWithHeader />}>
+          <Route index element={<FacultyDetails />} />
+          <Route path="materias" element={<SubjectsPage />} />
+          <Route path="materia/:subjectId" element={<SubjectDetail />} />
+          <Route path="maestros" element={<ProfessorsPage />} />
+          <Route path="maestros/agregar-maestro" element={<ProfessorAdd />} />
+          <Route path="maestro/:professorId" element={<ProfessorDetail />} />
+          <Route path="maestro/:professorId/calificar" element={<ProfessorRating />} />
+        </Route>
 
-      <Route path='/faq' element={<Faq />}></Route>
-      <Route path='/privacity' element={<Privacity />}></Route>
+        <Route path='/faq' element={<Faq />}></Route>
+        <Route path='/privacity' element={<Privacity />}></Route>
 
-      <Route element={<LayoutWithHeader />}>
-        <Route path='/401' element={<Unauthorized />}></Route>
-      </Route>
-    </Routes>
+        <Route element={<LayoutWithHeader />}>
+          <Route path='/401' element={<Unauthorized />}></Route>
+        </Route>
+      </Routes>
+      <Toaster />
+    </>
   );
 };
 
