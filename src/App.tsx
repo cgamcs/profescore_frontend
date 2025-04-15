@@ -4,7 +4,7 @@ import { Toaster } from './components/ui/toaster';
 import LayoutWithHeader from './layouts/UserWithHeader';
 import FacultyDetails from './pages/FacultyDetail';
 import SubjectsPage from './pages/SubjectsPage';
-import ProfessorsPage from './pages/ProfessorsPage';
+import ProfessorsPage from './pages/Professors';
 import SubjectDetail from './pages/SubjectDetail';
 import ProfessorDetail from './pages/ProfessorDetail';
 import ProfessorRating from './pages/ProfessorRating';
@@ -13,18 +13,12 @@ import AdminLogin from './pages/admin/Login';
 import AdminWithHeader from './layouts/AdminWithHeader';
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminFaculties from './pages/admin/Faculties';
-import AddFaculty from './components/admin/AddFaculty';
-import EditFaculty from './components/admin/EditFaculty';
 import AdminSubjects from './pages/admin/Subjects';
-import AddSubject from './components/admin/AddSubject';
-import EditSubject from './components/admin/EditSubject';
 import AdminProfessors from './pages/admin/Professors';
-import AddProfessor from './components/admin/AddProfessor';
 import Unauthorized from './components/401/Unauthorized';
 import Faq from './pages/Faq';
 import Privacity from './pages/Privacity';
 import AdminReports from './pages/admin/Reports';
-import EditProfessor from './components/admin/EditProfessor';
 import HomePage from './layouts/HomePage'; // Importa el nuevo componente
 
 const themeKeys = {
@@ -80,14 +74,8 @@ const App: React.FC = () => {
         <Route path="/admin" element={<AdminWithHeader />}>
           <Route index element={<AdminDashboard />} />
           <Route path="facultades" element={<AdminFaculties />} />
-          <Route path="facultades/agregar" element={<AddFaculty />} />
-          <Route path="facultades/:facultyId" element={<EditFaculty />} />
           <Route path="materias" element={<AdminSubjects />} />
-          <Route path="facultad/:facultyId/materia/agregar" element={<AddSubject />} />
-          <Route path="facultad/:facultyId/materia/:subjectId" element={<EditSubject />} />
           <Route path="profesores" element={<AdminProfessors />} />
-          <Route path="facultad/:facultyId/maestro/multiple" element={<AddProfessor />} />
-          <Route path="facultad/:facultyId/maestro/:professorId" element={<EditProfessor />} />
           <Route path="reportes" element={<AdminReports />} />
         </Route>
 

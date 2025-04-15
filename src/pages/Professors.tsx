@@ -1,10 +1,21 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useParams, Link, useLocation, useSearchParams } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useParams, Link } from 'react-router-dom';
 import { ProfessorPageLoader } from '../layouts/SkeletonLoader';
-import AddProfessorModal from '../components/AddProfessorModal'; // Importa el modal
 import api from '../api';
 import useViewTransition from '../layouts/useViewTransition';
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "../components/ui/dialog";
+import { Label } from "../components/ui/label";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import SubjectSelector from '../components/ui/subjectselector';
+import { useToast } from "../hooks/use-toast";
 
 interface IProfessor {
     _id: string;
@@ -25,14 +36,15 @@ interface ISubject {
 const STALE_TIME = 5 * 60 * 1000; // 5 minutos
 
 const ProfessorsPage = () => {
-    const { facultyId } = useParams<{ facultyId: string }>(); // Asegúrate de que facultyId sea una cadena
-    const location = useLocation();
+    const { facultyId } = useParams<{ facultyId: string }>();
     const [searchQuery, setSearchQuery] = useState('');
-    const [searchParams] = useSearchParams();
-    const addSuccess = searchParams.get('addSuccess') === 'true';
-    const [showSuccessMessage, setShowSuccessMessage] = useState(addSuccess);
-    const [isModalOpen, setIsModalOpen] = useState(false); // Estado para el modal
+    const [openDialog, setOpenDialog] = useState(false);
+    const [currentProfessor, setCurrentProfessor] = useState<IProfessor | null>(null);
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [isLoadingAction, setIsLoadingAction] = useState(false);
     const { handleLinkClick } = useViewTransition();
+    const { toast } = useToast();
+    const queryClient = useQueryClient();
 
     const { data: professors = [], isLoading: professorsLoading } = useQuery({
         queryKey: ['professors', facultyId],
@@ -56,13 +68,18 @@ const ProfessorsPage = () => {
         staleTime: STALE_TIME,
         select: (data) => data.map((subj: ISubject) => ({
             _id: subj._id,
-            name: subj.name
+            name: subj.name,
+            facultyId: facultyId // Asegúrate de agregar el facultyId aquí
         }))
     });
 
+    // Verificar si las materias se están cargando correctamente
+    useEffect(() => {
+        console.log('Subjects loaded:', subjects);
+    }, [subjects]);
+
     const isLoading = professorsLoading || subjectsLoading;
 
-    // En ambos componentes, añadir este useEffect
     useEffect(() => {
         document.title = "ProfeScore - Maestros";
 
@@ -81,33 +98,10 @@ const ProfessorsPage = () => {
         };
     }, []);
 
-    useEffect(() => {
-        const urlParams = new URLSearchParams(location.search);
-        if (urlParams.get('success') === 'true') {
-            setShowSuccessMessage(true);
-            const timer = setTimeout(() => {
-                setShowSuccessMessage(false);
-            }, 8000);
-            return () => clearTimeout(timer);
-        }
-    }, [location.search]);
-
-    useEffect(() => {
-        if (addSuccess) {
-            const timer = setTimeout(() => {
-                setShowSuccessMessage(false);
-            }, 5000); // Ocultar el mensaje después de 5 segundos
-
-            return () => clearTimeout(timer);
-        }
-    }, [addSuccess]);
-
-    // Función para normalizar el texto (eliminar acentos y convertir a minúsculas)
     const normalizeText = (text: string) => {
         return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     };
 
-    // Memoizar el filtrado de profesores
     const filteredProfessors = useMemo(() => {
         if (!searchQuery) return professors;
 
@@ -116,13 +110,12 @@ const ProfessorsPage = () => {
             const nameMatches = normalizeText(professor.name).includes(query);
             const subjectMatches = professor.subjects.some((subjectId: string) => {
                 const subject = subjects.find((s: ISubject) => s._id === subjectId);
-                return subject && normalizeText(subject.name).includes(query);
+                return subject ? normalizeText(subject.name).includes(query) : false;
             });
             return nameMatches || subjectMatches;
         });
     }, [professors, subjects, searchQuery]);
 
-    // Memoizar el filtrado de materias
     const filteredSubjects = useMemo(() => {
         if (!searchQuery) return [];
 
@@ -136,7 +129,6 @@ const ProfessorsPage = () => {
         });
     }, [subjects, professors, searchQuery]);
 
-    // Memoizar el renderizado de estrellas
     const renderStars = (rating: number) => {
         const fullStars = Math.floor(rating);
         const hasHalfStar = rating % 1 >= 0.5;
@@ -156,26 +148,94 @@ const ProfessorsPage = () => {
         );
     };
 
+    const handleOpenAddDialog = () => {
+        setCurrentProfessor({
+            _id: '',
+            name: '',
+            department: '',
+            subjects: [],
+            ratingStats: {
+                averageGeneral: 0,
+                totalRatings: 0
+            }
+        });
+        setErrors({});
+        setOpenDialog(true);
+    };
+
+    const handleSaveProfessor = async () => {
+        if (!currentProfessor || !facultyId) return;
+    
+        const newErrors: { [key: string]: string } = {};
+        if (!currentProfessor.name.trim()) newErrors.name = 'Nombre requerido';
+        if (currentProfessor.subjects.length === 0) newErrors.subjects = 'Selecciona al menos una materia';
+    
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+    
+        try {
+            setIsLoadingAction(true);
+    
+            const payload = {
+                name: currentProfessor.name,
+                subjects: currentProfessor.subjects // Aquí se envían los IDs de las materias
+            };
+    
+            const endpoint = currentProfessor._id ?
+                `/faculties/${facultyId}/professor/${currentProfessor._id}` :
+                `/faculties/${facultyId}/professor/multiple`; // Actualiza la ruta aquí
+    
+            const response = await api[currentProfessor._id ? 'put' : 'post'](endpoint, payload);
+    
+            const updatedProfessor = {
+                ...response.data,
+                subjects: Array.isArray(response.data.subjects) ? response.data.subjects.map((subjectId: string) => {
+                    const subject = subjects.find((s: ISubject) => s._id === subjectId);
+                    return subject ? subject.name : '';
+                }) : []
+            };
+    
+            queryClient.setQueryData(['professors', facultyId], (oldData: IProfessor[]) => {
+                if (currentProfessor._id) {
+                    return oldData.map(p => p._id === currentProfessor._id ? updatedProfessor : p);
+                } else {
+                    return [...oldData, updatedProfessor];
+                }
+            });
+    
+            toast({
+                title: 'Éxito',
+                description: `Profesor ${currentProfessor._id ? 'actualizado' : 'creado'} correctamente`
+            });
+    
+            setOpenDialog(false);
+        } catch (error) {
+            toast({
+                title: 'Error',
+                description: `Error ${currentProfessor._id ? 'actualizando' : 'creando'} profesor`,
+                variant: 'destructive'
+            });
+        } finally {
+            setIsLoadingAction(false);
+        }
+    };
+
     if (isLoading) return <ProfessorPageLoader />;
 
     return (
         <main id="main-content" data-view-transition className="container mx-auto px-4 py-6">
-            {showSuccessMessage && (
-                <div className="fixed top-15 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification">
-                    Profesor agregado correctamente
-                </div>
-            )}
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl dark:text-white font-bold">Maestros</h1>
                 <button
-                    onClick={() => setIsModalOpen(true)}
+                    onClick={handleOpenAddDialog}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium hover:cursor-pointer"
                 >
                     Agregar Maestro
                 </button>
             </div>
 
-            {/* Search Bar */}
             <div className="relative max-w-2xl mx-auto mb-8">
                 <input
                     type="text"
@@ -189,7 +249,6 @@ const ProfessorsPage = () => {
                 </svg>
             </div>
 
-            {/* Professors Table */}
             <div className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-[#383939]">
@@ -261,6 +320,7 @@ const ProfessorsPage = () => {
                                             </span>
                                         </div>
                                     </td>
+                                    <td className="px-6 py-4 text-right whitespace-nowrap"></td>
                                 </tr>
                             ))}
                         </tbody>
@@ -268,14 +328,48 @@ const ProfessorsPage = () => {
                 </div>
             </div>
 
-            {isModalOpen && facultyId && (
-                <AddProfessorModal
-                    facultyId={facultyId}
-                    subjects={subjects}
-                    onClose={() => setIsModalOpen(false)}
-                    onSuccess={() => setShowSuccessMessage(true)} // Pasamos la función de callback
-                />
-            )}
+            <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+                <DialogContent className="w-full">
+                    <DialogHeader>
+                        <DialogTitle>
+                            {currentProfessor ? "Editar Profesor" : "Nuevo Profesor"}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label>Nombre Completo</Label>
+                            <Input
+                                value={currentProfessor?.name || ''}
+                                onChange={(e) => setCurrentProfessor(prev =>
+                                    prev ? { ...prev, name: e.target.value } : null
+                                )}
+                                className={errors.name ? 'border-red-500' : 'dark:bg-[#383939] border border-gray-300 dark:border-[#202024] dark:text-white'}
+                            />
+                            {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+                        </div>
+
+                        <div className="space-y-2">
+                            <SubjectSelector
+                                facultyId={facultyId!}
+                                allSubjects={subjects}
+                                selectedSubjects={currentProfessor?.subjects || []}
+                                onChange={(newSubjects) => setCurrentProfessor(prev =>
+                                    prev ? { ...prev, subjects: newSubjects } : null
+                                )}
+                                error={errors.subjects}
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="cancel" onClick={() => setOpenDialog(false)}>
+                            Cancelar
+                        </Button>
+                        <Button variant="save" onClick={handleSaveProfessor} disabled={isLoadingAction}>
+                            {isLoadingAction ? 'Guardando...' : 'Guardar'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </main>
     );
 };

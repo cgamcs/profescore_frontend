@@ -1,271 +1,166 @@
-import React, { useState, useEffect } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import ReCAPTCHA from 'react-google-recaptcha';
+import React, { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import api from '../api';
-import Portal from './Portal';
 
-interface Subject {
+interface ISubject {
     _id: string;
     name: string;
 }
 
-interface ProfessorFormData {
-    name: string;
-    department: string;
-    subject: string; // Mantenemos subject como string para mantener consistencia con el backend
-}
-
-interface FormErrors {
-    name: string;
-    department: string;
-    subject: string;
-    captcha: string;
-}
-
 interface AddProfessorModalProps {
     facultyId: string;
-    subjects: Subject[];
+    subjects: ISubject[];
     onClose: () => void;
-    onSuccess: () => void; // Nueva propiedad para el callback de éxito
+    onSuccess: () => void;
 }
 
 const AddProfessorModal: React.FC<AddProfessorModalProps> = ({ facultyId, subjects, onClose, onSuccess }) => {
     const queryClient = useQueryClient();
-    const [formData, setFormData] = useState<ProfessorFormData>({
-        name: '',
-        department: '',
-        subject: ''
-    });
-    const [captchaValue, setCaptchaValue] = useState('');
-    const [errors, setErrors] = useState<FormErrors>({
-        name: '',
-        department: '',
-        subject: '',
-        captcha: ''
-    });
-    // Estados para la animación
-    const [isVisible, setIsVisible] = useState(false);
-    const [isClosing, setIsClosing] = useState(false);
-    const [, setIsSaving] = useState(false);
-
-    const { mutate, isPending } = useMutation({
-        mutationFn: (newProfessor: ProfessorFormData & { captcha: string }) => {
-            console.log("Datos a enviar:", newProfessor);
-            console.log("URL de la API:", `/faculties/${facultyId}/professors`);
-            return api.post(`/faculties/${facultyId}/professors`, newProfessor);
-        },
-        onSuccess: () => {
-            // Invalidamos la query
-            queryClient.invalidateQueries({
-                queryKey: ['professors', facultyId]
-            });
-            // Llamamos al callback de éxito
-            onSuccess();
-            // Iniciamos el cierre del modal
-            handleClose();
-        },
-        onError: (error: any) => {
-            console.error("Error en la mutación:", error);
-            if (error.response && error.response.data) {
-                setErrors(error.response.data.errors);
-            } else {
-                setErrors({
-                    name: '',
-                    department: '',
-                    subject: '',
-                    captcha: 'Error al enviar el formulario. Por favor, inténtalo de nuevo.'
-                });
-            }
-            setIsSaving(false);
-        }
-    });
-
-    const SITE_KEY = import.meta.env.VITE_SITE_KEY || '';
-
-    if (!SITE_KEY) {
-        console.error('La clave del sitio de reCAPTCHA no está configurada.');
-    }
-
-    // Efecto para la animación de entrada al montar el componente
-    useEffect(() => {
-        // Usamos requestAnimationFrame para asegurar que los estilos iniciales estén aplicados
-        // antes de iniciar la transición
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                setIsVisible(true);
-            });
-        });
-
-        return () => {
-            document.body.style.overflow = 'auto';
-        };
-    }, []);
-
-    // Función para manejar el cierre con animación
-    const handleClose = () => {
-        setIsClosing(true);
-        // Esperamos a que termine la animación antes de cerrar el modal
-        setTimeout(() => {
-            onClose();
-        }, 300); // Duración de la animación
-    };
+    const [isLoading, setIsLoading] = useState(false);
+    const [professorName, setProfessorName] = useState('');
+    const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        let isValid = true;
-        const newErrors: FormErrors = {
-            name: '',
-            department: '',
-            subject: '',
-            captcha: ''
-        };
 
-        if (!formData.name.trim()) {
-            newErrors.name = 'El nombre es obligatorio';
-            isValid = false;
-        }
+        // Validación
+        const newErrors: { [key: string]: string } = {};
+        if (!professorName.trim()) newErrors.name = 'Nombre requerido';
+        if (selectedSubjects.length === 0) newErrors.subjects = 'Selecciona al menos una materia';
 
-        if (!formData.subject) { // Verificar que se haya seleccionado una materia
-            newErrors.subject = 'Debe seleccionar al menos una materia';
-            isValid = false;
-        }
-
-        if (!captchaValue) {
-            newErrors.captcha = 'Por favor completa el CAPTCHA';
-            isValid = false;
-        }
-
-        if (!isValid) {
+        if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
             return;
         }
 
-        // Activar estado de guardando
-        setIsSaving(true);
-
         try {
-            // Creamos el payload exactamente igual que en el componente original
+            setIsLoading(true);
+            
+            // Preparar los datos para la API
             const payload = {
-                name: formData.name,
-                department: formData.department,
-                subject: formData.subject,
-                captcha: captchaValue
+                name: professorName,
+                facultyId: facultyId,
+                subjects: selectedSubjects
             };
 
-            console.log("Enviando datos:", payload);
-            mutate(payload);
+            // Llamar a la API
+            await api.post(`/faculties/${facultyId}/professors`, payload);
+            
+            // Invalidar consultas para refrescar los datos
+            queryClient.invalidateQueries({ queryKey: ['professors', facultyId] });
+            
+            // Cerrar modal y mostrar mensaje de éxito
+            onSuccess();
+            onClose();
         } catch (error) {
-            console.error('Error al enviar el formulario:', error);
-            // Desactivar estado de guardando en caso de error
-            setIsSaving(false);
+            console.error('Error al agregar profesor:', error);
+            setErrors({ form: 'Error al agregar profesor. Inténtalo de nuevo.' });
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    const handleCaptchaChange = (value: string | null) => {
-        if (value) {
-            setCaptchaValue(value);
-            setErrors({ ...errors, captcha: '' });
-        } else {
-            setCaptchaValue('');
+    const handleSubjectToggle = (subjectId: string) => {
+        setSelectedSubjects(prev => 
+            prev.includes(subjectId)
+                ? prev.filter(id => id !== subjectId)
+                : [...prev, subjectId]
+        );
+        
+        // Limpiar error de materias si hay al menos una seleccionada
+        if (errors.subjects && !selectedSubjects.includes(subjectId)) {
+            setErrors(prev => ({ ...prev, subjects: '' }));
         }
     };
-
-    // Evitamos que se cierre el modal si estamos en medio de un envío
-    const triggerClose = () => {
-        if (!isPending) {
-            handleClose();
-        }
-    };
-
-    // Bloqueamos el desplazamiento del body mientras el modal está abierto
-    useEffect(() => {
-        document.body.style.overflow = 'hidden';
-        return () => {
-            document.body.style.overflow = 'auto';
-        };
-    }, []);
 
     return (
-        <Portal>
-            <div
-                className="fixed inset-0 z-[100] flex items-center justify-center"
-                aria-modal="true"
-                role="dialog"
-            >
-                {/* Overlay con transición sincronizada */}
-                <div
-                    className={`fixed inset-0 bg-black transition-opacity duration-300 ease-in-out z-[101] ${isVisible && !isClosing ? 'opacity-60' : 'opacity-0'
-                        }`}
-                    onClick={handleClose}
-                />
-
-                {/* Contenido del modal con transición sincronizada */}
-                <div
-                    className={`relative bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm p-6 w-full max-w-md transition-all duration-300 ease-in-out z-[102] ${isVisible && !isClosing
-                        ? 'opacity-100 transform translate-y-0 scale-100'
-                        : 'opacity-0 transform -translate-y-4 scale-95'
-                        }`}
-                >
-                    <h2 className="text-xl font-bold mb-4 dark:text-white">Agregar Nuevo Maestro</h2>
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className="space-y-2">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-white">Nombre completo</label>
-                            <input
-                                required
-                                value={formData.name}
-                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                placeholder="Ej. Juan Pérez Rodríguez"
-                                className="w-full px-3 py-2 dark:text-white dark:bg-[#383939] border border-gray-300 dark:border-[#202024] rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            />
-                            {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-white">Materia que imparte</label>
-                            <select
-                                required
-                                value={formData.subject}
-                                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                                className="w-full px-3 py-2 dark:text-white dark:bg-[#383939] border border-gray-300 dark:border-[#202024] rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            >
-                                <option value="">Selecciona una materia</option>
-                                {subjects.map((subj: Subject) => (
-                                    <option key={subj._id} value={subj._id}>{subj.name}</option>
-                                ))}
-                            </select>
-                            {errors.subject && <p className="text-red-600 text-sm mt-1">{errors.subject}</p>}
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-white">Verificación CAPTCHA</label>
-                            <ReCAPTCHA
-                                sitekey={SITE_KEY}
-                                onChange={handleCaptchaChange}
-                            />
-                            {errors.captcha && <p className="text-red-600 text-sm mt-1">{errors.captcha}</p>}
-                        </div>
-
-                        <div className="pt-4 flex justify-end space-x-4">
-                            <button
-                                type="button"
-                                onClick={triggerClose}
-                                disabled={isPending}
-                                className="px-4 py-2 border border-gray-300 dark:border-[#202024] bg-white dark:bg-[#383939] rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-[#ffffff0d] disabled:opacity-50"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={isPending}
-                                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md hover:cursor-pointer text-sm font-medium disabled:opacity-50"
-                            >
-                                {isPending ? 'Guardando...' : 'Guardar Maestro'}
-                            </button>
-                        </div>
-                    </form>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-[#202024] rounded-lg w-full max-w-md mx-4 p-6 shadow-xl">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold dark:text-white">Agregar Maestro</h2>
+                    <button 
+                        onClick={onClose}
+                        className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Nombre del profesor */}
+                    <div className="space-y-2">
+                        <label htmlFor="professorName" className="block text-sm font-medium dark:text-white">
+                            Nombre Completo
+                        </label>
+                        <input
+                            id="professorName"
+                            type="text"
+                            value={professorName}
+                            onChange={(e) => setProfessorName(e.target.value)}
+                            className={`w-full border ${errors.name ? 'border-red-500' : 'border-gray-300 dark:border-[#383939]'} dark:bg-[#383939] dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                            placeholder="Ej. Juan Pérez González"
+                        />
+                        {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+                    </div>
+
+                    {/* Selector de materias */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium dark:text-white">
+                            Materias
+                        </label>
+                        <div className={`border ${errors.subjects ? 'border-red-500' : 'border-gray-300 dark:border-[#383939]'} rounded-md p-3 max-h-60 overflow-y-auto`}>
+                            {subjects.length > 0 ? (
+                                subjects.map((subject) => (
+                                    <div key={subject._id} className="flex items-center mb-2">
+                                        <input
+                                            type="checkbox"
+                                            id={`subject-${subject._id}`}
+                                            checked={selectedSubjects.includes(subject._id)}
+                                            onChange={() => handleSubjectToggle(subject._id)}
+                                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                        />
+                                        <label htmlFor={`subject-${subject._id}`} className="ml-2 block text-sm dark:text-white">
+                                            {subject.name}
+                                        </label>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-gray-500 dark:text-gray-400 text-sm">No hay materias disponibles</p>
+                            )}
+                        </div>
+                        {errors.subjects && <p className="text-red-500 text-sm">{errors.subjects}</p>}
+                    </div>
+
+                    {/* Error general del formulario */}
+                    {errors.form && (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                            {errors.form}
+                        </div>
+                    )}
+
+                    {/* Botones */}
+                    <div className="flex justify-end space-x-3">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="px-4 py-2 border border-gray-300 dark:border-[#383939] rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#282828] focus:outline-none"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-sm font-medium focus:outline-none disabled:opacity-70"
+                        >
+                            {isLoading ? 'Guardando...' : 'Guardar'}
+                        </button>
+                    </div>
+                </form>
             </div>
-        </Portal>
+        </div>
     );
 };
 

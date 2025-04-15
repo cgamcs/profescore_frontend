@@ -111,7 +111,7 @@ const SubjectSelector = ({
                                 <Badge
                                     key={subject._id}
                                     variant={isSelected ? "secondary" : "outline"}
-                                    className={`cursor-pointer flex items-center gap-1 ${isSelected ? 'bg-gray-200' : ''
+                                    className={`cursor-pointer flex items-center gap-1 ${isSelected ? 'bg-gray-200 dark:bg-[#2B2B2D]' : ''
                                         }`}
                                     onClick={() => handleToggleSubject(subject._id)}
                                 >
