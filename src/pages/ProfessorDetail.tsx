@@ -5,6 +5,7 @@ import { FaRegStar, FaStar, FaStarHalfAlt, FaHeart, FaRegHeart } from 'react-ico
 import api from '../api';
 import { ProfessorDetailLoader } from '../layouts/SkeletonLoader';
 import ReportModal from '../components/ReportModal';
+import { useToast } from '../hooks/use-toast';
 
 interface RatingType {
     _id: string;
@@ -23,11 +24,11 @@ interface Subject {
 const ProfessorDetail = () => {
     const { facultyId, professorId } = useParams();
     const queryClient = useQueryClient();
+    const { toast } = useToast();
     const [userId, setUserId] = useState<string>('');
     const [showReportModal, setShowReportModal] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const [selectedComment, setSelectedComment] = useState<RatingType | null>(null);
-    const [reportSent, setReportSent] = useState(false);
     const [captchaValue, setCaptchaValue] = useState('');
     const [captchaError, setCaptchaError] = useState('');
     const [, setError] = useState('');
@@ -206,12 +207,19 @@ const ProfessorDetail = () => {
             );
 
             if (res.status === 201) {
-                setReportSent(true);
+                toast({
+                    title: 'Éxito',
+                    description: 'Reporte enviado exitosamente'
+                });
                 closeReportModal();
-                setTimeout(() => setReportSent(false), 8000);
             }
         } catch (error) {
             console.error('Error al enviar el reporte:', error);
+            toast({
+                title: 'Error',
+                description: 'Error al enviar el reporte. Por favor, inténtalo de nuevo.',
+                variant: 'destructive'
+            });
         }
     };
 
@@ -393,12 +401,6 @@ const ProfessorDetail = () => {
                     handleCaptchaChange={handleCaptchaChange}
                     SITE_KEY={SITE_KEY}
                 />
-
-                {reportSent && (
-                    <div className="fixed top-15 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg notification z-10 animate-fadeIn">
-                        Reporte enviado exitosamente
-                    </div>
-                )}
             </main>
         </>
     );
