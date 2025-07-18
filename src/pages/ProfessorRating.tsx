@@ -149,7 +149,7 @@ const ProfessorRating = () => {
 
       // En ambos componentes, añadir este useEffect
       useEffect(() => {
-        document.title = `ProfeScore - Califcación`;
+        document.title = `ProfeScore - Calificación`;
 
         const mainElement = document.getElementById('main-content');
         if (mainElement) {
