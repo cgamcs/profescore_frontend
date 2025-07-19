@@ -192,7 +192,7 @@ const SubjectDetailLoader = () => {
             {/* Teachers List Skeleton */}
             <div className="bg-gray-200 dark:bg-[#383939] h-8 w-1/2 rounded-lg mb-4 animate-pulse"></div>
             <div className="bg-white dark:bg-[#202024] rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm overflow-hidden">
-                <div className="bg-gray-20 dark:bg-[#383939]0 h-10 w-full rounded-lg animate-pulse mb-2"></div>
+                <div className="bg-gray-200 dark:bg-[#383939] h-10 w-full rounded-lg animate-pulse mb-2"></div>
                 {[...Array(3)].map((_, i) => (
                     <div key={i} className="bg-gray-200 dark:bg-[#383939] h-16 w-full rounded-lg animate-pulse mb-2"></div>
                 ))}
@@ -269,7 +269,7 @@ const ProfessorDetailLoader = () => {
                     {/* Columna derecha */}
                     <div className="md:col-span-2">
                         <div>
-                            <div className="bg-gray-20 dark:bg-[#383939] h-8 rounded-lg mb-4 animate-pulse"></div>
+                            <div className="bg-gray-200 dark:bg-[#383939] h-8 rounded-lg mb-4 animate-pulse"></div>
                             <div className="space-y-4">
                                 {[...Array(3)].map((_, i) => (
                                     <div key={i} className="bg-gray-200 dark:bg-[#383939] h-32 rounded-lg border border-gray-200 dark:border-[#202024] shadow-sm animate-pulse"></div>
