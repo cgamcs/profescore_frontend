@@ -124,7 +124,7 @@ const Faq: React.FC = () => {
                 <div className="max-w-4xl mx-auto">
                     <div className="text-center mb-12">
                         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Preguntas Frecuentes</h1>
-                        <p className="text-lg text-gray-600 dark:text-gray-400">Encuentra respuestas a las preguntas más comunes sobre RATE</p>
+                        <p className="text-lg text-gray-600 dark:text-gray-400">Encuentra respuestas a las preguntas más comunes sobre ProfeScore</p>
                     </div>
                     <div className="mb-8">
                         <div className="relative">
