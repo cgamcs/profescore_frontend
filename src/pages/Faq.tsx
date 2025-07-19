@@ -90,7 +90,7 @@ const Faq: React.FC = () => {
                             }
                         >Preguntas Frecuentes</NavLink>
                         <NavLink
-                            to="/privacity"
+                            to="/privacy"
                             className={({ isActive }) =>
                                 `text-sm ${isActive ? 'text-indigo-600 dark:text-indigo-400 font-medium' : 'text-gray-600 dark:text-white'}`
                             }
@@ -111,7 +111,7 @@ const Faq: React.FC = () => {
                                 }
                             >Preguntas Frecuentes</NavLink>
                             <NavLink
-                                to="/privacity"
+                                to="/privacy"
                                 className={({ isActive }) =>
                                     `text-sm ${isActive ? 'text-indigo-600 font-medium dark:text-indigo-400' : 'text-gray-600 dark:text-white'}`
                                 }
@@ -201,7 +201,7 @@ const Faq: React.FC = () => {
 
                     <div className="flex md:gap-4">
                         <Link to="/faq" className="link">Preguntas Frecuentes</Link>
-                        <Link to="/privacity" className="link">Términos de Privacidad</Link>
+                        <Link to="/privacy" className="link">Términos de Privacidad</Link>
                     </div>
 
                 </div>
